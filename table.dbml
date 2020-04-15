@@ -1,0 +1,8 @@
+Table ".users" {
+    id integer [primary key]
+    username varchar( ) [not null, unique]
+    _full_name varchar() pk pk pk pk [not null]
+    gender varchar(1) [default: 'm']
+    created_at timestamp [default: `now()`]
+    rating integer [default: 10]
+}
