@@ -5,16 +5,17 @@ name = pp.Word(pp.alphanums + '_') | pp.dblQuotedString()
 # Literals
 
 string_literal = (
+    pp.QuotedString("'", escChar="\\") |
     pp.QuotedString('"', escChar="\\") |
     pp.QuotedString("'''", escChar="\\", multiline=True)
 )
-expression_literal = '`' + pp.CharsNotIn('`')[...] + '`'
+expression_literal = pp.Combine('`' + pp.CharsNotIn('`')[...] + '`')
 boolean_literal = (
     pp.CaselessLiteral('true') |
     pp.CaselessLiteral('false') |
     pp.CaselessLiteral('null')
 )
-number_literal = pp.Word(pp.nums) | pp.Word(pp.nums) + '.' + pp.Word(pp.nums)
+number_literal = pp.Word(pp.nums) ^ pp.Word(pp.nums) + '.' + pp.Word(pp.nums)
 
 # Expression
 
