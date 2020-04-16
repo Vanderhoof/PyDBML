@@ -4,11 +4,33 @@ class ColumnType:
         self.args = args
 
     def __repr__(self):
-        return f'ColumnType({repr(self.name)}, {repr(self.args)})'
+        components = f'ColumnType({repr(self.name)}'
+        if self.args:
+            components.append(f'{repr(self.args)})')
+        return ', '.join(components) + ')'
 
     def __str__(self):
         args = '(' + self.args + ')' if self.args else ''
         return self.name + args
+
+
+class ReferenceRegistry:
+    instance = None
+
+    def __new__(self, *args, **kwargs):
+        '''allowing only one instance of this class'''
+
+        if not self.instance:
+            self.instance = super(ReferenceRegistry, self).__new__(self, *args, **kwargs)
+            self.instance.registry = []
+            self.instance.awaiting = []
+        return self.instance
+
+    @classmethod
+    def clear(cls):
+        del cls.instance.registry
+        del cls.instance.awaiting
+        cls.instance = None
 
 
 class Reference:

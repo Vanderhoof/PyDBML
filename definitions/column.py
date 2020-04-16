@@ -2,7 +2,8 @@ import pyparsing as pp
 from definitions.generic import (expression, name, string_literal, boolean_literal,
                                  number_literal)
 from definitions.common import note, comment, pk, unique
-from classes import ColumnType, Reference, Column
+from definitions.reference import ref_inline
+from classes import ColumnType, Column, ReferenceRegistry
 
 
 def parse_column_type(s, l, t):
@@ -14,17 +15,6 @@ type_args = ("(" + pp.originalTextFor(expression)('args') + ")")
 type_name = (pp.Word(pp.alphanums + '_[]') | pp.dblQuotedString())('name')
 column_type = (type_name + type_args[0, 1])
 column_type.setParseAction(parse_column_type)
-
-
-def parse_inline_relation(s, l, t):
-    return Reference(type=t['type'],
-                     table2='table',
-                     col2='field')
-
-
-relation = pp.oneOf(">-<")
-ref_inline = pp.Literal("ref:") + relation('type') + name('table') + '.' + name('field')
-ref_inline.setParseAction(parse_inline_relation)
 
 
 default = pp.CaselessLiteral('default:') + (
@@ -58,6 +48,11 @@ def parse_column(s, l, t):
 
     if 'settings' in t:
         init_dict.update(t['settings'])
+
+    refs = ReferenceRegistry()
+    for ref in refs.awaiting:
+        ref.col1 = t['name']
+
     return Column(**init_dict)
 
 
@@ -89,6 +84,9 @@ def parse_column_settings(s, l, t):
         result['note'] = t['n']
     if 'd' in t:
         result['default'] = t['d']
+    if 'r' in t:
+        refs = ReferenceRegistry()
+        refs.awaiting.append(t['r'])
     return result
 
 

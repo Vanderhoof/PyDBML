@@ -3,7 +3,7 @@ from definitions.generic import name
 from definitions.common import note, note_object, comment
 from definitions.column import table_column
 from definitions.index import index
-from classes import Table
+from classes import Table, ReferenceRegistry
 
 alias = pp.WordStart() + pp.Literal('as').suppress() + pp.WordEnd() + name
 
@@ -67,6 +67,12 @@ def parse_table(s, l, t):
     if 'note' in t:
         # will override one from settings
         init_dict['note'] = t['note']
+
+    refs = ReferenceRegistry()
+    while refs.awaiting:
+        refs.awaiting[0].table1 = t['name']
+        refs.registry.append(refs.awaiting.pop(0))
+
     return Table(**init_dict)
 
 
