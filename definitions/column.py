@@ -33,29 +33,6 @@ default = pp.CaselessLiteral('default:') + (
 )
 
 
-def parse_column(s, l, t):
-    # TODO add validation and ref processing
-    init_dict = {
-        'name': t['name'],
-        'type_': t['type'],
-    }
-    # deprecated
-    for constraint in t.get('constraints', []):
-        if constraint == 'pk':
-            init_dict['pk'] = True
-        elif constraint == 'unique':
-            init_dict['unique'] = True
-
-    if 'settings' in t:
-        init_dict.update(t['settings'])
-
-    refs = ReferenceRegistry()
-    for ref in refs.awaiting:
-        ref.col1 = t['name']
-
-    return Column(**init_dict)
-
-
 column_setting = (
     pp.CaselessLiteral("not null")('nn') |
     pp.CaselessLiteral("null")('n') |
@@ -85,12 +62,11 @@ def parse_column_settings(s, l, t):
     if 'd' in t:
         result['default'] = t['d']
     if 'r' in t:
-        refs = ReferenceRegistry()
-        refs.awaiting.append(t['r'])
+        result['ref'] = t['r']
     return result
 
 
-column_settings.addParseAction(parse_column_settings)
+column_settings.setParseAction(parse_column_settings)
 
 
 constraint = pp.CaselessLiteral("unique") | pp.CaselessLiteral("pk")
@@ -101,5 +77,26 @@ table_column = (
     constraint('constraints')[...] +
     column_settings('settings')[0, 1]
 )
-table_column.addParseAction(parse_column)
+
+
+def parse_column(s, l, t):
+    # TODO add validation and ref processing
+    init_dict = {
+        'name': t['name'],
+        'type_': t['type'],
+    }
+    # deprecated
+    for constraint in t.get('constraints', []):
+        if constraint == 'pk':
+            init_dict['pk'] = True
+        elif constraint == 'unique':
+            init_dict['unique'] = True
+
+    if 'settings' in t:
+        init_dict.update(t['settings'])
+
+    return Column(**init_dict)
+
+
+table_column.setParseAction(parse_column)
 table_column.ignore(comment)

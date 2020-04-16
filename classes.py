@@ -1,10 +1,13 @@
+from __future__ import annotations
+
+
 class ColumnType:
     def __init__(self, name: str, args: str or None):
         self.name = name
         self.args = args
 
     def __repr__(self):
-        components = f'ColumnType({repr(self.name)}'
+        components = [f'ColumnType({repr(self.name)}']
         if self.args:
             components.append(f'{repr(self.args)})')
         return ', '.join(components) + ')'
@@ -93,7 +96,8 @@ class Column:
                  pk: bool = False,
                  autoinc: bool = False,
                  default=None,
-                 note: str or None = None):
+                 note: str or None = None,
+                 ref: Reference or None = None):
         self.name = name
         self.type = type_
         self.unique = unique
@@ -102,6 +106,20 @@ class Column:
         self.autoinc = autoinc
         self.default = default
         self.note = note
+        self.ref = ref
+        if self.ref:
+            self.ref.col1 = self.name
+        self._table = None
+
+        @property
+        def table(self):
+            return self._table
+
+        @table.setter
+        def table(self, v: Table):
+            self._table = v
+            if self.ref:
+                self.ref.table1 = v.name
 
     def __repr__(self):
         components = [f"Column({repr(self.name)}, {repr(self.type)}"]
@@ -149,17 +167,20 @@ class Index:
 class Table:
     def __init__(self,
                  name: str,
-                 columns: list,
                  alias: str or None = None,
                  indexes: list or None = None,
                  note: Note or None = None,
                  header_color: str or None = None):
         self.name = name
-        self.columns = columns
+        self.columns = []
         self.alias = alias
         self.indexes = indexes
         self.note = note
         self.header_color = header_color
+
+    def add_column(self, c: Column):
+        c.table = self
+        self.columns.append(c)
 
     def __repr__(self):
         components = [f"Table({self.name}, {self.columns}"]

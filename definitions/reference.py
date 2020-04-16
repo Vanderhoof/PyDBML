@@ -5,7 +5,7 @@ from classes import Reference, ReferenceRegistry
 
 relation = pp.oneOf("> - <")
 ref_inline = pp.Literal("ref:") + relation('type') + name('table') + '.' + name('field')
-
+ref_inline.setWhitespaceChars(' \t')
 
 def parse_inline_relation(s, l, t):
     return Reference(type_=t['type'],
@@ -61,19 +61,19 @@ def parse_ref(s, l, t):
     init_dict = {
         'type_': t['type'],
         'table1': t['table1'],
-        'field1': t['field1'],
+        'col1': t['field1'],
         'table2': t['table2'],
-        'field2': t['field2']
+        'col2': t['field2']
     }
     if 'name' in t:
         init_dict['name'] = t['name']
     if 'settings' in t:
         init_dict.update(t['settings'])
     ref = Reference(**init_dict)
-    refs = ReferenceRegistry()
-    refs.registry.append(ref)
     return ref
 
 
 ref_short.setParseAction(parse_ref)
 ref_long.setParseAction(parse_ref)
+
+ref = ref_short | ref_long

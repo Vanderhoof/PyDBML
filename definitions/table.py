@@ -13,9 +13,9 @@ hex_color = ("#" + (hex_char * 3 ^ hex_char * 6)).leaveWhitespace()
 header_color = (
     pp.CaselessLiteral('headercolor:').suppress() +
     pp.White()[...].suppress() +
-    pp.Combine(hex_color)
+    pp.Combine(hex_color)('header_color')
 )
-table_setting = note('note') | header_color('header_color')
+table_setting = note('note') | header_color
 table_settings = '[' + table_setting + (',' + table_setting)[...] + ']'
 
 
@@ -28,7 +28,7 @@ def parse_table_settings(s, l, t):
     return result
 
 
-table_settings.addParseAction(parse_table_settings)
+table_settings.setParseAction(parse_table_settings)
 
 
 indexes = (
@@ -56,7 +56,6 @@ table = (
 def parse_table(s, l, t):
     init_dict = {
         'name': t['name'],
-        'columns': list(t['columns'])
     }
     if 'settings' in t:
         init_dict.update(t['settings'])
@@ -67,14 +66,12 @@ def parse_table(s, l, t):
     if 'note' in t:
         # will override one from settings
         init_dict['note'] = t['note']
+    result = Table(**init_dict)
+    for column in t['columns']:
+        result.add_column(column)
 
-    refs = ReferenceRegistry()
-    while refs.awaiting:
-        refs.awaiting[0].table1 = t['name']
-        refs.registry.append(refs.awaiting.pop(0))
-
-    return Table(**init_dict)
+    return result
 
 
-table.addParseAction(parse_table)
+table.setParseAction(parse_table)
 table.ignore(comment)

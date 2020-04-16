@@ -1,6 +1,5 @@
-import pyparsing as pp
 from definitions.table import table
-from definitions.ref import ref
+from definitions.reference import ref
 
 
 class DBMLParser:
@@ -8,12 +7,21 @@ class DBMLParser:
         self.tables = []
         self.refs = []
 
-        table_expr = pp.copy(table)
-        ref_expr = pp.copy(ref)
-        table_expr.setParseAction(self._parse_table)
+        table_expr = table.copy()
+        ref_expr = ref.copy()
+
+        table_expr.addParseAction(self._parse_table)
+        ref_expr.addParseAction(self._parse_ref)
 
         expr = table_expr | ref_expr
         self._syntax = expr[...]
 
     def _parse_table(self, s, l, t):
-        self.tables.append()
+        self.tables.append(t[0])
+        self.refs.extend(c.ref for c in t[0].columns if c.ref)
+
+    def _parse_ref(self, s, l, t):
+        self.refs.append(t[0])
+
+    def parse_file(self, filename: str):
+        self._syntax.parseFile(filename)
