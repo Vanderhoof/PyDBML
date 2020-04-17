@@ -1,6 +1,6 @@
 import pyparsing as pp
 from definitions.generic import name
-from definitions.common import __, _, note
+from definitions.common import _, note
 from classes import EnumItem, Enum
 
 

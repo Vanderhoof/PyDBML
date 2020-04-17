@@ -1,20 +1,24 @@
 import pyparsing as pp
 from definitions.table import table
 from definitions.reference import ref
+from definitions.enum import enum
 
 
 class DBMLParser:
     def __init__(self):
         self.tables = []
         self.refs = []
+        self.enums = []
 
         pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
         table_expr = table.copy()
         ref_expr = ref.copy()
+        enum_expr = enum.copy()
 
         table_expr.addParseAction(self._parse_table)
         ref_expr.addParseAction(self._parse_ref)
+        enum_expr.addParseAction(self._parse_enum)
 
         expr = table_expr | ref_expr
         self._syntax = expr[...]
@@ -25,6 +29,9 @@ class DBMLParser:
 
     def _parse_ref(self, s, l, t):
         self.refs.append(t[0])
+
+    def _parse_enum(self, s, l, t):
+        self.enums.append(t[0])
 
     def parse_file(self, filename: str):
         self._syntax.parseFile(filename)

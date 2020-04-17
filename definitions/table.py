@@ -1,6 +1,6 @@
 import pyparsing as pp
 from definitions.generic import name
-from definitions.common import _, n, note, note_object, comment
+from definitions.common import _, note, note_object
 from definitions.column import table_column
 from definitions.index import index
 from classes import Table
