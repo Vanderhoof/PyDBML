@@ -222,3 +222,14 @@ class Enum:
 
     def __repr__(self):
         return f'Enum({repr(self.name)}, {repr(self.items)})'
+
+
+class TableGroup:
+    def __init__(self,
+                 name: str,
+                 items: list):
+        self.name = name
+        self.items = items
+
+    def __repr__(self):
+        return f'TableGroup({repr(self.name)}, {repr(self.items)})'
