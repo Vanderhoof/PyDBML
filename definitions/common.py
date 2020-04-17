@@ -2,6 +2,8 @@ import pyparsing as pp
 from .generic import string_literal
 from classes import Note
 
+pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+
 comment = pp.Suppress("//") + pp.SkipTo(pp.LineEnd() | pp.StringEnd())
 
 # optional comment or newline
@@ -14,8 +16,10 @@ __ = (pp.White() | comment)[1, ...].suppress()
 n = (comment[0, 1] + '\n')[...].suppress()
 
 note = pp.CaselessLiteral("note:") + _ + string_literal('text')
-note.setParseAction(lambda s, l, t: Note(t[1]))
+note.setParseAction(lambda s, l, t: Note(t['text'][0]))
 
-note_object = pp.CaselessLiteral('note') + _ + '{' + _ + string_literal + _ + '}'
+note_object = pp.CaselessLiteral('note') + _ + '{' + _ + string_literal('text') + _ + '}'
+note_object.setParseAction(lambda s, l, t: Note(t['text'][0]))
+
 pk = pp.CaselessLiteral("pk")
 unique = pp.CaselessLiteral("unique")

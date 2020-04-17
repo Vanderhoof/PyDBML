@@ -5,6 +5,8 @@ from definitions.common import _, n, note, comment, pk, unique
 from definitions.reference import ref_inline
 from classes import ColumnType, Column
 
+pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+
 
 def parse_column_type(s, l, t):
     return ColumnType(name=t['name'],

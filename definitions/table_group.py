@@ -3,6 +3,7 @@ from definitions.generic import name
 from definitions.common import _, __
 from classes import TableGroup
 
+pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 tg_body = name + __
 
@@ -10,7 +11,7 @@ table_group = (
     pp.CaselessLiteral('TableGroup') +
     name('name') + _ +
     '{' + _ +
-    tg_body('items') + _ +
+    tg_body[...]('items') + _ +
     '}'
 )
 

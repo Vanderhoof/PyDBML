@@ -1,12 +1,14 @@
 import pyparsing as pp
 
+pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+
 name = pp.Word(pp.alphanums + '_') | pp.dblQuotedString()
 
 # Literals
 
 string_literal = (
-    pp.QuotedString("'", escChar="\\") |
-    pp.QuotedString('"', escChar="\\") |
+    pp.QuotedString("'", escChar="\\") ^
+    pp.QuotedString('"', escChar="\\") ^
     pp.QuotedString("'''", escChar="\\", multiline=True)
 )
 expression_literal = pp.Combine('`' + pp.CharsNotIn('`')[...] + '`')

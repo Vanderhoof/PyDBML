@@ -3,6 +3,8 @@ from definitions.generic import expression_literal, name, string_literal
 from definitions.common import _, pk, unique, comment, note
 from classes import Index
 
+pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+
 table_type = pp.CaselessLiteral("type:") + (
     pp.CaselessLiteral("btree") | pp.CaselessLiteral("hash")
 )

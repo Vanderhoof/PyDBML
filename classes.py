@@ -233,3 +233,21 @@ class TableGroup:
 
     def __repr__(self):
         return f'TableGroup({repr(self.name)}, {repr(self.items)})'
+
+
+class Project:
+    def __init__(self,
+                 name: str,
+                 items: dict or None = None,
+                 note: Note or None = None):
+        self.name = name
+        self.items = items
+        self.note = note
+
+    def __repr__(self):
+        components = [f'Project({repr(self.name)}']
+        if self.items:
+            components.append(f'items={repr(self.items)}')
+        if self.note:
+            components.append(f'note={repr(self.note)}')
+        return ', '.join(components) + ')'

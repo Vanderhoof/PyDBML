@@ -3,6 +3,7 @@ from definitions.generic import name
 from definitions.common import _, note
 from classes import EnumItem, Enum
 
+pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 enum_setting = _ + note('note') + _
 

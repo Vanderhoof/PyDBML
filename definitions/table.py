@@ -5,6 +5,8 @@ from definitions.column import table_column
 from definitions.index import index
 from classes import Table
 
+pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+
 alias = pp.WordStart() + pp.Literal('as').suppress() + pp.WordEnd() + name
 
 

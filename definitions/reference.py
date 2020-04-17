@@ -3,6 +3,7 @@ from definitions.generic import name
 from definitions.common import __, _
 from classes import Reference
 
+pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 relation = pp.oneOf("> - <")
 ref_inline = pp.Literal("ref:") + relation('type') + name('table') + '.' + name('field')
