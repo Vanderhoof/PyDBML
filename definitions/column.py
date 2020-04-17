@@ -1,9 +1,9 @@
 import pyparsing as pp
 from definitions.generic import (expression, name, string_literal, boolean_literal,
                                  number_literal)
-from definitions.common import note, comment, pk, unique
+from definitions.common import _, n, note, comment, pk, unique
 from definitions.reference import ref_inline
-from classes import ColumnType, Column, ReferenceRegistry
+from classes import ColumnType, Column
 
 
 def parse_column_type(s, l, t):
@@ -17,7 +17,7 @@ column_type = (type_name + type_args[0, 1])
 column_type.setParseAction(parse_column_type)
 
 
-default = pp.CaselessLiteral('default:') + (
+default = pp.CaselessLiteral('default:') + _ + (
     string_literal |
     expression |
     boolean_literal.setParseAction(
@@ -33,7 +33,7 @@ default = pp.CaselessLiteral('default:') + (
 )
 
 
-column_setting = (
+column_setting = _ + (
     pp.CaselessLiteral("not null")('nn') |
     pp.CaselessLiteral("null")('n') |
     pp.CaselessLiteral("primary key")('pk') |
@@ -42,9 +42,9 @@ column_setting = (
     pp.CaselessLiteral("increment")('i') |
     note('n') |
     ref_inline('r') |
-    default('d')
+    default('d') + _
 )
-column_settings = '[' + column_setting + ("," + column_setting)[...] + ']'
+column_settings = '[' + column_setting + ("," + column_setting)[...] + ']' + n
 
 
 def parse_column_settings(s, l, t):
@@ -71,12 +71,12 @@ column_settings.setParseAction(parse_column_settings)
 
 constraint = pp.CaselessLiteral("unique") | pp.CaselessLiteral("pk")
 
-table_column = (
+table_column = _ + (
     name('name') +
     column_type('type') +
     constraint('constraints')[...] +
     column_settings('settings')[0, 1]
-)
+) + n
 
 
 def parse_column(s, l, t):

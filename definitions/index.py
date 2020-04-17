@@ -1,6 +1,6 @@
 import pyparsing as pp
 from definitions.generic import expression_literal, name, string_literal
-from definitions.common import pk, unique, comment
+from definitions.common import _, pk, unique, comment, note
 from classes import Index
 
 table_type = pp.CaselessLiteral("type:") + (
@@ -9,7 +9,8 @@ table_type = pp.CaselessLiteral("type:") + (
 index_setting = (
     unique('unique') |
     table_type('type') |
-    pp.CaselessLiteral("name:") + string_literal('name')
+    pp.CaselessLiteral("name:") + string_literal('name') |
+    note('note')
 )
 index_settings = (
     '[' + pk('pk') + ']' |
@@ -27,6 +28,8 @@ def parse_index_settings(s, l, t):
         result['pk'] = True
     if 'type' in t:
         result['type_'] = t['type']
+    if 'note' in t:
+        result['note'] = t['note']
     return result
 
 
@@ -43,7 +46,7 @@ composite_index_syntax = (
 )('subject') + index_settings('settings')[0, 1]
 
 single_index_syntax = single_index('subject') + index_settings('settings')[0, 1]
-index = single_index_syntax ^ composite_index_syntax
+index = _ + (single_index_syntax ^ composite_index_syntax) + _
 
 
 def parse_index(s, l, t):

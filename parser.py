@@ -1,3 +1,4 @@
+import pyparsing as pp
 from definitions.table import table
 from definitions.reference import ref
 
@@ -6,6 +7,8 @@ class DBMLParser:
     def __init__(self):
         self.tables = []
         self.refs = []
+
+        pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
         table_expr = table.copy()
         ref_expr = ref.copy()

@@ -1,11 +1,13 @@
 import pyparsing as pp
 from definitions.generic import name
-from classes import Reference, ReferenceRegistry
+from definitions.common import __, _
+from classes import Reference
 
 
 relation = pp.oneOf("> - <")
 ref_inline = pp.Literal("ref:") + relation('type') + name('table') + '.' + name('field')
 ref_inline.setWhitespaceChars(' \t')
+
 
 def parse_inline_relation(s, l, t):
     return Reference(type_=t['type'],
@@ -23,10 +25,10 @@ on_option = (
     pp.CaselessLiteral('set null') |
     pp.CaselessLiteral('set default')
 )
-update = pp.CaselessLiteral("update:").suppress() + on_option
-delete = pp.CaselessLiteral("delete:").suppress() + on_option
+update = pp.CaselessLiteral("update:").suppress() + _ + on_option
+delete = pp.CaselessLiteral("delete:").suppress() + _ + on_option
 
-ref_setting = update('update') | delete('delete')
+ref_setting = _ + (update('update') | delete('delete')) + _
 
 ref_settings = '[' + ref_setting + ']'
 
@@ -54,7 +56,13 @@ ref_body = (
 )
 
 ref_short = pp.CaselessLiteral('ref') + name('name')[0, 1] + ':' + ref_body
-ref_long = pp.CaselessLiteral('ref') + name('name')[0, 1] + '{' + ref_body + '}'
+ref_long = (
+    pp.CaselessLiteral('ref') + __ +
+    name('name')[0, 1] + _ +
+    '{' + _ +
+    ref_body + _ +
+    '}'
+)
 
 
 def parse_ref(s, l, t):

@@ -1,9 +1,9 @@
 import pyparsing as pp
 from definitions.generic import name
-from definitions.common import note, note_object, comment
+from definitions.common import _, n, note, note_object, comment
 from definitions.column import table_column
 from definitions.index import index
-from classes import Table, ReferenceRegistry
+from classes import Table
 
 alias = pp.WordStart() + pp.Literal('as').suppress() + pp.WordEnd() + name
 
@@ -11,11 +11,10 @@ alias = pp.WordStart() + pp.Literal('as').suppress() + pp.WordEnd() + name
 hex_char = pp.Word(pp.srange('[0-9a-fA-F]'), exact=1)
 hex_color = ("#" + (hex_char * 3 ^ hex_char * 6)).leaveWhitespace()
 header_color = (
-    pp.CaselessLiteral('headercolor:').suppress() +
-    pp.White()[...].suppress() +
+    pp.CaselessLiteral('headercolor:').suppress() + _ +
     pp.Combine(hex_color)('header_color')
 )
-table_setting = note('note') | header_color
+table_setting = _ + (note('note') | header_color) + _
 table_settings = '[' + table_setting + (',' + table_setting)[...] + ']'
 
 
@@ -32,7 +31,7 @@ table_settings.setParseAction(parse_table_settings)
 
 
 indexes = (
-    pp.CaselessLiteral('indexes').suppress() +
+    pp.CaselessLiteral('indexes').suppress() + _ +
     pp.Suppress('{') +
     index[1, ...] +
     pp.Suppress('}')
@@ -40,16 +39,16 @@ indexes = (
 
 note_element = note | note_object
 
-table_element = note_element('note') | indexes('indexes')
+table_element = _ + (note_element('note') | indexes('indexes')) + _
 
-table_body = table_column[1, ...]('columns') + table_element[...]
+table_body = _ + table_column[1, ...]('columns') + _ + table_element[...]
 
 table = (
     pp.CaselessLiteral("table").suppress() +
     name('name') +
     alias('alias')[0, 1] +
-    table_settings('settings')[0, 1] +
-    '{' + table_body + '}'
+    table_settings('settings')[0, 1] + _ +
+    '{' + _ + table_body + _ + '}' + _
 )
 
 

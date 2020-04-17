@@ -17,23 +17,23 @@ class ColumnType:
         return self.name + args
 
 
-class ReferenceRegistry:
-    instance = None
+# class ReferenceRegistry:
+#     instance = None
 
-    def __new__(self, *args, **kwargs):
-        '''allowing only one instance of this class'''
+#     def __new__(self, *args, **kwargs):
+#         '''allowing only one instance of this class'''
 
-        if not self.instance:
-            self.instance = super(ReferenceRegistry, self).__new__(self, *args, **kwargs)
-            self.instance.registry = []
-            self.instance.awaiting = []
-        return self.instance
+#         if not self.instance:
+#             self.instance = super(ReferenceRegistry, self).__new__(self, *args, **kwargs)
+#             self.instance.registry = []
+#             self.instance.awaiting = []
+#         return self.instance
 
-    @classmethod
-    def clear(cls):
-        del cls.instance.registry
-        del cls.instance.awaiting
-        cls.instance = None
+#     @classmethod
+#     def clear(cls):
+#         del cls.instance.registry
+#         del cls.instance.awaiting
+#         cls.instance = None
 
 
 class Reference:
@@ -144,12 +144,14 @@ class Index:
                  name: str or None = None,
                  unique: bool = False,
                  type_: str or None = None,
-                 pk: bool = False):
+                 pk: bool = False,
+                 note: Note or None = None):
         self.subjects = subjects
         self.name = name
         self.unique = unique
         self.type = type_
         self.pk = pk
+        self.note = note
 
     def __repr__(self):
         components = [f"Index({self.subjects}"]
@@ -161,6 +163,8 @@ class Index:
             components.append(f'type_={repr(self.type)}')
         if self.pk:
             components.append(f'pk=True')
+        if self.note:
+            components.append(f'note_={repr(self.note)}')
         return ', '.join(components) + ')'
 
 
