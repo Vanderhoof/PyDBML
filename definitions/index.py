@@ -59,4 +59,3 @@ def parse_index(s, l, t):
 
 
 index.setParseAction(parse_index)
-index.ignore(comment)

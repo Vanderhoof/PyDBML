@@ -73,4 +73,3 @@ def parse_table(s, l, t):
 
 
 table.setParseAction(parse_table)
-table.ignore(comment)

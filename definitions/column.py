@@ -99,4 +99,3 @@ def parse_column(s, l, t):
 
 
 table_column.setParseAction(parse_column)
-table_column.ignore(comment)

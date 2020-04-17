@@ -197,3 +197,28 @@ class Table:
         if self.header_color:
             components.append(f'header_color={repr(self.header_color)}')
         return ', '.join(components) + ')'
+
+
+class EnumItem:
+    def __init__(self,
+                 name: str,
+                 note: Note or None = None):
+        self.name = name
+        self.note = note
+
+    def __repr__(self):
+        components = [f'EnumItem({repr(self.name)}']
+        if self.note:
+            components.append(f'note={repr(self.note)}')
+        return ', '.join(components) + ')'
+
+
+class Enum:
+    def __init__(self,
+                 name: str,
+                 items: list):
+        self.name = name
+        self.items = items
+
+    def __repr__(self):
+        return f'Enum({repr(self.name)}, {repr(self.items)})'

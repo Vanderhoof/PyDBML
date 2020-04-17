@@ -17,7 +17,6 @@ def parse_inline_relation(s, l, t):
 
 ref_inline.setParseAction(parse_inline_relation)
 
-
 on_option = (
     pp.CaselessLiteral('no action') |
     pp.CaselessLiteral('restrict') |
