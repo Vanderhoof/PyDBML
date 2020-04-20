@@ -1,9 +1,9 @@
 import pyparsing as pp
-from definitions.generic import (expression, name, string_literal, boolean_literal,
-                                 number_literal)
-from definitions.common import _, n, note, comment, pk, unique
-from definitions.reference import ref_inline
-from classes import ColumnType, Column
+from pydbml.definitions.generic import (expression, name, string_literal, boolean_literal,
+                                        number_literal, expression_literal)
+from pydbml.definitions.common import _, n, note, pk, unique
+from pydbml.definitions.reference import ref_inline
+from pydbml.classes import ColumnType, Column
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
@@ -19,9 +19,9 @@ column_type = (type_name + type_args[0, 1])
 column_type.setParseAction(parse_column_type)
 
 
-default = pp.CaselessLiteral('default:') + _ + (
+default = pp.CaselessLiteral('default:').suppress() + _ + (
     string_literal |
-    expression |
+    expression_literal |
     boolean_literal.setParseAction(
         lambda s, l, t: {
             'true': True,
@@ -30,7 +30,7 @@ default = pp.CaselessLiteral('default:') + _ + (
         }[t[0]]
     ) |
     number_literal.setParseAction(
-        lambda s, l, t: float(''.join(t)) if len(t) > 1 else int(t)
+        lambda s, l, t: float(''.join(t[0])) if '.' in t[0] else int(t[0])
     )
 )
 
@@ -43,7 +43,7 @@ column_setting = _ + (
     unique('u') |
     pp.CaselessLiteral("increment")('i') |
     note('n') |
-    ref_inline('r') |
+    ref_inline('r*') |
     default('d') + _
 )
 column_settings = '[' + column_setting + ("," + column_setting)[...] + ']' + n
@@ -62,9 +62,9 @@ def parse_column_settings(s, l, t):
     if 'n' in t:
         result['note'] = t['n']
     if 'd' in t:
-        result['default'] = t['d']
+        result['default'] = t['d'][0]
     if 'r' in t:
-        result['ref'] = t['r']
+        result['refs'] = list(t['r'])
     return result
 
 

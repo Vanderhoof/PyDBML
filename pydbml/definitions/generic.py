@@ -17,7 +17,12 @@ boolean_literal = (
     pp.CaselessLiteral('false') |
     pp.CaselessLiteral('null')
 )
-number_literal = pp.Word(pp.nums) ^ pp.Word(pp.nums) + '.' + pp.Word(pp.nums)
+number_literal = (
+    pp.Word(pp.nums) ^
+    pp.Combine(
+        pp.Word(pp.nums) + '.' + pp.Word(pp.nums)
+    )
+)
 
 # Expression
 

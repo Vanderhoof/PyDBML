@@ -1,9 +1,9 @@
 import pyparsing as pp
-from definitions.generic import name
-from definitions.common import _, note, note_object
-from definitions.column import table_column
-from definitions.index import index
-from classes import Table
+from pydbml.definitions.generic import name
+from pydbml.definitions.common import _, note, note_object
+from pydbml.definitions.column import table_column
+from pydbml.definitions.index import index
+from pydbml.classes import Table
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
@@ -62,14 +62,14 @@ def parse_table(s, l, t):
         init_dict.update(t['settings'])
     if 'alias' in t:
         init_dict['alias'] = t['alias']
-    if 'indexes' in t:
-        init_dict['indexes'] = list(t['indexes'])
     if 'note' in t:
         # will override one from settings
         init_dict['note'] = t['note']
     result = Table(**init_dict)
     for column in t['columns']:
         result.add_column(column)
+    for index_ in t.get('indexes', []):
+        result.add_index(index_)
 
     return result
 

@@ -1,7 +1,7 @@
 import pyparsing as pp
-from definitions.generic import name
-from definitions.common import _, note
-from classes import EnumItem, Enum
+from pydbml.definitions.generic import name
+from pydbml.definitions.common import _, note
+from pydbml.classes import EnumItem, Enum
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
@@ -26,7 +26,7 @@ def parse_enum_item(s, l, t):
     init_dict = {'name': t['name']}
     if 'settings' in t:
         init_dict.update(t['settings'])
-    return EnumItem(init_dict)
+    return EnumItem(**init_dict)
 
 
 enum_item.setParseAction(parse_enum_item)
