@@ -1,5 +1,4 @@
 from __future__ import annotations
-import os
 import pyparsing as pp
 from pathlib import PosixPath
 from io import TextIOWrapper
@@ -69,6 +68,7 @@ class PyDBMLParseResults:
         self._syntax.parseString(self.source, parseAll=True)
         self._validate()
         self._add_col_refs()
+        self._set_enum_types()
 
     def __repr__(self):
         return "<PyDBMLParseResults>"
@@ -149,6 +149,13 @@ class PyDBMLParseResults:
             table.refs.append(
                 TableReference(**init_dict)
             )
+
+    def _set_enum_types(self):
+        enum_dict = {enum.name: enum for enum in self.enums}
+        for table_ in self.tables:
+            for col in table_:
+                if str(col.type) in enum_dict:
+                    col.type = enum_dict[str(col.type)].get_type()
 
     def _validate(self):
         for ref_ in self.refs:

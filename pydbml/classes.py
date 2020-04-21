@@ -1,22 +1,6 @@
 from __future__ import annotations
 
 
-class ColumnType:
-    def __init__(self, name: str, args: str or None):
-        self.name = name.strip('"')
-        self.args = args
-
-    def __repr__(self):
-        components = [f'ColumnType({repr(self.name)}']
-        if self.args:
-            components.append(f'{repr(self.args)})')
-        return ', '.join(components) + ')'
-
-    def __str__(self):
-        args = '(' + self.args + ')' if self.args else ''
-        return self.name + args
-
-
 class Reference:
     ONE_TO_MANY = '<'
     MANY_TO_ONE = '>'
@@ -99,6 +83,12 @@ class Note:
     def __init__(self, text: str):
         self.text = text
 
+    def __str__(self):
+        return self.text
+
+    def __bool__(self):
+        return bool(self.text)
+
     def __repr__(self):
         return f'Note({repr(self.text)})'
 
@@ -106,7 +96,7 @@ class Note:
 class Column:
     def __init__(self,
                  name: str,
-                 type_: ColumnType,
+                 type_: str,
                  unique: bool = False,
                  not_null: bool = False,
                  pk: bool = False,
@@ -126,7 +116,7 @@ class Column:
         else:
             self.default = default
 
-        self.note = note
+        self.note = note or Note('')
         self.refs = refs or []
         for ref in self.refs:
             ref.col1 = self.name
@@ -188,7 +178,7 @@ class Index:
         self.unique = unique
         self.type = type_
         self.pk = pk
-        self.note = note
+        self.note = note or Note('')
 
     def __repr__(self):
         components = [f"Index({self.subjects}"]
@@ -232,7 +222,7 @@ class Table:
         self.indexes = []
         self.column_dict = {}
         self.alias = alias.strip('"') if alias else None
-        self.note = note
+        self.note = note or Note('')
         self.header_color = header_color
         self.refs = refs or []
 
@@ -285,7 +275,7 @@ class EnumItem:
                  name: str,
                  note: Note or None = None):
         self.name = name.strip('"')
-        self.note = note
+        self.note = note or Note('')
 
     def __repr__(self):
         components = [f'EnumItem({repr(self.name)}']
@@ -304,6 +294,15 @@ class Enum:
         self.name = name.strip('"')
         self.items = items
 
+    def get_type(self):
+        return EnumType(self.name, self.items)
+
+    def __getitem__(self, key):
+        return self.item[key]
+
+    def __iter__(self):
+        return iter(self.items)
+
     def __repr__(self):
         return f'Enum({repr(self.name)}, {repr(self.items)})'
 
@@ -314,6 +313,14 @@ class Enum:
         return f'CREATE TYPE "{self.name}" AS ENUM (\n' +\
                '\n'.join(items) +\
                '\n);'
+
+
+class EnumType(Enum):
+    def __repr__(self):
+        return f'EnumType({repr(self.name)}, {repr(self.items)})'
+
+    def __str__(self):
+        return self.name
 
 
 class TableGroup:
@@ -334,7 +341,7 @@ class Project:
                  note: Note or None = None):
         self.name = name.strip('"')
         self.items = items
-        self.note = note
+        self.note = note or Note('')
 
     def __repr__(self):
         components = [f'Project({repr(self.name)}']

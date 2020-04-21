@@ -3,19 +3,23 @@ from pydbml.definitions.generic import (expression, name, string_literal, boolea
                                         number_literal, expression_literal)
 from pydbml.definitions.common import _, n, note, pk, unique
 from pydbml.definitions.reference import ref_inline
-from pydbml.classes import ColumnType, Column
+from pydbml.classes import Column
+
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
-
-
-def parse_column_type(s, l, t):
-    return ColumnType(name=t['name'],
-                      args=t.get('args'))
-
 
 type_args = ("(" + pp.originalTextFor(expression)('args') + ")")
 type_name = (pp.Word(pp.alphanums + '_[]') | pp.dblQuotedString())('name')
 column_type = (type_name + type_args[0, 1])
+
+
+def parse_column_type(s, l, t):
+    result = t['name']
+    args = t.get('args')
+    result += '(' + args + ')' if args else ''
+    return result
+
+
 column_type.setParseAction(parse_column_type)
 
 

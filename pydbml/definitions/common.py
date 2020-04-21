@@ -16,10 +16,10 @@ __ = (pp.White() | comment)[1, ...].suppress()
 n = (comment[0, 1] + '\n')[...].suppress()
 
 note = pp.CaselessLiteral("note:") + _ + string_literal('text')
-note.setParseAction(lambda s, l, t: Note(t['text'][0]))
+note.setParseAction(lambda s, l, t: Note(t['text']))
 
 note_object = pp.CaselessLiteral('note') + _ + '{' + _ + string_literal('text') + _ + '}'
-note_object.setParseAction(lambda s, l, t: Note(t['text'][0]))
+note_object.setParseAction(lambda s, l, t: Note(t['text']))
 
 pk = pp.CaselessLiteral("pk")
 unique = pp.CaselessLiteral("unique")
