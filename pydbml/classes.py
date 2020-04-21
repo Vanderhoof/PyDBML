@@ -253,7 +253,7 @@ class Table:
         return iter(self.columns)
 
     def __repr__(self):
-        components = [f"Table({self.name}, {self.columns}"]
+        components = [f"Table({repr(self.name)}, {repr(self.columns)}"]
         if self.alias:
             components.append(f'alias={repr(self.alias)}')
         if self.indexes:

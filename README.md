@@ -59,9 +59,9 @@ Or just by getting items directly:
 
 ```python
 >>> p['countries']
-Table(countries, [Column('code', ColumnType('int'), pk=True), Column('name', ColumnType('varchar')), Column('continent_name', ColumnType('varchar'))])
+Table('countries', [Column('code', 'int', pk=True), Column('name', 'varchar'), Column('continent_name', 'varchar')])
 >>> p[1]
-Table(order_items, [Column('order_id', ColumnType('int')), Column('product_id', ColumnType('int')), Column('quantity', ColumnType('int'), default=1)])
+Table('order_items', [Column('order_id', 'int'), Column('product_id', 'int'), Column('quantity', 'int', default=1)])
 
 ```
 
