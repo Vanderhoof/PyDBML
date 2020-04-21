@@ -2,7 +2,6 @@ from __future__ import annotations
 import pyparsing as pp
 from pathlib import PosixPath
 from io import TextIOWrapper
-from pydbml.definitions.common import _
 from pydbml.definitions.table import table
 from pydbml.definitions.reference import ref
 from pydbml.definitions.enum import enum
@@ -86,13 +85,13 @@ class PyDBMLParseResults:
         table_group_expr.addParseAction(self._parse_table_group)
         project_expr.addParseAction(self._parse_project)
 
-        expr = _ + (
-            table_expr |
-            ref_expr |
-            enum_expr |
-            table_group_expr |
+        expr = (
+            table_expr ^
+            ref_expr ^
+            enum_expr ^
+            table_group_expr ^
             project_expr
-        ) + _
+        )
         self._syntax = expr[...]
 
     def __getitem__(self, k: int or str) -> Table:

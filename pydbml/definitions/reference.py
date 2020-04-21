@@ -1,6 +1,6 @@
 import pyparsing as pp
 from pydbml.definitions.generic import name
-from pydbml.definitions.common import __, _
+from pydbml.definitions.common import __, _, _c, c, n
 from pydbml.classes import Reference
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
@@ -30,7 +30,7 @@ delete = pp.CaselessLiteral("delete:").suppress() + _ + on_option
 
 ref_setting = _ + (update('update') | delete('delete')) + _
 
-ref_settings = '[' + ref_setting + ']'
+ref_settings = '[' + ref_setting + ']' + c
 
 
 def parse_ref_settings(s, l, t):
@@ -39,6 +39,8 @@ def parse_ref_settings(s, l, t):
         result['update'] = t['update'][0]
     if 'delete' in t:
         result['delete'] = t['delete'][0]
+    if 'comment' in t:
+        result['comment'] = t['comment'][0]
     return result
 
 
@@ -51,12 +53,12 @@ ref_body = (
     relation('type') +
     name('table2') +
     '.' +
-    name('field2') +
+    name('field2') + c +
     ref_settings('settings')[0, 1]
 )
 
-ref_short = pp.CaselessLiteral('ref') + name('name')[0, 1] + ':' + ref_body
-ref_long = (
+ref_short = _c + pp.CaselessLiteral('ref') + name('name')[0, 1] + ':' + ref_body
+ref_long = _c + (
     pp.CaselessLiteral('ref') + __ +
     name('name')[0, 1] + _ +
     '{' + _ +
@@ -77,6 +79,14 @@ def parse_ref(s, l, t):
         init_dict['name'] = t['name']
     if 'settings' in t:
         init_dict.update(t['settings'])
+
+    # comments after settings have priority
+    if 'comment' in t:
+        init_dict['comment'] = t['comment'][0]
+    if 'comment' not in init_dict and 'comment_before' in t:
+        comment = '\n'.join(c[0] for c in t['comment_before'])
+        init_dict['comment'] = comment
+
     ref = Reference(**init_dict)
     return ref
 
@@ -84,4 +94,4 @@ def parse_ref(s, l, t):
 ref_short.setParseAction(parse_ref)
 ref_long.setParseAction(parse_ref)
 
-ref = ref_short | ref_long
+ref = ref_short | ref_long + (n | pp.StringEnd())

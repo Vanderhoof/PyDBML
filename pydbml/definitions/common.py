@@ -9,11 +9,17 @@ comment = pp.Suppress("//") + pp.SkipTo(pp.LineEnd() | pp.StringEnd())
 # optional comment or newline
 _ = ('\n' | comment)[...].suppress()
 
+# optional comment or newline, but comments are captured
+_c = (pp.Suppress('\n') | comment('comment_before*'))[...]
+
+# optional captured comment
+c = comment('comment')[0, 1]
+
 # obligatory any whitespace
 __ = (pp.White() | comment)[1, ...].suppress()
 
 # optional comment and obligatory newline
-n = (comment[0, 1] + '\n')[...].suppress()
+n = pp.Suppress('\n')[...]
 
 note = pp.CaselessLiteral("note:") + _ + string_literal('text')
 note.setParseAction(lambda s, l, t: Note(t['text']))

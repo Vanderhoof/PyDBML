@@ -1,7 +1,7 @@
 import pyparsing as pp
 from pydbml.definitions.generic import (expression, name, string_literal, boolean_literal,
                                         number_literal, expression_literal)
-from pydbml.definitions.common import _, n, note, pk, unique
+from pydbml.definitions.common import _, _c, c, n, note, pk, unique
 from pydbml.definitions.reference import ref_inline
 from pydbml.classes import Column
 
@@ -50,7 +50,7 @@ column_setting = _ + (
     ref_inline('r*') |
     default('d') + _
 )
-column_settings = '[' + column_setting + ("," + column_setting)[...] + ']' + n
+column_settings = '[' + column_setting + ("," + column_setting)[...] + ']' + c + n
 
 
 def parse_column_settings(s, l, t):
@@ -69,6 +69,8 @@ def parse_column_settings(s, l, t):
         result['default'] = t['d'][0]
     if 'r' in t:
         result['refs'] = list(t['r'])
+    if 'comment' in t:
+        result['comment'] = t['comment'][0]
     return result
 
 
@@ -77,16 +79,15 @@ column_settings.setParseAction(parse_column_settings)
 
 constraint = pp.CaselessLiteral("unique") | pp.CaselessLiteral("pk")
 
-table_column = _ + (
+table_column = _c + (
     name('name') +
     column_type('type') +
-    constraint('constraints')[...] +
+    constraint('constraints')[...] + c +
     column_settings('settings')[0, 1]
 ) + n
 
 
 def parse_column(s, l, t):
-    # TODO add validation and ref processing
     init_dict = {
         'name': t['name'],
         'type_': t['type'],
@@ -100,6 +101,13 @@ def parse_column(s, l, t):
 
     if 'settings' in t:
         init_dict.update(t['settings'])
+
+    # comments after column definition have priority
+    if 'comment' in t:
+        init_dict['comment'] = t['comment'][0]
+    if 'comment' not in init_dict and 'comment_before' in t:
+        comment = '\n'.join(c[0] for c in t['comment_before'])
+        init_dict['comment'] = comment
 
     return Column(**init_dict)
 

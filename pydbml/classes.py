@@ -13,18 +13,20 @@ class Reference:
     }
 
     def __init__(self,
-                 type_=str,
-                 name=None,
-                 table1=None,
-                 col1=None,
-                 table2=None,
-                 col2=None):
+                 type_: str,
+                 name: str = None,
+                 table1: str = None,
+                 col1: str = None,
+                 table2: str = None,
+                 col2: str = None,
+                 comment: str = None):
         self.type = type_
         self.name = name.strip('"') if name else None
         self.table1 = table1.strip('"') if table1 else None
         self.col1 = col1.strip('"') if col1 else None
         self.table2 = table2.strip('"') if table2 else None
         self.col2 = col2.strip('"') if col2 else None
+        self.comment = comment
 
     def __repr__(self):
         components = [f"Reference({repr(self.type)}"]
@@ -103,13 +105,15 @@ class Column:
                  autoinc: bool = False,
                  default=None,
                  note: str or None = None,
-                 refs: list = None):
+                 refs: list = None,
+                 comment: str or None = None):
         self.name = name.strip('"')
         self.type = type_
         self.unique = unique
         self.not_null = not_null
         self.pk = pk
         self.autoinc = autoinc
+        self.comment = comment
 
         if isinstance(default, str):
             self.default = default.strip('`')
@@ -167,11 +171,12 @@ class Index:
     def __init__(self,
                  subjects: list,
                  name: str or None = None,
-                 table: str or None = None,  # TODO
+                 table: str or None = None,
                  unique: bool = False,
                  type_: str or None = None,
                  pk: bool = False,
-                 note: Note or None = None):
+                 note: Note or None = None,
+                 comment: str or None = None):
         self.subjects = [s.strip('"') for s in subjects]
         self.name = name.strip('"') if name else None
         self.table = table
@@ -179,6 +184,7 @@ class Index:
         self.type = type_
         self.pk = pk
         self.note = note or Note('')
+        self.comment = comment
 
     def __repr__(self):
         components = [f"Index({self.subjects}"]
@@ -216,7 +222,8 @@ class Table:
                  alias: str or None = None,
                  note: Note or None = None,
                  header_color: str or None = None,
-                 refs: list or None = None):
+                 refs: list or None = None,
+                 comment: str or None = None):
         self.name = name.strip('"')
         self.columns = []
         self.indexes = []
@@ -225,6 +232,7 @@ class Table:
         self.note = note or Note('')
         self.header_color = header_color
         self.refs = refs or []
+        self.comment = comment
 
     def add_column(self, c: Column):
         c.table = self
@@ -273,9 +281,11 @@ class Table:
 class EnumItem:
     def __init__(self,
                  name: str,
-                 note: Note or None = None):
+                 note: Note or None = None,
+                 comment: str or None = None):
         self.name = name.strip('"')
         self.note = note or Note('')
+        self.comment = comment
 
     def __repr__(self):
         components = [f'EnumItem({repr(self.name)}']
@@ -290,15 +300,17 @@ class EnumItem:
 class Enum:
     def __init__(self,
                  name: str,
-                 items: list):
+                 items: list,
+                 comment: str or None = None):
         self.name = name.strip('"')
         self.items = items
+        self.comment = comment
 
     def get_type(self):
         return EnumType(self.name, self.items)
 
     def __getitem__(self, key):
-        return self.item[key]
+        return self.items[key]
 
     def __iter__(self):
         return iter(self.items)
@@ -326,9 +338,11 @@ class EnumType(Enum):
 class TableGroup:
     def __init__(self,
                  name: str,
-                 items: list):
+                 items: list,
+                 comment: str or None = None):
         self.name = name.strip('"')
         self.items = items
+        self.comment = comment
 
     def __repr__(self):
         return f'TableGroup({repr(self.name)}, {repr(self.items)})'
@@ -338,10 +352,12 @@ class Project:
     def __init__(self,
                  name: str,
                  items: dict or None = None,
-                 note: Note or None = None):
+                 note: Note or None = None,
+                 comment: str or None = None):
         self.name = name.strip('"')
         self.items = items
         self.note = note or Note('')
+        self.comment = comment
 
     def __repr__(self):
         components = [f'Project({repr(self.name)}']

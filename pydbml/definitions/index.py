@@ -1,6 +1,6 @@
 import pyparsing as pp
 from pydbml.definitions.generic import expression_literal, name, string_literal
-from pydbml.definitions.common import _, pk, unique, note
+from pydbml.definitions.common import _, _c, c, pk, unique, note
 from pydbml.classes import Index
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
@@ -15,8 +15,8 @@ index_setting = (
     note('note')
 )
 index_settings = (
-    '[' + pk('pk') + ']' |
-    '[' + index_setting + (',' + index_setting)[...] + ']'
+    '[' + pk('pk') + ']' + c |
+    '[' + index_setting + (',' + index_setting)[...] + ']' + c
 )
 
 
@@ -32,6 +32,8 @@ def parse_index_settings(s, l, t):
         result['type_'] = t['type']
     if 'note' in t:
         result['note'] = t['note']
+    if 'comment' in t:
+        result['comment'] = t['comment'][0]
     return result
 
 
@@ -45,19 +47,30 @@ composite_index_syntax = (
         single_index
     )[...] +
     pp.Suppress(')')
-)('subject') + index_settings('settings')[0, 1]
+)('subject') + c + index_settings('settings')[0, 1]
 
-single_index_syntax = single_index('subject') + index_settings('settings')[0, 1]
-index = _ + (single_index_syntax ^ composite_index_syntax) + _
+single_index_syntax = single_index('subject') + c + index_settings('settings')[0, 1]
+index = _c + (single_index_syntax ^ composite_index_syntax)
 
 
 def parse_index(s, l, t):
+    init_dict = {}
     if isinstance(t['subject'], str):
         subjects = [t['subject']]
     else:
         subjects = list(t['subject'])
+
+    init_dict['subjects'] = subjects
     settings = t.get('settings', {})
-    return Index(subjects=subjects, **settings)
+    init_dict.update(settings)
+
+    # comments after settings have priority
+    if 'comment' in t:
+        init_dict['comment'] = t['comment'][0]
+    if 'comment' not in init_dict and 'comment_before' in t:
+        comment = '\n'.join(c[0] for c in t['comment_before'])
+        init_dict['comment'] = comment
+    return Index(**init_dict)
 
 
 index.setParseAction(parse_index)

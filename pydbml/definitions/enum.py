@@ -1,31 +1,41 @@
 import pyparsing as pp
 from pydbml.definitions.generic import name
-from pydbml.definitions.common import _, note
+from pydbml.definitions.common import _, c, _c, n, note
 from pydbml.classes import EnumItem, Enum
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 enum_setting = _ + note('note') + _
 
-enum_settings = '[' + enum_setting + ']'
+enum_settings = '[' + enum_setting + ']' + c
 
 
 def parse_enum_settings(s, l, t):
     result = {}
     if 'note' in t:
         result['note'] = t['note']
+    if 'comment' in t:
+        result['comment'] = t['comment'][0]
     return result
 
 
 enum_settings.setParseAction(parse_enum_settings)
 
-enum_item = _ + (name('name') + enum_settings('settings')[0, 1]) + _
+enum_item = _c + (name('name') + c + enum_settings('settings')[0, 1])
 
 
 def parse_enum_item(s, l, t):
     init_dict = {'name': t['name']}
     if 'settings' in t:
         init_dict.update(t['settings'])
+
+    # comments after settings have priority
+    if 'comment' in t:
+        init_dict['comment'] = t['comment'][0]
+    if 'comment' not in init_dict and 'comment_before' in t:
+        comment = '\n'.join(c[0] for c in t['comment_before'])
+        init_dict['comment'] = comment
+
     return EnumItem(**init_dict)
 
 
@@ -33,17 +43,26 @@ enum_item.setParseAction(parse_enum_item)
 
 enum_body = enum_item[1, ...]
 
-enum = (
+enum = _c + (
     pp.CaselessLiteral('enum') +
     name('name') + _ +
-    '{' + _ +
+    '{' +
     enum_body('items') + _ +
     '}'
-)
+) + (n | pp.StringEnd())
 
 
 def parse_enum(s, l, t):
-    return Enum(name=t['name'], items=list(t['items']))
+    init_dict = {
+        'name': t['name'],
+        'items': list(t['items'])
+    }
+
+    if 'comment_before' in t:
+        comment = '\n'.join(c[0] for c in t['comment_before'])
+        init_dict['comment'] = comment
+
+    return Enum(**init_dict)
 
 
 enum.setParseAction(parse_enum)
