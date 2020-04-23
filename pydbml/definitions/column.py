@@ -26,7 +26,7 @@ def parse_column_type(s, l, t):
 column_type.setParseAction(parse_column_type)
 
 
-default = pp.CaselessLiteral('default:').suppress() + _ + (
+default = pp.CaselessLiteral('default:').suppress() + _ - (
     string_literal |
     expression_literal |
     boolean_literal.setParseAction(

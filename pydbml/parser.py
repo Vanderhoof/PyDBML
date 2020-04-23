@@ -133,8 +133,8 @@ class PyDBMLParseResults:
                     'col': ref_.col1,
                     'ref_table': ref_.table2,
                     'ref_col': ref_.col2,
-                    'on_update': ref.on_update,
-                    'on_delete': ref.on_delete
+                    'on_update': ref_.on_update,
+                    'on_delete': ref_.on_delete
                 }
                 if ref_.name:
                     init_dict['name'] = ref_.name
@@ -144,8 +144,8 @@ class PyDBMLParseResults:
                     'col': ref_.col2,
                     'ref_table': ref_.table1,
                     'ref_col': ref_.col1,
-                    'on_update': ref.on_update,
-                    'on_delete': ref.on_delete
+                    'on_update': ref_.on_update,
+                    'on_delete': ref_.on_delete
                 }
                 if ref_.name:
                     init_dict['name'] = ref_.name
