@@ -2,7 +2,8 @@
 
 - Better syntax errors.
 - sql for each object now contains in `sql` property instead of string rerpresentation. Added proper string representations.
-- Added syntax tests. Million bugs fixed.
+- Added syntax tests.
+- Million bugs fixed after testing.
 
 # 0.1.1
 
