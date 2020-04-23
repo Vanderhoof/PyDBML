@@ -11,11 +11,16 @@ string_literal = (
     pp.QuotedString('"', escChar="\\") ^
     pp.QuotedString("'''", escChar="\\", multiline=True)
 )
-expression_literal = pp.Combine('`' + pp.CharsNotIn('`')[...] + '`')
+expression_literal = pp.Combine(
+    pp.Suppress('`') +
+    pp.CharsNotIn('`')[...] +
+    pp.Suppress('`')
+).setParseAction(lambda s, l, t: f'({t[0]})')
+
 boolean_literal = (
     pp.CaselessLiteral('true') |
     pp.CaselessLiteral('false') |
-    pp.CaselessLiteral('null')
+    pp.CaselessLiteral('NULL')
 )
 number_literal = (
     pp.Word(pp.nums) ^

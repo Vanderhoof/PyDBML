@@ -4,7 +4,7 @@ from pydbml.classes import Note
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
-comment = pp.Suppress("//") + pp.SkipTo(pp.LineEnd() | pp.StringEnd())
+comment = pp.Suppress("//") + pp.SkipTo(pp.LineEnd())
 
 # optional comment or newline
 _ = ('\n' | comment)[...].suppress()
@@ -15,16 +15,15 @@ _c = (pp.Suppress('\n') | comment('comment_before*'))[...]
 # optional captured comment
 c = comment('comment')[0, 1]
 
-# obligatory any whitespace
-__ = (pp.White() | comment)[1, ...].suppress()
+n = pp.LineEnd()
+end = n | pp.StringEnd()
+# obligatory newline
+# n = pp.Suppress('\n')[1, ...]
 
-# optional comment and obligatory newline
-n = pp.Suppress('\n')[...]
-
-note = pp.CaselessLiteral("note:") + _ + string_literal('text')
+note = pp.CaselessLiteral("note:") + _ - string_literal('text')
 note.setParseAction(lambda s, l, t: Note(t['text']))
 
-note_object = pp.CaselessLiteral('note') + _ + '{' + _ + string_literal('text') + _ + '}'
+note_object = pp.CaselessLiteral('note') + _ - '{' + _ - string_literal('text') + _ - '}'
 note_object.setParseAction(lambda s, l, t: Note(t['text']))
 
 pk = pp.CaselessLiteral("pk")

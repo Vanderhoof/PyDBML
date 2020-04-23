@@ -19,7 +19,9 @@ class Reference:
                  col1: str = None,
                  table2: str = None,
                  col2: str = None,
-                 comment: str = None):
+                 comment: str = None,
+                 on_update: str or None = None,
+                 on_delete: str or None = None):
         self.type = type_
         self.name = name.strip('"') if name else None
         self.table1 = table1.strip('"') if table1 else None
@@ -27,6 +29,8 @@ class Reference:
         self.table2 = table2.strip('"') if table2 else None
         self.col2 = col2.strip('"') if col2 else None
         self.comment = comment
+        self.on_update = on_update
+        self.on_delete = on_delete
 
     def __repr__(self):
         components = [f"Reference({repr(self.type)}"]
@@ -40,20 +44,49 @@ class Reference:
             components.append(f'table2={repr(self.table2)}')
         if self.col2:
             components.append(f'col2={repr(self.col2)}')
+        if self.on_update:
+            components.append(f'on_update={repr(self.on_update)}')
+        if self.on_delete:
+            components.append(f'on_delete={repr(self.on_delete)}')
         return ', '.join(components) + ')'
 
     def __str__(self):
+        components = [f"Reference("]
+        if self.table1:
+            components.append(self.table1)
+        if self.col1:
+            components.append(f'.{self.col1}')
+        components.append(f' {self.type} ')
+        if self.table2:
+            components.append(self.table2)
+        if self.col2:
+            components.append(f'.{self.col2}')
+        return ''.join(components) + ')'
+
+    @property
+    def sql(self):
         c = f'CONSTRAINT "{self.name}" ' if self.name else ''
+
         if self.type in (self.MANY_TO_ONE, self.ONE_TO_ONE):
-            return (
-                f'ALTER TABLE "{self.table1}" ADD {c}FOREIGN KEY ("{self.col1}") '
-                f'REFERENCES "{self.table2} ("{self.col2}");'
-            )
+            t1 = self.table1
+            c1 = self.col1
+            t2 = self.table2
+            c2 = self.col2
         else:
-            return (
-                f'ALTER TABLE "{self.table2}" ADD {c}FOREIGN KEY ("{self.col2}") '
-                f'REFERENCES "{self.table1} ("{self.col1}");'
-            )
+            t1 = self.table2
+            c1 = self.col2
+            t2 = self.table1
+            c2 = self.col1
+
+        result = (
+            f'ALTER TABLE "{t1}" ADD {c}FOREIGN KEY ("{c1}") '
+            f'REFERENCES "{t2} ("{c2}")'
+        )
+        if self.on_update:
+            result += f' ON UPDATE {self.on_update.upper()}'
+        if self.on_delete:
+            result += f' ON DELETE {self.on_delete.upper()}'
+        return result + ';'
 
 
 class TableReference:
@@ -61,24 +94,41 @@ class TableReference:
                  col: str,
                  ref_table: str,
                  ref_col: str,
-                 name=None):
+                 name: str or None = None,
+                 on_delete: str or None = None,
+                 on_update: str or None = None):
         self.col = col
         self.ref_table = ref_table
         self.ref_col = ref_col
         self.name = name
+        self.on_update = on_update
+        self.on_delete = on_delete
 
     def __repr__(self):
         components = [f"TableReference({repr(self.col)}, {repr(self.ref_table)}, {repr(self.ref_col)}"]
         if self.name:
             components.append(f'name={repr(self.name)}')
+        if self.on_update:
+            components.append(f'on_update={repr(self.on_update)}')
+        if self.on_delete:
+            components.append(f'on_delete={repr(self.on_delete)}')
         return ', '.join(components) + ')'
 
     def __str__(self):
+        return f"TableReference({self.col} -> {self.ref_table}.{self.ref_col})"
+
+    @property
+    def sql(self):
         c = f'CONSTRAINT "{self.name}" ' if self.name else ''
-        return (
+        result = (
             f'{c}FOREIGN KEY ("{self.col}") '
             f'REFERENCES "{self.ref_table} ("{self.ref_col}")'
         )
+        if self.on_update:
+            result += f' ON UPDATE {self.on_update.upper()}'
+        if self.on_delete:
+            result += f' ON DELETE {self.on_delete.upper()}'
+        return result
 
 
 class Note:
@@ -136,7 +186,8 @@ class Column:
         for ref in self.refs:
             ref.table1 = v.name
 
-    def __str__(self):
+    @property
+    def sql(self):
         components = [f'"{self.name}"', str(self.type)]
         if self.pk:
             components.append('PRIMARY KEY')
@@ -166,6 +217,20 @@ class Column:
             components.append(f'note={repr(self.note)}')
         return ', '.join(components) + ')'
 
+    def __str__(self):
+        components = [f"Column({self.name} {self.type}"]
+        if self.unique:
+            components.append(f'unique')
+        if self.not_null:
+            components.append(f'not_null')
+        if self.pk:
+            components.append(f'pk')
+        if self.autoinc:
+            components.append(f'autoincrement')
+        if self.default:
+            components.append(f'default={repr(self.default)}')
+        return ' '.join(components) + ')'
+
 
 class Index:
     def __init__(self,
@@ -187,7 +252,7 @@ class Index:
         self.comment = comment
 
     def __repr__(self):
-        components = [f"Index({self.subjects}"]
+        components = [f"Index({repr(self.subjects)}"]
         if self.name:
             components.append(f'name={repr(self.name)}')
         if self.unique:
@@ -201,6 +266,23 @@ class Index:
         return ', '.join(components) + ')'
 
     def __str__(self):
+        components = [f"Index("]
+        if len(self.subjects) == 1:
+            components[0] += self.subjects[0]
+        else:
+            components[0] += '(' + ', '.join(self.subjects) + ')'
+        if self.name:
+            components.append(f'{repr(self.name)}')
+        if self.unique:
+            components.append(f'unique')
+        if self.type:
+            components.append(f'{self.type}')
+        if self.pk:
+            components.append(f'pk')
+        return ' '.join(components) + ')'
+
+    @property
+    def sql(self):
         keys = ', '.join(f'"{key}"' for key in self.subjects)
         if self.pk:
             return f'PRIMARY KEY ({keys})'
@@ -212,6 +294,8 @@ class Index:
         if self.name:
             components.append(f'"{self.name}"')
         components.append(f'ON "{self.table.name}"')
+        if self.type:
+            components.append(f'USING {self.type.upper()}')
         components.append('(' + keys + ')')
         return ' '.join(components) + ';'
 
@@ -265,16 +349,22 @@ class Table:
         return ', '.join(components) + ')'
 
     def __str__(self):
-        def indent(text):
-            return '  ' + text
+        components = [f"Table {self.name}"]
+        if self.alias:
+            components.append(f' as {self.alias} ')
+        components.append('(' + ', '.join(c.name for c in self.columns))
+        return ''.join(components) + ')'
+
+    @property
+    def sql(self):
         components = [f'CREATE TABLE "{self.name}" (']
         body = []
-        body.extend(indent(str(c)) for c in self.columns)
-        body.extend(indent(str(i)) for i in self.indexes if i.pk)
-        body.extend(indent(str(r)) for r in self.refs)
+        body.extend('  ' + c.sql for c in self.columns)
+        body.extend('  ' + i.sql for i in self.indexes if i.pk)
+        body.extend('  ' + r.sql for r in self.refs)
         components.append(',\n'.join(body))
         components.append(');\n')
-        components.extend(str(i) + '\n' for i in self.indexes if not i.pk)
+        components.extend(i.sql + '\n' for i in self.indexes if not i.pk)
         return '\n'.join(components)
 
 
@@ -319,6 +409,13 @@ class Enum:
         return f'Enum({repr(self.name)}, {repr(self.items)})'
 
     def __str__(self):
+        return (
+            f'Enum {self.name}' +
+            ', '.join(str(i) for i in self.items)
+        )
+
+    @property
+    def sql(self):
         items = []
         for item in self.items:
             items.append(f"  '{item}',")

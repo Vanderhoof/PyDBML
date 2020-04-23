@@ -66,7 +66,7 @@ class PyDBMLParseResults:
         self._set_syntax()
         self._syntax.parseString(self.source, parseAll=True)
         self._validate()
-        self._add_col_refs()
+        self._add_table_refs()
         self._set_enum_types()
 
     def __repr__(self):
@@ -86,10 +86,10 @@ class PyDBMLParseResults:
         project_expr.addParseAction(self._parse_project)
 
         expr = (
-            table_expr ^
-            ref_expr ^
-            enum_expr ^
-            table_group_expr ^
+            table_expr |
+            ref_expr |
+            enum_expr |
+            table_group_expr |
             project_expr
         )
         self._syntax = expr[...]
@@ -125,14 +125,16 @@ class PyDBMLParseResults:
         else:
             raise SyntaxError('Project redifinition not allowed')
 
-    def _add_col_refs(self):
+    def _add_table_refs(self):
         for ref_ in self.refs:
             if ref_.type in (Reference.MANY_TO_ONE, Reference.ONE_TO_ONE):
                 table = self.table_dict[ref_.table1]
                 init_dict = {
                     'col': ref_.col1,
                     'ref_table': ref_.table2,
-                    'ref_col': ref_.col2
+                    'ref_col': ref_.col2,
+                    'on_update': ref.on_update,
+                    'on_delete': ref.on_delete
                 }
                 if ref_.name:
                     init_dict['name'] = ref_.name
@@ -141,7 +143,9 @@ class PyDBMLParseResults:
                 init_dict = {
                     'col': ref_.col2,
                     'ref_table': ref_.table1,
-                    'ref_col': ref_.col1
+                    'ref_col': ref_.col1,
+                    'on_update': ref.on_update,
+                    'on_delete': ref.on_delete
                 }
                 if ref_.name:
                     init_dict['name'] = ref_.name
@@ -180,5 +184,5 @@ class PyDBMLParseResults:
 
     @property
     def sql(self):
-        components = (str(i) for i in (*self.enums, *self.tables))
+        components = (i.sql for i in (*self.enums, *self.tables))
         return '\n'.join(components)

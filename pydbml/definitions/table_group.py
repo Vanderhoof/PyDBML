@@ -1,25 +1,30 @@
 import pyparsing as pp
 from pydbml.definitions.generic import name
-from pydbml.definitions.common import _, __, _c, n
+from pydbml.definitions.common import _, _c, end
 from pydbml.classes import TableGroup
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
-tg_body = name + __
-
 table_group = _c + (
-    pp.CaselessLiteral('TableGroup') +
-    name('name') + _ +
-    '{' + _ +
-    tg_body[...]('items') + _ +
+    pp.CaselessLiteral('TableGroup') -
+    name('name') + _ -
+    '{' + _ -
+    (name + _)[...]('items') + _ -
     '}'
-) + (n | pp.StringEnd())
+) + end
 
 
 def parse_table_group(s, l, t):
+    '''
+    TableGroup tablegroup_name {
+        table1
+        table2
+        table3
+    }
+    '''
     init_dict = {
         'name': t['name'],
-        'items': list(t['items'])
+        'items': list(t.get('items', []))
     }
     if 'comment_before' in t:
         comment = '\n'.join(c[0] for c in t['comment_before'])

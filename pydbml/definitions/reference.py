@@ -1,16 +1,18 @@
 import pyparsing as pp
 from pydbml.definitions.generic import name
-from pydbml.definitions.common import __, _, _c, c, n
+from pydbml.definitions.common import _, _c, c, n
 from pydbml.classes import Reference
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 relation = pp.oneOf("> - <")
-ref_inline = pp.Literal("ref:") + relation('type') + name('table') + '.' + name('field')
-ref_inline.setWhitespaceChars(' \t')
+ref_inline = pp.Literal("ref:") - relation('type') - name('table') - '.' - name('field')
 
 
 def parse_inline_relation(s, l, t):
+    '''
+    ref: < table.column
+    '''
     return Reference(type_=t['type'],
                      table2=t['table'],
                      col2=t['field'])
@@ -30,15 +32,26 @@ delete = pp.CaselessLiteral("delete:").suppress() + _ + on_option
 
 ref_setting = _ + (update('update') | delete('delete')) + _
 
-ref_settings = '[' + ref_setting + ']' + c
+ref_settings = (
+    '[' +
+    ref_setting +
+    (
+        ',' +
+        ref_setting
+    )[...] +
+    ']' + c
+)
 
 
 def parse_ref_settings(s, l, t):
+    '''
+    [delete: cascade]
+    '''
     result = {}
     if 'update' in t:
-        result['update'] = t['update'][0]
+        result['on_update'] = t['update'][0]
     if 'delete' in t:
-        result['delete'] = t['delete'][0]
+        result['on_delete'] = t['delete'][0]
     if 'comment' in t:
         result['comment'] = t['comment'][0]
     return result
@@ -47,27 +60,34 @@ def parse_ref_settings(s, l, t):
 ref_settings.setParseAction(parse_ref_settings)
 
 ref_body = (
-    name('table1') +
-    '.' +
-    name('field1') +
-    relation('type') +
-    name('table2') +
-    '.' +
+    name('table1') -
+    '.' -
+    name('field1') -
+    relation('type') -
+    name('table2') -
+    '.' -
     name('field2') + c +
     ref_settings('settings')[0, 1]
 )
 
-ref_short = _c + pp.CaselessLiteral('ref') + name('name')[0, 1] + ':' + ref_body
+ref_short = _c + pp.CaselessLiteral('ref') + name('name')[0, 1] + ':' - ref_body
 ref_long = _c + (
-    pp.CaselessLiteral('ref') + __ +
+    pp.CaselessLiteral('ref') + _ +
     name('name')[0, 1] + _ +
-    '{' + _ +
-    ref_body + _ +
+    '{' + _ -
+    ref_body + _ -
     '}'
 )
 
 
 def parse_ref(s, l, t):
+    '''
+    ref name: table1.col1 > table2.col2
+    or
+    ref name {
+        table1.col1 < table2.col2
+    }
+    '''
     init_dict = {
         'type_': t['type'],
         'table1': t['table1'],

@@ -1,3 +1,9 @@
+# 0.2
+
+- Better syntax errors.
+- sql for each object now contains in `sql` property instead of string rerpresentation. Added proper string representations.
+- Added tests. Million bugs fixed.
+
 # 0.1.1
 
 - Comments are now parsed too if they are before [b] or on the same line [l] as the entity. Works for: tables[b], columns[lb], references [lb], indexes[lb], enum items [lb], enums [b], project [b] and table group [b]

@@ -1,16 +1,17 @@
 import pyparsing as pp
 from pydbml.definitions.generic import name
-from pydbml.definitions.common import _, c, _c, n, note
+from pydbml.definitions.common import _, c, n, _c, end, note
 from pydbml.classes import EnumItem, Enum
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
-enum_setting = _ + note('note') + _
-
-enum_settings = '[' + enum_setting + ']' + c
+enum_settings = '[' + _ - note('note') + _ - ']' + c
 
 
 def parse_enum_settings(s, l, t):
+    '''
+    [note: "note content"] // comment
+    '''
     result = {}
     if 'note' in t:
         result['note'] = t['note']
@@ -25,6 +26,9 @@ enum_item = _c + (name('name') + c + enum_settings('settings')[0, 1])
 
 
 def parse_enum_item(s, l, t):
+    '''
+    student [note: "is stupid"]
+    '''
     init_dict = {'name': t['name']}
     if 'settings' in t:
         init_dict.update(t['settings'])
@@ -44,15 +48,23 @@ enum_item.setParseAction(parse_enum_item)
 enum_body = enum_item[1, ...]
 
 enum = _c + (
-    pp.CaselessLiteral('enum') +
-    name('name') + _ +
+    pp.CaselessLiteral('enum') -
+    name('name') + _ -
     '{' +
-    enum_body('items') + _ +
+    enum_body('items') + n -
     '}'
-) + (n | pp.StringEnd())
+) + end
 
 
 def parse_enum(s, l, t):
+    '''
+    enum members {
+        janitor
+        student
+        teacher
+        headmaster
+    }
+    '''
     init_dict = {
         'name': t['name'],
         'items': list(t['items'])

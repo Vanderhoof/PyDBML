@@ -1,19 +1,19 @@
 import pyparsing as pp
 from pydbml.definitions.generic import name
-from pydbml.definitions.common import _, _c, n, note, note_object
+from pydbml.definitions.common import _, _c, end, note, note_object
 from pydbml.definitions.column import table_column
-from pydbml.definitions.index import index
+from pydbml.definitions.index import indexes
 from pydbml.classes import Table
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
-alias = pp.WordStart() + pp.Literal('as').suppress() + pp.WordEnd() + name
+alias = pp.WordStart() + pp.Literal('as').suppress() - pp.WordEnd() - name
 
 
 hex_char = pp.Word(pp.srange('[0-9a-fA-F]'), exact=1)
-hex_color = ("#" + (hex_char * 3 ^ hex_char * 6)).leaveWhitespace()
+hex_color = ("#" - (hex_char * 3 ^ hex_char * 6)).leaveWhitespace()
 header_color = (
-    pp.CaselessLiteral('headercolor:').suppress() + _ +
+    pp.CaselessLiteral('headercolor:').suppress() + _ -
     pp.Combine(hex_color)('header_color')
 )
 table_setting = _ + (note('note') | header_color) + _
@@ -21,6 +21,9 @@ table_settings = '[' + table_setting + (',' + table_setting)[...] + ']'
 
 
 def parse_table_settings(s, l, t):
+    '''
+    [headercolor: #cccccc, note: 'note']
+    '''
     result = {}
     if 'note' in t:
         result['note'] = t['note']
@@ -31,13 +34,6 @@ def parse_table_settings(s, l, t):
 
 table_settings.setParseAction(parse_table_settings)
 
-
-indexes = (
-    pp.CaselessLiteral('indexes').suppress() + _ +
-    pp.Suppress('{') +
-    index[1, ...] + _ +
-    pp.Suppress('}')
-)
 
 note_element = note | note_object
 
@@ -50,21 +46,33 @@ table = _c + (
     name('name') +
     alias('alias')[0, 1] +
     table_settings('settings')[0, 1] + _ +
-    '{' + table_body + _ + '}'
-) + (n | pp.StringEnd())
+    '{' - table_body + _ + '}'
+) + end
 
 
 def parse_table(s, l, t):
+    '''
+    Table bookings as bb [headercolor: #cccccc] {
+      id integer
+      country varchar [NOT NULL, ref: > countries.country_name]
+      booking_date date unique pk
+      created_at timestamp
+
+      indexes {
+          (id, country) [pk] // composite primary key
+      }
+    }
+    '''
     init_dict = {
         'name': t['name'],
     }
     if 'settings' in t:
         init_dict.update(t['settings'])
     if 'alias' in t:
-        init_dict['alias'] = t['alias']
+        init_dict['alias'] = t['alias'][0]
     if 'note' in t:
         # will override one from settings
-        init_dict['note'] = t['note']
+        init_dict['note'] = t['note'][0]
     if'comment_before' in t:
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment

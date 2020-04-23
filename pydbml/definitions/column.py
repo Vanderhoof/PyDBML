@@ -9,11 +9,14 @@ from pydbml.classes import Column
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 type_args = ("(" + pp.originalTextFor(expression)('args') + ")")
-type_name = (pp.Word(pp.alphanums + '_[]') | pp.dblQuotedString())('name')
+type_name = (pp.Word(pp.alphanums + '_') | pp.dblQuotedString())('name')
 column_type = (type_name + type_args[0, 1])
 
 
 def parse_column_type(s, l, t):
+    '''
+    int or "mytype" or varchar(255)
+    '''
     result = t['name']
     args = t.get('args')
     result += '(' + args + ')' if args else ''
@@ -30,7 +33,7 @@ default = pp.CaselessLiteral('default:').suppress() + _ + (
         lambda s, l, t: {
             'true': True,
             'false': False,
-            'null': None
+            'NULL': None
         }[t[0]]
     ) |
     number_literal.setParseAction(
@@ -40,35 +43,42 @@ default = pp.CaselessLiteral('default:').suppress() + _ + (
 
 
 column_setting = _ + (
-    pp.CaselessLiteral("not null")('nn') |
-    pp.CaselessLiteral("null")('n') |
+    pp.CaselessLiteral("not null").setParseAction(
+        lambda s, l, t: True
+    )('notnull') |
+    pp.CaselessLiteral("null").setParseAction(
+        lambda s, l, t: False
+    )('notnull') |
     pp.CaselessLiteral("primary key")('pk') |
     pk('pk') |
-    unique('u') |
-    pp.CaselessLiteral("increment")('i') |
-    note('n') |
-    ref_inline('r*') |
-    default('d') + _
+    unique('unique') |
+    pp.CaselessLiteral("increment")('increment') |
+    note('note') |
+    ref_inline('ref*') |
+    default('default') + _
 )
-column_settings = '[' + column_setting + ("," + column_setting)[...] + ']' + c + n
+column_settings = '[' - column_setting + ("," + column_setting)[...] + ']' + c
 
 
 def parse_column_settings(s, l, t):
+    '''
+    [ NOT NULL, increment, default: `now()`]
+    '''
     result = {}
-    if 'nn' in t:
+    if t.get('notnull'):
         result['not_null'] = True
     if 'pk' in t:
         result['pk'] = True
-    if 'u' in t:
+    if 'unique' in t:
         result['unique'] = True
-    if 'i' in t:
+    if 'increment' in t:
         result['autoinc'] = True
-    if 'n' in t:
-        result['note'] = t['n']
-    if 'd' in t:
-        result['default'] = t['d'][0]
-    if 'r' in t:
-        result['refs'] = list(t['r'])
+    if 'note' in t:
+        result['note'] = t['note']
+    if 'default' in t:
+        result['default'] = t['default'][0]
+    if 'ref' in t:
+        result['refs'] = list(t['ref'])
     if 'comment' in t:
         result['comment'] = t['comment'][0]
     return result
@@ -82,12 +92,15 @@ constraint = pp.CaselessLiteral("unique") | pp.CaselessLiteral("pk")
 table_column = _c + (
     name('name') +
     column_type('type') +
-    constraint('constraints')[...] + c +
+    constraint[...]('constraints') + c +
     column_settings('settings')[0, 1]
 ) + n
 
 
 def parse_column(s, l, t):
+    '''
+    address varchar(255) [unique, not null, note: 'to include unit number']
+    '''
     init_dict = {
         'name': t['name'],
         'type_': t['type'],

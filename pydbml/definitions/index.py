@@ -5,22 +5,25 @@ from pydbml.classes import Index
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
-table_type = pp.CaselessLiteral("type:") + (
-    pp.CaselessLiteral("btree") | pp.CaselessLiteral("hash")
+index_type = pp.CaselessLiteral("type:").suppress() + _ - (
+    pp.CaselessLiteral("btree")('type') | pp.CaselessLiteral("hash")('type')
 )
 index_setting = (
     unique('unique') |
-    table_type('type') |
-    pp.CaselessLiteral("name:") + string_literal('name') |
+    index_type |
+    pp.CaselessLiteral("name:") + _ - string_literal('name') |
     note('note')
 )
 index_settings = (
-    '[' + pk('pk') + ']' + c |
-    '[' + index_setting + (',' + index_setting)[...] + ']' + c
+    '[' + _ + pk('pk') + _ - ']' + c |
+    '[' + _ + index_setting + (_ + ',' + _ - index_setting)[...] + _ - ']' + c
 )
 
 
 def parse_index_settings(s, l, t):
+    '''
+    [type: btree, name: 'name', unique, note: 'note']
+    '''
     result = {}
     if 'unique' in t:
         result['unique'] = True
@@ -39,21 +42,38 @@ def parse_index_settings(s, l, t):
 
 index_settings.setParseAction(parse_index_settings)
 
-single_index = name | expression_literal
+subject = name | expression_literal
 composite_index_syntax = (
     pp.Suppress('(') +
-    single_index + (
+    subject + (
         pp.Suppress(',') +
-        single_index
+        subject
     )[...] +
     pp.Suppress(')')
 )('subject') + c + index_settings('settings')[0, 1]
 
-single_index_syntax = single_index('subject') + c + index_settings('settings')[0, 1]
-index = _c + (single_index_syntax ^ composite_index_syntax)
+single_index_syntax = subject('subject') + c + index_settings('settings')[0, 1]
+index = _c + (single_index_syntax ^ composite_index_syntax) + c
+
+indexes = (
+    pp.CaselessLiteral('indexes').suppress() + _ -
+    pp.Suppress('{') -
+    index[1, ...] + _ +
+    pp.Suppress('}')
+)
 
 
 def parse_index(s, l, t):
+    '''
+        (id, country) [pk] // composite primary key
+        or
+        "created_at"
+        or
+        booking_date [
+          name: 'name',
+          unique
+        ]
+    '''
     init_dict = {}
     if isinstance(t['subject'], str):
         subjects = [t['subject']]
