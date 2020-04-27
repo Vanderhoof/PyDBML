@@ -80,7 +80,7 @@ def parse_index(s, l, t):
     else:
         subjects = list(t['subject'])
 
-    init_dict['subjects'] = subjects
+    init_dict['subject_names'] = subjects
     settings = t.get('settings', {})
     init_dict.update(settings)
 

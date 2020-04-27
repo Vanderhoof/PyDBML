@@ -2,7 +2,7 @@ import pyparsing as pp
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
-name = pp.Word(pp.alphanums + '_') | pp.dblQuotedString()
+name = pp.Word(pp.alphanums + '_') | pp.QuotedString('"')
 
 # Literals
 

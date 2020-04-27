@@ -13,6 +13,7 @@ except FileNotFoundError:
 
 setup(
     name='pydbml',
+    python_requires='>=3.5',
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
@@ -23,7 +24,7 @@ setup(
     license='MIT',
     platforms='any',
     install_requires=[
-        'pyparsing',
+        'pyparsing>=2.4.2',
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

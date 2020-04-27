@@ -1,7 +1,7 @@
 import pyparsing as pp
 from pydbml.definitions.generic import name
 from pydbml.definitions.common import _, _c, c, n
-from pydbml.classes import Reference
+from pydbml.classes import ReferenceBlueprint
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
@@ -13,9 +13,9 @@ def parse_inline_relation(s, l, t):
     '''
     ref: < table.column
     '''
-    return Reference(type_=t['type'],
-                     table2=t['table'],
-                     col2=t['field'])
+    return ReferenceBlueprint(type_=t['type'],
+                              table2=t['table'],
+                              col2=t['field'])
 
 
 ref_inline.setParseAction(parse_inline_relation)
@@ -107,7 +107,7 @@ def parse_ref(s, l, t):
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment
 
-    ref = Reference(**init_dict)
+    ref = ReferenceBlueprint(**init_dict)
     return ref
 
 

@@ -73,7 +73,7 @@ class TestDefault(TestCase):
 
     def test_wrong(self):
         val = "default: now"
-        with self.assertRaises(ParseException):
+        with self.assertRaises(ParseSyntaxException):
             default.parseString(val, parseAll=True)
 
 
@@ -124,9 +124,9 @@ class TestColumnSettings(TestCase):
 
     def test_refs(self):
         res = column_settings.parseString('[ref: > table.column]', parseAll=True)
-        self.assertEqual(len(res[0]['refs']), 1)
+        self.assertEqual(len(res[0]['ref_blueprints']), 1)
         res = column_settings.parseString('[ref: - table.column, ref: < table2.column2]', parseAll=True)
-        self.assertEqual(len(res[0]['refs']), 2)
+        self.assertEqual(len(res[0]['ref_blueprints']), 2)
 
     def test_note_default(self):
         res = column_settings.parseString('[default: 123, note: "mynote"]', parseAll=True)

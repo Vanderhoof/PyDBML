@@ -160,6 +160,7 @@ table ids as ii [
   note: "headernote"]
 {
   id integer
+  country varchar
   note: "bodynote"
   indexes {
       (id, country) [pk] // composite primary key
@@ -170,5 +171,5 @@ table ids as ii [
         self.assertEqual(res[0].alias, 'ii')
         self.assertEqual(res[0].header_color, '#ccc')
         self.assertEqual(res[0].note.text, 'bodynote')
-        self.assertEqual(len(res[0].columns), 1)
+        self.assertEqual(len(res[0].columns), 2)
         self.assertEqual(len(res[0].indexes), 1)

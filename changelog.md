@@ -1,3 +1,11 @@
+# 0.3
+
+- More tests and more bug fixes.
+- Added index columns validation.
+- Added table group items validation.
+- References now contain link to Table and Column objects instead of just names.
+- Indexes now contain link to Column objects instead of just names.
+
 # 0.2
 
 - Better syntax errors.

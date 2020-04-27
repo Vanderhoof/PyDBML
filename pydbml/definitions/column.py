@@ -78,7 +78,7 @@ def parse_column_settings(s, l, t):
     if 'default' in t:
         result['default'] = t['default'][0]
     if 'ref' in t:
-        result['refs'] = list(t['ref'])
+        result['ref_blueprints'] = list(t['ref'])
     if 'comment' in t:
         result['comment'] = t['comment'][0]
     return result

@@ -8,7 +8,7 @@ from unittest import TestCase
 ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 
-class TestColumnType(TestCase):
+class TestIndexType(TestCase):
     def test_correct(self):
         val = 'Type: BTREE'
         res = index_type.parseString(val, parseAll=True)
@@ -151,41 +151,41 @@ class TestIndex(TestCase):
     def test_single(self):
         val = 'my_column'
         res = index.parseString(val, parseAll=True)
-        self.assertEqual(res[0].subjects, ['my_column'])
+        self.assertEqual(res[0].subject_names, ['my_column'])
 
     def test_composite(self):
         val = '(my_column, my_another_column)'
         res = index.parseString(val, parseAll=True)
-        self.assertEqual(res[0].subjects, ['my_column', 'my_another_column'])
+        self.assertEqual(res[0].subject_names, ['my_column', 'my_another_column'])
 
     def test_with_settings(self):
         val = '(my_column, my_another_column) [unique]'
         res = index.parseString(val, parseAll=True)
-        self.assertEqual(res[0].subjects, ['my_column', 'my_another_column'])
+        self.assertEqual(res[0].subject_names, ['my_column', 'my_another_column'])
         self.assertTrue(res[0].unique)
 
     def test_comment_above(self):
         val = '//comment above\nmy_column [unique]'
         res = index.parseString(val, parseAll=True)
-        self.assertEqual(res[0].subjects, ['my_column'])
+        self.assertEqual(res[0].subject_names, ['my_column'])
         self.assertTrue(res[0].unique)
         self.assertEqual(res[0].comment, 'comment above')
 
     def test_comment_after(self):
         val = 'my_column [unique] //comment after'
         res = index.parseString(val, parseAll=True)
-        self.assertEqual(res[0].subjects, ['my_column'])
+        self.assertEqual(res[0].subject_names, ['my_column'])
         self.assertTrue(res[0].unique)
         self.assertEqual(res[0].comment, 'comment after')
         val = 'my_column //comment after'
         res = index.parseString(val, parseAll=True)
-        self.assertEqual(res[0].subjects, ['my_column'])
+        self.assertEqual(res[0].subject_names, ['my_column'])
         self.assertEqual(res[0].comment, 'comment after')
 
     def test_both_comments(self):
         val = '//comment before\nmy_column [unique] //comment after'
         res = index.parseString(val, parseAll=True)
-        self.assertEqual(res[0].subjects, ['my_column'])
+        self.assertEqual(res[0].subject_names, ['my_column'])
         self.assertTrue(res[0].unique)
         self.assertEqual(res[0].comment, 'comment after')
 
