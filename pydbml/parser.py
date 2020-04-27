@@ -41,6 +41,8 @@ class PyDBML:
                     source = f.read()
             else:  # TextIOWrapper
                 source = source_.read()
+            if source[0] == '\ufeff':  # removing BOM
+                source = source[1:]
             return cls.parse(source)
         else:
             return super().__new__(cls)
@@ -50,6 +52,8 @@ class PyDBML:
 
     @staticmethod
     def parse(text: str) -> PyDBMLParseResults:
+        if text[0] == '\ufeff':  # removing BOM
+            text = text[1:]
         return PyDBMLParseResults(text)
 
     @staticmethod
@@ -59,6 +63,8 @@ class PyDBML:
         else:
             with open(file, encoding='utf8') as f:
                 source = f.read()
+        if source[0] == '\ufeff':  # removing BOM
+            source = source[1:]
         return PyDBMLParseResults(source)
 
 

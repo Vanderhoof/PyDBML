@@ -1,3 +1,7 @@
+# 0.3.1
+
+- Fix: files in **UTF-8 with BOM** encoding couldn't be parsed.
+
 # 0.3
 
 - More tests and more bug fixes.
