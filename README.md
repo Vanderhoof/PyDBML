@@ -2,8 +2,6 @@
 
 # DBML parser for Python
 
-> The parser is currently on alpha stage. It doesn't have any tests or docstrings yet.
-
 PyDBML is a Python parser for [DBML](https://www.dbml.org) syntax.
 
 ## Installation
