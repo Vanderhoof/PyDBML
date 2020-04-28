@@ -1,3 +1,7 @@
+# 0.3.2
+
+- Fix TableReference sql
+
 # 0.3.1
 
 - Fix: files in **UTF-8 with BOM** encoding couldn't be parsed.

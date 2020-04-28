@@ -223,7 +223,7 @@ class TableReference(SQLOjbect):
         c = f'CONSTRAINT "{self.name}" ' if self.name else ''
         result = (
             f'{c}FOREIGN KEY ("{self.col}") '
-            f'REFERENCES "{self.ref_table} ("{self.ref_col}")'
+            f'REFERENCES "{self.ref_table.name} ("{self.ref_col.name}")'
         )
         if self.on_update:
             result += f' ON UPDATE {self.on_update.upper()}'
