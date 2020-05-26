@@ -429,7 +429,7 @@ class Index(SQLOjbect):
 
 
 class Table(SQLOjbect):
-    '''Class representing index.'''
+    '''Class representing table.'''
 
     required_attributes = ['name']
 

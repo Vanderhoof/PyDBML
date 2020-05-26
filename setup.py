@@ -20,6 +20,7 @@ setup(
     version='0.3.2',
     author='Daniil Minukhin',
     author_email='ddddsa@gmail.com',
+    url='https://github.com/Vanderhoof/PyDBML',
     packages=['pydbml', 'pydbml.definitions'],
     license='MIT',
     platforms='any',
