@@ -1,3 +1,8 @@
+# 0.3.3
+
+- Fix: bug in TableReference
+- Fix: if schema had newline or comment at the end, it crashed parser
+
 # 0.3.2
 
 - Fix TableReference sql

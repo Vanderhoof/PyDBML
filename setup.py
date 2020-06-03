@@ -17,7 +17,7 @@ setup(
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
-    version='0.3.2',
+    version='0.3.3',
     author='Daniil Minukhin',
     author_email='ddddsa@gmail.com',
     url='https://github.com/Vanderhoof/PyDBML',
@@ -25,7 +25,7 @@ setup(
     license='MIT',
     platforms='any',
     install_requires=[
-        'pyparsing==2.4.7',
+        'pyparsing>=2.4.7',
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
