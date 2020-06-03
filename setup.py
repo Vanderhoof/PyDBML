@@ -25,7 +25,7 @@ setup(
     license='MIT',
     platforms='any',
     install_requires=[
-        'pyparsing>=2.4.2',
+        'pyparsing==2.4.7',
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

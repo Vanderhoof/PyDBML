@@ -3,6 +3,7 @@ import pyparsing as pp
 from pathlib import PosixPath
 from io import TextIOWrapper
 from pydbml.definitions.table import table
+from pydbml.definitions.common import comment, _
 from pydbml.definitions.reference import ref
 from pydbml.definitions.enum import enum
 from pydbml.definitions.table_group import table_group
@@ -102,13 +103,13 @@ class PyDBMLParseResults:
         project_expr.addParseAction(self._parse_project)
 
         expr = (
-            table_expr |
-            ref_expr |
-            enum_expr |
-            table_group_expr |
-            project_expr
+            table_expr
+            | ref_expr
+            | enum_expr
+            | table_group_expr
+            | project_expr
         )
-        self._syntax = expr[...]
+        self._syntax = expr[...] + ('\n' | comment)[...] + pp.StringEnd()
 
     def __getitem__(self, k: int or str) -> Table:
         if isinstance(k, int):

@@ -185,9 +185,9 @@ class TableReference(SQLOjbect):
     required_attributes = ['col', 'ref_table', 'ref_col']
 
     def __init__(self,
-                 col: str,
+                 col: Column,
                  ref_table: Table,
-                 ref_col: str,
+                 ref_col: Column,
                  name: str or None = None,
                  on_delete: str or None = None,
                  on_update: str or None = None):
@@ -222,7 +222,7 @@ class TableReference(SQLOjbect):
         self.check_attributes_for_sql()
         c = f'CONSTRAINT "{self.name}" ' if self.name else ''
         result = (
-            f'{c}FOREIGN KEY ("{self.col}") '
+            f'{c}FOREIGN KEY ("{self.col.name}") '
             f'REFERENCES "{self.ref_table.name} ("{self.ref_col.name}")'
         )
         if self.on_update:

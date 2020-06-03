@@ -179,12 +179,16 @@ class TestTable(TestCase):
         self.assertEqual(t.sql, expected)
 
     def test_ref(self):
-        r = TableReference('name', 'names', 'name_val')
-        t = Table('products', refs=[r])
+        t = Table('products')
         c1 = Column('id', 'integer')
         c2 = Column('name', 'varchar2')
         t.add_column(c1)
         t.add_column(c2)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        t2.add_column(c21)
+        r = TableReference(c2, t2, c21)
+        t.refs.append(r)
         expected = \
 '''CREATE TABLE "products" (
   "id" integer,
@@ -195,12 +199,16 @@ class TestTable(TestCase):
         self.assertEqual(t.sql, expected)
 
     def test_ref_index(self):
-        r = TableReference('name', 'names', 'name_val')
-        t = Table('products', refs=[r])
+        t = Table('products')
         c1 = Column('id', 'integer')
         c2 = Column('name', 'varchar2')
         t.add_column(c1)
         t.add_column(c2)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        t2.add_column(c21)
+        r = TableReference(c2, t2, c21)
+        t.refs.append(r)
         i = Index(['id', 'name'])
         t.add_index(i)
         expected = \
