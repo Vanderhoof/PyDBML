@@ -4,3 +4,6 @@ __pycache__
 *.dbml
 *.log
 !test_schema.dbml
+build
+dist
+pydbml.egg-info
