@@ -1,7 +1,7 @@
 from unittest import TestCase
 from pydbml.exceptions import AttributeMissingError, ColumnNotFoundError
-from pydbml.classes import (ReferenceBlueprint, SQLOjbect,
-                            TableReference, Column, Table, Index, Enum, EnumItem)
+from pydbml.classes import (ReferenceBlueprint, SQLOjbect, Note,
+                            TableReference, Column, Table, Index, Enum, EnumItem,)
 
 
 class TestDBMLObject:
@@ -83,6 +83,14 @@ class TestColumn(TestCase):
         expected = '"id" integer'
         self.assertEqual(r.sql, expected)
 
+    def test_note(self):
+        n = Note('Column note')
+        r = Column(name='id',
+                   type_='integer',
+                   note=n)
+        expected = '"id" integer -- Column note'
+        self.assertEqual(r.sql, expected)
+
     def test_pk_autoinc(self):
         r = Column(name='id',
                    type_='integer',
@@ -146,6 +154,17 @@ class TestIndex(TestCase):
         expected = 'CREATE INDEX ON "products" ("id");'
         self.assertEqual(r.sql, expected)
 
+    def test_note(self):
+        t = Table('products')
+        t.add_column(Column('id', 'integer'))
+        n = Note('Index note')
+        r = Index(subject_names=['id'],
+                  table=t,
+                  note=n)
+        t.add_index(r)
+        expected = 'CREATE INDEX ON "products" ("id"); -- Index note'
+        self.assertEqual(r.sql, expected)
+
     def test_unique_type_composite(self):
         t = Table('products')
         t.add_column(Column('id', 'integer'))
@@ -196,6 +215,14 @@ class TestTable(TestCase):
   FOREIGN KEY ("name") REFERENCES "names ("name_val")
 );
 '''
+        self.assertEqual(t.sql, expected)
+
+    def test_note(self):
+        n = Note('Table note')
+        t = Table('products', note=n)
+        c = Column('id', 'integer')
+        t.add_column(c)
+        expected = 'CREATE TABLE "products" (\n  -- Table note\n  "id" integer\n);\n'
         self.assertEqual(t.sql, expected)
 
     def test_ref_index(self):
@@ -286,6 +313,24 @@ class TestEnum(TestCase):
   'created',
   'running',
   'donef',
+  'failure',
+);'''
+        self.assertEqual(e.sql, expected)
+
+    def test_notes(self):
+        n = Note('EnumItem note')
+        items = [
+            EnumItem('created', note=n),
+            EnumItem('running'),
+            EnumItem('donef', note=n),
+            EnumItem('failure'),
+        ]
+        e = Enum('job_status', items)
+        expected = \
+'''CREATE TYPE "job_status" AS ENUM (
+  'created', -- EnumItem note
+  'running',
+  'donef', -- EnumItem note
   'failure',
 );'''
         self.assertEqual(e.sql, expected)

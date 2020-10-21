@@ -1,0 +1,14 @@
+table ids as ii [
+  headercolor: #ccc,
+  note: "headernote"]
+{
+  id integer
+  note: "bodynote"
+}
+
+Table bookings as bb [headercolor: #cccccc] {
+  id integer
+  country varchar [NOT NULL, ref: > ids.wrong_column]
+  booking_date date unique pk
+  created_at timestamp
+}

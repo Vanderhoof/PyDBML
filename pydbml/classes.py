@@ -245,6 +245,13 @@ class Note:
     def __repr__(self):
         return f'Note({repr(self.text)})'
 
+    @property
+    def sql(self):
+        if self.text:
+            return '\n'.join(f'-- {l}' for l in self.text.split('\n'))
+        else:
+            return ''
+
 
 class Column(SQLOjbect):
     '''Class representing table column.'''
@@ -309,6 +316,8 @@ class Column(SQLOjbect):
             components.append('NOT NULL')
         if self.default is not None:
             components.append('DEFAULT ' + str(self.default))
+        if self.note:
+            components.append(self.note.sql)
         return ' '.join(components)
 
     def __repr__(self):
@@ -425,7 +434,10 @@ class Index(SQLOjbect):
         if self.type:
             components.append(f'USING {self.type.upper()}')
         components.append(f'({keys})')
-        return ' '.join(components) + ';'
+        result = ' '.join(components) + ';'
+        if self.note:
+            result += f' {self.note.sql}'
+        return result
 
 
 class Table(SQLOjbect):
@@ -521,6 +533,8 @@ class Table(SQLOjbect):
         '''
         self.check_attributes_for_sql()
         components = [f'CREATE TABLE "{self.name}" (']
+        if self.note:
+            components.append(f'  {self.note.sql}')
         body = []
         body.extend('  ' + c.sql for c in self.columns)
         body.extend('  ' + i.sql for i in self.indexes if i.pk)
@@ -551,6 +565,13 @@ class EnumItem:
     def __str__(self):
         return self.name
 
+    @property
+    def sql(self):
+        components = [f"'{self.name}',"]
+        if self.note:
+            components.append(self.note.sql)
+        return ' '.join(components)
+
 
 class Enum(SQLOjbect):
     required_attributes = ['name', 'items']
@@ -577,9 +598,7 @@ class Enum(SQLOjbect):
 
     def __str__(self):
         return (
-            f'Enum {self.name} (' +
-            ', '.join(str(i) for i in self.items) +
-            ')'
+            f'Enum {self.name} (' + ', '.join(str(i) for i in self.items) + ')'
         )
 
     @property
@@ -596,11 +615,8 @@ class Enum(SQLOjbect):
 
         '''
         self.check_attributes_for_sql()
-        items = []
-        for item in self.items:
-            items.append(f"  '{item}',")
         return f'CREATE TYPE "{self.name}" AS ENUM (\n' +\
-               '\n'.join(items) +\
+               '\n'.join(f'  {i.sql}' for i in self.items) +\
                '\n);'
 
 

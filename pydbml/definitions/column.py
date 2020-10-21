@@ -55,8 +55,8 @@ column_setting = _ + (
     pp.CaselessLiteral("increment")('increment') |
     note('note') |
     ref_inline('ref*') |
-    default('default') + _
-)
+    default('default')
+) + _
 column_settings = '[' - column_setting + ("," + column_setting)[...] + ']' + c
 
 

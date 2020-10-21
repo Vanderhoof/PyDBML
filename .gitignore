@@ -3,3 +3,4 @@ __pycache__
 .DS_Store
 *.dbml
 *.log
+!test_schema.dbml

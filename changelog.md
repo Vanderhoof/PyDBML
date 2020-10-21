@@ -1,3 +1,7 @@
+# 0.3.4
+
+- Notes are now added as comments in SQL for tables, table columns, indeces, enums.
+
 # 0.3.3
 
 - Fix: bug in TableReference
