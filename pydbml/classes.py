@@ -368,7 +368,7 @@ class Column(SQLOjbect):
 
 class Index(SQLOjbect):
     '''Class representing index.'''
-    required_attributes = ('subjects',)
+    required_attributes = ('subjects', 'table')
 
     def __init__(self,
                  subject_names: List[str],
@@ -380,7 +380,7 @@ class Index(SQLOjbect):
                  note: Optional[Note] = None,
                  comment: Optional[str] = None):
         self.subject_names = subject_names
-        self.subjects: List[str] = []
+        self.subjects: List[Union[Column, str]] = []
 
         self.name = name if name else None
         self.table = table
@@ -435,7 +435,7 @@ class Index(SQLOjbect):
 
         '''
         self.check_attributes_for_sql()
-        keys = ', '.join(f'"{key.name}"' for key in self.subjects)
+        keys = ', '.join(f'"{key.name}"' if isinstance(key, Column) else key for key in self.subjects)
         if self.pk:
             return f'PRIMARY KEY ({keys})'
 
@@ -492,10 +492,15 @@ class Table(SQLOjbect):
         `table` attribute.
         '''
         for subj in i.subject_names:
-            col = self.get(subj)
-            if not col:
-                raise ColumnNotFoundError(f'Cannot add index, column "{subj}" not defined in table "{self.name}".')
-            i.subjects.append(col)
+            if subj.startswith('(') and subj.endswith(')'):
+                # subject is an expression, add it as string
+                i.subjects.append(subj)
+            else:
+                try:
+                    col = self[subj]
+                    i.subjects.append(col)
+                except KeyError:
+                    raise ColumnNotFoundError(f'Cannot add index, column "{subj}" not defined in table "{self.name}".')
 
         i.table = self
         self.indexes.append(i)

@@ -197,6 +197,16 @@ class TestIndex(TestCase):
         expected = 'PRIMARY KEY ("id", "name")'
         self.assertEqual(r.sql, expected)
 
+    def test_composite_with_expression(self) -> None:
+        t = Table('products')
+        t.add_column(Column('id', 'integer'))
+        r = Index(subject_names=['id', '(id*3)'],
+                  table=t)
+        t.add_index(r)
+        self.assertEqual(r.subjects, [t['id'], '(id*3)'])
+        expected = 'CREATE INDEX ON "products" ("id", (id*3));'
+        self.assertEqual(r.sql, expected)
+
 
 class TestTable(TestCase):
     def test_one_column(self) -> None:

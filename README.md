@@ -153,7 +153,7 @@ Indexes are stored in the `indexes` attribute of a `Table` object.
 
 Important attributes of the `Index` object are:
 
-* **subjects** (list of `Column`) — list of columns, which are indexed.
+* **subjects** (list of `Column` or `str`) — list subjects which are indexed. Columns are represented by `Column` objects, expressions (`getdate()`) are stored as strings `(getdate())`. Expressions are supported since **0.3.5**.
 * **table** (`Table`) — table, for which this index is defined.
 * **name** (str) — index name, if defined.
 * **unique** (bool) — is index unique.

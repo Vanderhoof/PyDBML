@@ -1,3 +1,9 @@
+# 0.3.5
+
+- New: Support references by aliases
+- New: Support indexes with expressions
+- Fix: minor bug fixes.
+
 # 0.3.4
 
 - Notes are now added as comments in SQL for tables, table columns, indeces, enums.

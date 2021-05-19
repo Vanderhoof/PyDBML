@@ -162,10 +162,20 @@ class TestIndex(TestCase):
         res = index.parseString(val, parseAll=True)
         self.assertEqual(res[0].subject_names, ['my_column'])
 
+    def test_expression(self) -> None:
+        val = '(`id*3`)'
+        res = index.parseString(val, parseAll=True)
+        self.assertEqual(res[0].subject_names, ['(id*3)'])
+
     def test_composite(self) -> None:
         val = '(my_column, my_another_column)'
         res = index.parseString(val, parseAll=True)
         self.assertEqual(res[0].subject_names, ['my_column', 'my_another_column'])
+
+    def test_composite_with_expression(self) -> None:
+        val = '(`id*3`, fieldname)'
+        res = index.parseString(val, parseAll=True)
+        self.assertEqual(res[0].subject_names, ['(id*3)', 'fieldname'])
 
     def test_with_settings(self) -> None:
         val = '(my_column, my_another_column) [unique]'

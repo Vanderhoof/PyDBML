@@ -167,12 +167,18 @@ class PyDBMLParseResults:
         Validate refs at the same time.
         '''
         for ref_ in self.ref_blueprints:
-            table1 = self.table_dict.get(ref_.table1)
-            if not table1:
+            for tb in self.tables:
+                if tb.name == ref_.table1 or tb.alias == ref_.table1:
+                    table1 = tb
+                    break
+            else:
                 raise TableNotFoundError('Error while parsing reference:'
                                          f'table "{ref_.table1}"" is not defined.')
-            table2 = self.table_dict.get(ref_.table2)
-            if not table2:
+            for tb in self.tables:
+                if tb.name == ref_.table2 or tb.alias == ref_.table2:
+                    table2 = tb
+                    break
+            else:
                 raise TableNotFoundError('Error while parsing reference:'
                                          f'table "{ref_.table2}"" is not defined.')
             col1 = table1.get(ref_.col1)

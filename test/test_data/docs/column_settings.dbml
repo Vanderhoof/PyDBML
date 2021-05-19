@@ -1,0 +1,6 @@
+Table buildings {
+    address varchar(255) [unique, not null, note: 'to include unit number']
+    id integer [ pk, unique, default: 123, note: 'Number' ]
+    nullable string [null]
+    counter integer [increment]
+}

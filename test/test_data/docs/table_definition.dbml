@@ -1,0 +1,8 @@
+Table table_name {
+    column_name column_type
+    "example" Example
+    json_column JSON
+    jsonb_column JSONB
+    decimal_column decimal(1,2)
+}
+

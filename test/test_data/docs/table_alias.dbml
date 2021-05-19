@@ -1,0 +1,10 @@
+Table very_long_user_table as U {
+    id integer
+}
+
+Table posts {
+    id integer
+    user_id integer
+}
+
+Ref: U.id < posts.user_id
