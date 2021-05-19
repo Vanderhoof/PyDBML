@@ -16,7 +16,7 @@ class TestDBMLObject(TestCase):
         o.a1 = 1
         with self.assertRaises(AttributeMissingError):
             o.check_attributes_for_sql()
-        o.a2 = 'a2'
+        o.b1 = 'a2'
         o.check_attributes_for_sql()
 
 
