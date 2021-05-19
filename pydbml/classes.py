@@ -66,21 +66,21 @@ class ReferenceBlueprint:
         self.on_delete = on_delete
 
     def __repr__(self):
-        components = [f"ReferenceBlueprint({repr(self.type)}"]
+        components = [f"ReferenceBlueprint({self.type!r}"]
         if self.name:
-            components.append(f'name={repr(self.name)}')
+            components.append(f'name={self.name!r}')
         if self.table1:
-            components.append(f'table1={repr(self.table1)}')
+            components.append(f'table1={self.table1!r}')
         if self.col1:
-            components.append(f'col1={repr(self.col1)}')
+            components.append(f'col1={self.col1!r}')
         if self.table2:
-            components.append(f'table2={repr(self.table2)}')
+            components.append(f'table2={self.table2!r}')
         if self.col2:
-            components.append(f'col2={repr(self.col2)}')
+            components.append(f'col2={self.col2!r}')
         if self.on_update:
-            components.append(f'on_update={repr(self.on_update)}')
+            components.append(f'on_update={self.on_update!r}')
         if self.on_delete:
-            components.append(f'on_delete={repr(self.on_delete)}')
+            components.append(f'on_delete={self.on_delete!r}')
         return ', '.join(components) + ')'
 
     def __str__(self):
@@ -131,18 +131,18 @@ class Reference(SQLOjbect):
 
     def __repr__(self):
         components = [
-            f"Reference({repr(self.type)}",
-            f"{repr(self.table1)}",
-            f"{repr(self.col1)}",
-            f"{repr(self.table2)}",
-            f"{repr(self.col2)}",
+            f"Reference({self.type!r}",
+            f"{self.table1!r}",
+            f"{self.col1!r}",
+            f"{self.table2!r}",
+            f"{self.col2!r}",
         ]
         if self.name:
-            components.append(f'name={repr(self.name)}')
+            components.append(f'name={self.name!r}')
         if self.on_update:
-            components.append(f'on_update={repr(self.on_update)}')
+            components.append(f'on_update={self.on_update!r}')
         if self.on_delete:
-            components.append(f'on_delete={repr(self.on_delete)}')
+            components.append(f'on_delete={self.on_delete!r}')
         return ', '.join(components) + ')'
 
     def __str__(self):
@@ -214,13 +214,13 @@ class TableReference(SQLOjbect):
         self.on_delete = on_delete
 
     def __repr__(self):
-        components = [f"TableReference({repr(self.col)}, {repr(self.ref_table)}, {repr(self.ref_col)}"]
+        components = [f"TableReference({self.col!r}, {self.ref_table!r}, {self.ref_col!r}"]
         if self.name:
-            components.append(f'name={repr(self.name)}')
+            components.append(f'name={self.name!r}')
         if self.on_update:
-            components.append(f'on_update={repr(self.on_update)}')
+            components.append(f'on_update={self.on_update!r}')
         if self.on_delete:
-            components.append(f'on_delete={repr(self.on_delete)}')
+            components.append(f'on_delete={self.on_delete!r}')
         return ', '.join(components) + ')'
 
     def __str__(self):
@@ -263,7 +263,7 @@ class Note:
     @property
     def sql(self):
         if self.text:
-            return '\n'.join(f'-- {l}' for l in self.text.split('\n'))
+            return '\n'.join(f'-- {line}' for line in self.text.split('\n'))
         else:
             return ''
 
@@ -336,7 +336,7 @@ class Column(SQLOjbect):
         return ' '.join(components)
 
     def __repr__(self):
-        components = [f"Column({repr(self.name)}, {repr(self.type)}"]
+        components = [f"Column({self.name!r}, {self.type!r}"]
         if self.unique:
             components.append(f'unique=True')
         if self.not_null:
@@ -346,9 +346,9 @@ class Column(SQLOjbect):
         if self.autoinc:
             components.append(f'autoinc=True')
         if self.default:
-            components.append(f'default={repr(self.default)}')
+            components.append(f'default={self.default!r}')
         if self.note:
-            components.append(f'note={repr(self.note)}')
+            components.append(f'note={self.note!r}')
         return ', '.join(components) + ')'
 
     def __str__(self):
@@ -362,7 +362,7 @@ class Column(SQLOjbect):
         if self.autoinc:
             components.append(f'autoincrement')
         if self.default:
-            components.append(f'default={repr(self.default)}')
+            components.append(f'default={self.default!r}')
         return ' '.join(components) + ')'
 
 
@@ -391,17 +391,17 @@ class Index(SQLOjbect):
         self.comment = comment
 
     def __repr__(self):
-        components = [f"Index({repr(self.subject_names)}"]
+        components = [f"Index({self.subject_names!r}"]
         if self.name:
-            components.append(f'name={repr(self.name)}')
+            components.append(f'name={self.name!r}')
         if self.unique:
             components.append(f'unique=True')
         if self.type:
-            components.append(f'type_={repr(self.type)}')
+            components.append(f'type_={self.type!r}')
         if self.pk:
             components.append(f'pk=True')
         if self.note:
-            components.append(f'note_={repr(self.note)}')
+            components.append(f'note_={self.note!r}')
         return ', '.join(components) + ')'
 
     def __str__(self):
@@ -411,7 +411,7 @@ class Index(SQLOjbect):
         else:
             components[0] += '(' + ', '.join(self.subjects) + ')'
         if self.name:
-            components.append(f'{repr(self.name)}')
+            components.append(f'{self.name!r}')
         if self.unique:
             components.append(f'unique')
         if self.type:
@@ -513,15 +513,15 @@ class Table(SQLOjbect):
         return iter(self.columns)
 
     def __repr__(self):
-        components = [f"Table({repr(self.name)}, {repr(self.columns)}"]
+        components = [f"Table({self.name!r}, {self.columns!r}"]
         if self.alias:
-            components.append(f'alias={repr(self.alias)}')
+            components.append(f'alias={self.alias!r}')
         if self.indexes:
-            components.append(f'indexes={repr(self.indexes)}')
+            components.append(f'indexes={self.indexes!r}')
         if self.note:
-            components.append(f'note={repr(self.note)}')
+            components.append(f'note={self.note!r}')
         if self.header_color:
-            components.append(f'header_color={repr(self.header_color)}')
+            components.append(f'header_color={self.header_color!r}')
         return ', '.join(components) + ')'
 
     def __str__(self):
@@ -572,9 +572,9 @@ class EnumItem:
         self.comment = comment
 
     def __repr__(self):
-        components = [f'EnumItem({repr(self.name)}']
+        components = [f'EnumItem({self.name!r}']
         if self.note:
-            components.append(f'note={repr(self.note)}')
+            components.append(f'note={self.note!r}')
         return ', '.join(components) + ')'
 
     def __str__(self):
@@ -609,7 +609,7 @@ class Enum(SQLOjbect):
         return iter(self.items)
 
     def __repr__(self):
-        return f'Enum({repr(self.name)}, {repr(self.items)})'
+        return f'Enum({self.name!r}, {self.items!r})'
 
     def __str__(self):
         return (
@@ -641,7 +641,7 @@ class EnumType(Enum):
     '''
 
     def __repr__(self):
-        return f'EnumType({repr(self.name)}, {repr(self.items)})'
+        return f'EnumType({self.name!r}, {self.items!r})'
 
     def __str__(self):
         return self.name
@@ -657,7 +657,7 @@ class TableGroup:
         self.comment = comment
 
     def __repr__(self):
-        return f'TableGroup({repr(self.name)}, {repr(self.items)})'
+        return f'TableGroup({self.name!r}, {self.items!r})'
 
     def __getitem__(self, key) -> str:
         return self.items[key]
@@ -678,9 +678,9 @@ class Project:
         self.comment = comment
 
     def __repr__(self):
-        components = [f'Project({repr(self.name)}']
+        components = [f'Project({self.name!r}']
         if self.items:
-            components.append(f'items={repr(self.items)}')
+            components.append(f'items={self.items!r}')
         if self.note:
-            components.append(f'note={repr(self.note)}')
+            components.append(f'note={self.note!r}')
         return ', '.join(components) + ')'
