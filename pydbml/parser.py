@@ -1,6 +1,6 @@
 from __future__ import annotations
 import pyparsing as pp
-from pathlib import PosixPath
+from pathlib import Path
 from io import TextIOWrapper
 from pydbml.definitions.table import table
 from pydbml.definitions.common import comment, _
@@ -33,12 +33,13 @@ class PyDBML:
     >>> from pathlib import Path
     >>> p = PyDBML(Path('schema.dbml'))
     '''
+
     def __new__(cls,
-                source_: Optional[Union[str, PosixPath, TextIOWrapper]] = None):
+                source_: Optional[Union[str, Path, TextIOWrapper]] = None):
         if source_ is not None:
             if isinstance(source_, str):
                 source = source_
-            elif isinstance(source_, PosixPath):
+            elif isinstance(source_, Path):
                 with open(source_, encoding='utf8') as f:
                     source = f.read()
             else:  # TextIOWrapper
@@ -59,7 +60,7 @@ class PyDBML:
         return PyDBMLParseResults(text)
 
     @staticmethod
-    def parse_file(file: Union[str, PosixPath, TextIOWrapper]):
+    def parse_file(file: Union[str, Path, TextIOWrapper]):
         if isinstance(file, TextIOWrapper):
             source = file.read()
         else:

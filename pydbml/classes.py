@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Tuple, Union, List, Dict
+from typing import Optional, Tuple, Union, List, Dict, Any
 
 from .exceptions import AttributeMissingError, ColumnNotFoundError
 
@@ -20,6 +20,12 @@ class SQLOjbect:
                 raise AttributeMissingError(
                     f'Cannot render SQL. Missing required attribute "{attr}".'
                 )
+
+    def __setattr__(self, name: str, value: Any):
+        """
+        Required for type testing with MyPy.
+        """
+        super().__setattr__(name, value)
 
 
 class ReferenceBlueprint:
@@ -267,8 +273,8 @@ class Column(SQLOjbect):
                  not_null: bool = False,
                  pk: bool = False,
                  autoinc: bool = False,
-                 default: Optional[str] = None,
-                 note: Optional[str] = None,
+                 default: Optional[Union[str, int]] = None,
+                 note: Optional[Note] = None,
                  ref_blueprints: Optional[List[ReferenceBlueprint]] = None,
                  comment: Optional[str] = None):
         self.name = name
@@ -452,7 +458,7 @@ class Table(SQLOjbect):
                  alias: Optional[str] = None,
                  note: Optional[Note] = None,
                  header_color: Optional[str] = None,
-                 refs: Optional[List[Reference]] = None,
+                 refs: Optional[List[TableReference]] = None,
                  comment: Optional[str] = None):
         self.name = name
         self.columns: List[Column] = []
