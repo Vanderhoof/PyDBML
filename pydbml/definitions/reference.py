@@ -26,11 +26,11 @@ def parse_inline_relation(s, l, t):
 ref_inline.setParseAction(parse_inline_relation)
 
 on_option = (
-    pp.CaselessLiteral('no action') |
-    pp.CaselessLiteral('restrict') |
-    pp.CaselessLiteral('cascade') |
-    pp.CaselessLiteral('set null') |
-    pp.CaselessLiteral('set default')
+    pp.CaselessLiteral('no action')
+    | pp.CaselessLiteral('restrict')
+    | pp.CaselessLiteral('cascade')
+    | pp.CaselessLiteral('set null')
+    | pp.CaselessLiteral('set default')
 )
 update = pp.CaselessLiteral("update:").suppress() + _ + on_option
 delete = pp.CaselessLiteral("delete:").suppress() + _ + on_option
@@ -38,13 +38,13 @@ delete = pp.CaselessLiteral("delete:").suppress() + _ + on_option
 ref_setting = _ + (update('update') | delete('delete')) + _
 
 ref_settings = (
-    '[' +
-    ref_setting +
-    (
-        ',' +
-        ref_setting
-    )[...] +
-    ']' + c
+    '['
+    + ref_setting
+    + (
+        ','
+        + ref_setting
+    )[...]
+    + ']' + c
 )
 
 
@@ -65,23 +65,23 @@ def parse_ref_settings(s, l, t):
 ref_settings.setParseAction(parse_ref_settings)
 
 ref_body = (
-    name('table1') -
-    '.' -
-    name('field1') -
-    relation('type') -
-    name('table2') -
-    '.' -
-    name('field2') + c +
-    ref_settings('settings')[0, 1]
+    name('table1')
+    - '.'
+    - name('field1')
+    - relation('type')
+    - name('table2')
+    - '.'
+    - name('field2') + c
+    + ref_settings('settings')[0, 1]
 )
 
 ref_short = _c + pp.CaselessLiteral('ref') + name('name')[0, 1] + ':' - ref_body
 ref_long = _c + (
-    pp.CaselessLiteral('ref') + _ +
-    name('name')[0, 1] + _ +
-    '{' + _ -
-    ref_body + _ -
-    '}'
+    pp.CaselessLiteral('ref') + _
+    + name('name')[0, 1] + _
+    + '{' + _
+    - ref_body + _
+    - '}'
 )
 
 

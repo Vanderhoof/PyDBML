@@ -11,7 +11,6 @@ from .common import n
 from .common import note
 from .generic import name
 
-
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 enum_settings = '[' + _ - note('note') + _ - ']' + c
@@ -57,11 +56,11 @@ enum_item.setParseAction(parse_enum_item)
 enum_body = enum_item[1, ...]
 
 enum = _c + (
-    pp.CaselessLiteral('enum') -
-    name('name') + _ -
-    '{' +
-    enum_body('items') + n -
-    '}'
+    pp.CaselessLiteral('enum')
+    - name('name') + _
+    - '{'
+    + enum_body('items') + n
+    - '}'
 ) + end
 
 

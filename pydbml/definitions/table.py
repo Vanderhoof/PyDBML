@@ -19,8 +19,8 @@ alias = pp.WordStart() + pp.Literal('as').suppress() - pp.WordEnd() - name
 hex_char = pp.Word(pp.srange('[0-9a-fA-F]'), exact=1)
 hex_color = ("#" - (hex_char * 3 ^ hex_char * 6)).leaveWhitespace()
 header_color = (
-    pp.CaselessLiteral('headercolor:').suppress() + _ -
-    pp.Combine(hex_color)('header_color')
+    pp.CaselessLiteral('headercolor:').suppress() + _
+    - pp.Combine(hex_color)('header_color')
 )
 table_setting = _ + (note('note') | header_color) + _
 table_settings = '[' + table_setting + (',' + table_setting)[...] + ']'
@@ -48,11 +48,11 @@ table_element = _ + (note_element('note') | indexes('indexes')) + _
 table_body = table_column[1, ...]('columns') + _ + table_element[...]
 
 table = _c + (
-    pp.CaselessLiteral("table").suppress() +
-    name('name') +
-    alias('alias')[0, 1] +
-    table_settings('settings')[0, 1] + _ +
-    '{' - table_body + _ + '}'
+    pp.CaselessLiteral("table").suppress()
+    + name('name')
+    + alias('alias')[0, 1]
+    + table_settings('settings')[0, 1] + _
+    + '{' - table_body + _ + '}'
 ) + end
 
 

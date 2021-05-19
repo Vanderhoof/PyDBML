@@ -18,14 +18,14 @@ index_type = pp.CaselessLiteral("type:").suppress() + _ - (
     pp.CaselessLiteral("btree")('type') | pp.CaselessLiteral("hash")('type')
 )
 index_setting = (
-    unique('unique') |
-    index_type |
-    pp.CaselessLiteral("name:") + _ - string_literal('name') |
-    note('note')
+    unique('unique')
+    | index_type
+    | pp.CaselessLiteral("name:") + _ - string_literal('name')
+    | note('note')
 )
 index_settings = (
-    '[' + _ + pk('pk') + _ - ']' + c |
-    '[' + _ + index_setting + (_ + ',' + _ - index_setting)[...] + _ - ']' + c
+    '[' + _ + pk('pk') + _ - ']' + c
+    | '[' + _ + index_setting + (_ + ',' + _ - index_setting)[...] + _ - ']' + c
 )
 
 
@@ -53,22 +53,22 @@ index_settings.setParseAction(parse_index_settings)
 
 subject = name | expression_literal
 composite_index_syntax = (
-    pp.Suppress('(') +
-    subject + (
-        pp.Suppress(',') +
-        subject
-    )[...] +
-    pp.Suppress(')')
+    pp.Suppress('(')
+    + subject + (
+        pp.Suppress(',')
+        + subject
+    )[...]
+    + pp.Suppress(')')
 )('subject') + c + index_settings('settings')[0, 1]
 
 single_index_syntax = subject('subject') + c + index_settings('settings')[0, 1]
 index = _c + (single_index_syntax ^ composite_index_syntax) + c
 
 indexes = (
-    pp.CaselessLiteral('indexes').suppress() + _ -
-    pp.Suppress('{') -
-    index[1, ...] + _ +
-    pp.Suppress('}')
+    pp.CaselessLiteral('indexes').suppress() + _
+    - pp.Suppress('{')
+    - index[1, ...] + _
+    + pp.Suppress('}')
 )
 
 

@@ -39,16 +39,16 @@ column_type.setParseAction(parse_column_type)
 
 
 default = pp.CaselessLiteral('default:').suppress() + _ - (
-    string_literal |
-    expression_literal |
-    boolean_literal.setParseAction(
+    string_literal
+    | expression_literal
+    | boolean_literal.setParseAction(
         lambda s, l, t: {
             'true': True,
             'false': False,
             'NULL': None
         }[t[0]]
-    ) |
-    number_literal.setParseAction(
+    )
+    | number_literal.setParseAction(
         lambda s, l, t: float(''.join(t[0])) if '.' in t[0] else int(t[0])
     )
 )
@@ -57,17 +57,17 @@ default = pp.CaselessLiteral('default:').suppress() + _ - (
 column_setting = _ + (
     pp.CaselessLiteral("not null").setParseAction(
         lambda s, l, t: True
-    )('notnull') |
-    pp.CaselessLiteral("null").setParseAction(
+    )('notnull')
+    | pp.CaselessLiteral("null").setParseAction(
         lambda s, l, t: False
-    )('notnull') |
-    pp.CaselessLiteral("primary key")('pk') |
-    pk('pk') |
-    unique('unique') |
-    pp.CaselessLiteral("increment")('increment') |
-    note('note') |
-    ref_inline('ref*') |
-    default('default')
+    )('notnull')
+    | pp.CaselessLiteral("primary key")('pk')
+    | pk('pk')
+    | unique('unique')
+    | pp.CaselessLiteral("increment")('increment')
+    | note('note')
+    | ref_inline('ref*')
+    | default('default')
 ) + _
 column_settings = '[' - column_setting + ("," + column_setting)[...] + ']' + c
 
@@ -102,10 +102,10 @@ column_settings.setParseAction(parse_column_settings)
 constraint = pp.CaselessLiteral("unique") | pp.CaselessLiteral("pk")
 
 table_column = _c + (
-    name('name') +
-    column_type('type') +
-    constraint[...]('constraints') + c +
-    column_settings('settings')[0, 1]
+    name('name')
+    + column_type('type')
+    + constraint[...]('constraints') + c
+    + column_settings('settings')[0, 1]
 ) + n
 
 

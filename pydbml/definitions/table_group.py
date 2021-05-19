@@ -10,11 +10,11 @@ from .generic import name
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 table_group = _c + (
-    pp.CaselessLiteral('TableGroup') -
-    name('name') + _ -
-    '{' + _ -
-    (name + _)[...]('items') + _ -
-    '}'
+    pp.CaselessLiteral('TableGroup')
+    - name('name') + _
+    - '{' + _
+    - (name + _)[...]('items') + _
+    - '}'
 ) + end
 
 

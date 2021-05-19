@@ -19,11 +19,11 @@ project_element = _ + (note | project_field) + _
 project_body = project_element[...]
 
 project = _c + (
-    pp.CaselessLiteral('project') + _ -
-    name('name') + _ +
-    '{' + _ -
-    project_body('items') + _ -
-    '}'
+    pp.CaselessLiteral('project') + _
+    - name('name') + _
+    + '{' + _
+    - project_body('items') + _
+    - '}'
 ) + (n | pp.StringEnd())
 
 
