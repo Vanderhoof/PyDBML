@@ -8,8 +8,9 @@ from pydbml.definitions.reference import ref
 from pydbml.definitions.enum import enum
 from pydbml.definitions.table_group import table_group
 from pydbml.definitions.project import project
-from pydbml.classes import Table, TableReference, Reference
+from pydbml.classes import Table, TableReference, Reference, ReferenceBlueprint, Enum, Project, TableGroup
 from pydbml.exceptions import TableNotFoundError, ColumnNotFoundError
+from typing import Union, Optional, List, Dict
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
@@ -33,7 +34,7 @@ class PyDBML:
     >>> p = PyDBML(Path('schema.dbml'))
     '''
     def __new__(cls,
-                source_: str or PosixPath or TextIOWrapper or None = None):
+                source_: Optional[Union[str, PosixPath, TextIOWrapper]] = None):
         if source_ is not None:
             if isinstance(source_, str):
                 source = source_
@@ -58,7 +59,7 @@ class PyDBML:
         return PyDBMLParseResults(text)
 
     @staticmethod
-    def parse_file(file: str or PosixPath or TextIOWrapper):
+    def parse_file(file: Union[str, PosixPath, TextIOWrapper]):
         if isinstance(file, TextIOWrapper):
             source = file.read()
         else:
@@ -71,13 +72,13 @@ class PyDBML:
 
 class PyDBMLParseResults:
     def __init__(self, source: str):
-        self.tables = []
-        self.table_dict = {}
-        self.refs = []
-        self.ref_blueprints = []
-        self.enums = []
-        self.table_groups = []
-        self.project = None
+        self.tables: List[Table] = []
+        self.table_dict: Dict[str, Table] = {}
+        self.refs: List[Reference] = []
+        self.ref_blueprints: List[ReferenceBlueprint] = []
+        self.enums: List[Enum] = []
+        self.table_groups: List[TableGroup] = []
+        self.project: Optional[Project] = None
         self.source = source
 
         self._set_syntax()
@@ -111,7 +112,7 @@ class PyDBMLParseResults:
         )
         self._syntax = expr[...] + ('\n' | comment)[...] + pp.StringEnd()
 
-    def __getitem__(self, k: int or str) -> Table:
+    def __getitem__(self, k: Union[int, str]) -> Table:
         if isinstance(k, int):
             return self.tables[k]
         else:

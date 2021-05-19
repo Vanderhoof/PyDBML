@@ -1,4 +1,6 @@
 from __future__ import annotations
+from typing import Optional, Tuple, Union, List, Dict
+
 from .exceptions import AttributeMissingError, ColumnNotFoundError
 
 
@@ -6,7 +8,7 @@ class SQLOjbect:
     '''
     Base class for all SQL objects.
     '''
-    required_attributes = []
+    required_attributes: Tuple[str, ...] = ()
 
     def check_attributes_for_sql(self):
         '''
@@ -32,14 +34,14 @@ class ReferenceBlueprint:
 
     def __init__(self,
                  type_: str,
-                 name: str = None,
-                 table1: str = None,
-                 col1: str = None,
-                 table2: str = None,
-                 col2: str = None,
-                 comment: str = None,
-                 on_update: str or None = None,
-                 on_delete: str or None = None):
+                 name: Optional[str] = None,
+                 table1: Optional[str] = None,
+                 col1: Optional[str] = None,
+                 table2: Optional[str] = None,
+                 col2: Optional[str] = None,
+                 comment: Optional[str] = None,
+                 on_update: Optional[str] = None,
+                 on_delete: Optional[str] = None):
         self.type = type_
         self.name = name if name else None
         self.table1 = table1 if table1 else None
@@ -88,7 +90,7 @@ class Reference(SQLOjbect):
     It is a separate object, which is not connected to Table or Column objects
     and its `sql` property contains the ALTER TABLE clause.
     '''
-    required_attributes = ['type', 'table1', 'col1', 'table2', 'col2']
+    required_attributes = ('type', 'table1', 'col1', 'table2', 'col2')
 
     ONE_TO_MANY = '<'
     MANY_TO_ONE = '>'
@@ -100,10 +102,10 @@ class Reference(SQLOjbect):
                  col1: Column,
                  table2: Table,
                  col2: Column,
-                 name: str = None,
-                 comment: str = None,
-                 on_update: str or None = None,
-                 on_delete: str or None = None):
+                 name: Optional[str] = None,
+                 comment: Optional[str] = None,
+                 on_update: Optional[str] = None,
+                 on_delete: Optional[str] = None):
         self.type = type_
         self.table1 = table1
         self.col1 = col1
@@ -182,15 +184,15 @@ class TableReference(SQLOjbect):
     This object should be assigned to the `refs` attribute of a Table object.
     Its `sql` property contains the inline definition of the FOREIGN KEY clause.
     '''
-    required_attributes = ['col', 'ref_table', 'ref_col']
+    required_attributes = ('col', 'ref_table', 'ref_col')
 
     def __init__(self,
                  col: Column,
                  ref_table: Table,
                  ref_col: Column,
-                 name: str or None = None,
-                 on_delete: str or None = None,
-                 on_update: str or None = None):
+                 name: Optional[str] = None,
+                 on_delete: Optional[str] = None,
+                 on_update: Optional[str] = None):
         self.col = col
         self.ref_table = ref_table
         self.ref_col = ref_col
@@ -256,7 +258,7 @@ class Note:
 class Column(SQLOjbect):
     '''Class representing table column.'''
 
-    required_attributes = ['name', 'type']
+    required_attributes = ('name', 'type')
 
     def __init__(self,
                  name: str,
@@ -265,10 +267,10 @@ class Column(SQLOjbect):
                  not_null: bool = False,
                  pk: bool = False,
                  autoinc: bool = False,
-                 default=None,
-                 note: str or None = None,
-                 ref_blueprints: list = None,
-                 comment: str or None = None):
+                 default: Optional[str] = None,
+                 note: Optional[str] = None,
+                 ref_blueprints: Optional[List[ReferenceBlueprint]] = None,
+                 comment: Optional[str] = None):
         self.name = name
         self.type = type_
         self.unique = unique
@@ -284,10 +286,10 @@ class Column(SQLOjbect):
         for ref in self.ref_blueprints:
             ref.col1 = self.name
 
-        self._table = None
+        self._table: Optional[Table] = None
 
     @property
-    def table(self):
+    def table(self) -> Optional[Table]:
         return self._table
 
     @table.setter
@@ -353,19 +355,19 @@ class Column(SQLOjbect):
 
 class Index(SQLOjbect):
     '''Class representing index.'''
-    required_attributes = ['subjects']
+    required_attributes = ('subjects',)
 
     def __init__(self,
-                 subject_names: list,
-                 name: str or None = None,
-                 table: Table or None = None,
+                 subject_names: List[str],
+                 name: Optional[str] = None,
+                 table: Optional[Table] = None,
                  unique: bool = False,
-                 type_: str or None = None,
+                 type_: Optional[str] = None,
                  pk: bool = False,
-                 note: Note or None = None,
-                 comment: str or None = None):
+                 note: Optional[Note] = None,
+                 comment: Optional[str] = None):
         self.subject_names = subject_names
-        self.subjects = []
+        self.subjects: List[str] = []
 
         self.name = name if name else None
         self.table = table
@@ -443,19 +445,19 @@ class Index(SQLOjbect):
 class Table(SQLOjbect):
     '''Class representing table.'''
 
-    required_attributes = ['name']
+    required_attributes = ('name',)
 
     def __init__(self,
                  name: str,
-                 alias: str or None = None,
-                 note: Note or None = None,
-                 header_color: str or None = None,
-                 refs: list or None = None,
-                 comment: str or None = None):
+                 alias: Optional[str] = None,
+                 note: Optional[Note] = None,
+                 header_color: Optional[str] = None,
+                 refs: Optional[List[Reference]] = None,
+                 comment: Optional[str] = None):
         self.name = name
-        self.columns = []
-        self.indexes = []
-        self.column_dict = {}
+        self.columns: List[Column] = []
+        self.indexes: List[Index] = []
+        self.column_dict: Dict[str, Column] = {}
         self.alias = alias if alias else None
         self.note = note or Note('')
         self.header_color = header_color
@@ -485,7 +487,7 @@ class Table(SQLOjbect):
         i.table = self
         self.indexes.append(i)
 
-    def __getitem__(self, k: int or str) -> Table:
+    def __getitem__(self, k: Union[int, str]) -> Column:
         if isinstance(k, int):
             return self.columns[k]
         else:
@@ -550,8 +552,8 @@ class EnumItem:
 
     def __init__(self,
                  name: str,
-                 note: Note or None = None,
-                 comment: str or None = None):
+                 note: Optional[Note] = None,
+                 comment: Optional[str] = None):
         self.name = name
         self.note = note or Note('')
         self.comment = comment
@@ -574,12 +576,12 @@ class EnumItem:
 
 
 class Enum(SQLOjbect):
-    required_attributes = ['name', 'items']
+    required_attributes = ('name', 'items')
 
     def __init__(self,
                  name: str,
-                 items: list,
-                 comment: str or None = None):
+                 items: List[EnumItem],
+                 comment: Optional[str] = None):
         self.name = name
         self.items = items
         self.comment = comment
@@ -587,7 +589,7 @@ class Enum(SQLOjbect):
     def get_type(self):
         return EnumType(self.name, self.items)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> EnumItem:
         return self.items[key]
 
     def __iter__(self):
@@ -635,8 +637,8 @@ class EnumType(Enum):
 class TableGroup:
     def __init__(self,
                  name: str,
-                 items: list,
-                 comment: str or None = None):
+                 items: List[str],
+                 comment: Optional[str] = None):
         self.name = name
         self.items = items
         self.comment = comment
@@ -644,7 +646,7 @@ class TableGroup:
     def __repr__(self):
         return f'TableGroup({repr(self.name)}, {repr(self.items)})'
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> str:
         return self.items[key]
 
     def __iter__(self):
@@ -654,9 +656,9 @@ class TableGroup:
 class Project:
     def __init__(self,
                  name: str,
-                 items: dict or None = None,
-                 note: Note or None = None,
-                 comment: str or None = None):
+                 items: Optional[Dict[str, str]] = None,
+                 note: Optional[Note] = None,
+                 comment: Optional[str] = None):
         self.name = name
         self.items = items
         self.note = note or Note('')
