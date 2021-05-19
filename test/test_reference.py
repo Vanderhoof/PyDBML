@@ -1,7 +1,15 @@
-from pyparsing import ParseException, ParseSyntaxException, ParserElement
-from pydbml.definitions.reference import (relation, ref_inline, on_option,
-                                          ref_settings, ref_short, ref_long)
 from unittest import TestCase
+
+from pyparsing import ParseException
+from pyparsing import ParseSyntaxException
+from pyparsing import ParserElement
+
+from pydbml.definitions.reference import on_option
+from pydbml.definitions.reference import ref_inline
+from pydbml.definitions.reference import ref_long
+from pydbml.definitions.reference import ref_settings
+from pydbml.definitions.reference import ref_short
+from pydbml.definitions.reference import relation
 
 
 ParserElement.setDefaultWhitespaceChars(' \t\r')

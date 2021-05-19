@@ -1,7 +1,14 @@
-from pyparsing import ParseException, ParseSyntaxException, ParserElement
-from pydbml.definitions.table import (alias, header_color, table_settings,
-                                      table_body, table)
 from unittest import TestCase
+
+from pyparsing import ParseException
+from pyparsing import ParseSyntaxException
+from pyparsing import ParserElement
+
+from pydbml.definitions.table import alias
+from pydbml.definitions.table import header_color
+from pydbml.definitions.table import table
+from pydbml.definitions.table import table_body
+from pydbml.definitions.table import table_settings
 
 
 ParserElement.setDefaultWhitespaceChars(' \t\r')

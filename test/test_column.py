@@ -1,7 +1,15 @@
-from pyparsing import ParseException, ParseSyntaxException, ParserElement
-from pydbml.definitions.column import (column_type, default, column_setting,
-                                       column_settings, constraint, table_column)
 from unittest import TestCase
+
+from pyparsing import ParseException
+from pyparsing import ParseSyntaxException
+from pyparsing import ParserElement
+
+from pydbml.definitions.column import column_setting
+from pydbml.definitions.column import column_settings
+from pydbml.definitions.column import column_type
+from pydbml.definitions.column import constraint
+from pydbml.definitions.column import default
+from pydbml.definitions.column import table_column
 
 
 ParserElement.setDefaultWhitespaceChars(' \t\r')

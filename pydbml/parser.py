@@ -1,16 +1,31 @@
 from __future__ import annotations
+
 import pyparsing as pp
-from pathlib import Path
+
 from io import TextIOWrapper
-from pydbml.definitions.table import table
-from pydbml.definitions.common import comment, _
-from pydbml.definitions.reference import ref
-from pydbml.definitions.enum import enum
-from pydbml.definitions.table_group import table_group
-from pydbml.definitions.project import project
-from pydbml.classes import Table, TableReference, Reference, ReferenceBlueprint, Enum, Project, TableGroup
-from pydbml.exceptions import TableNotFoundError, ColumnNotFoundError
-from typing import Union, Optional, List, Dict
+from pathlib import Path
+
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
+
+from .classes import Enum
+from .classes import Project
+from .classes import Reference
+from .classes import ReferenceBlueprint
+from .classes import Table
+from .classes import TableGroup
+from .classes import TableReference
+from .definitions.common import _
+from .definitions.common import comment
+from .definitions.enum import enum
+from .definitions.project import project
+from .definitions.reference import ref
+from .definitions.table import table
+from .definitions.table_group import table_group
+from .exceptions import ColumnNotFoundError
+from .exceptions import TableNotFoundError
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 

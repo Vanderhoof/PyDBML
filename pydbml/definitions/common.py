@@ -1,6 +1,8 @@
 import pyparsing as pp
-from .generic import string_literal
+
 from pydbml.classes import Note
+
+from .generic import string_literal
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 

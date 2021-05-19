@@ -1,6 +1,8 @@
-from pyparsing import ParserElement
-from pydbml.definitions.table_group import table_group
 from unittest import TestCase
+
+from pyparsing import ParserElement
+
+from pydbml.definitions.table_group import table_group
 
 
 ParserElement.setDefaultWhitespaceChars(' \t\r')

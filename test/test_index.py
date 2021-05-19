@@ -1,8 +1,17 @@
-from pyparsing import ParseException, ParseSyntaxException, ParserElement
-from pydbml.definitions.index import (index_type, index_setting, index_settings,
-                                      subject, single_index_syntax,
-                                      composite_index_syntax, index, indexes)
 from unittest import TestCase
+
+from pyparsing import ParseException
+from pyparsing import ParseSyntaxException
+from pyparsing import ParserElement
+
+from pydbml.definitions.index import composite_index_syntax
+from pydbml.definitions.index import index
+from pydbml.definitions.index import index_setting
+from pydbml.definitions.index import index_settings
+from pydbml.definitions.index import index_type
+from pydbml.definitions.index import indexes
+from pydbml.definitions.index import single_index_syntax
+from pydbml.definitions.index import subject
 
 
 ParserElement.setDefaultWhitespaceChars(' \t\r')

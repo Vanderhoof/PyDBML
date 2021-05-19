@@ -1,6 +1,12 @@
 from unittest import TestCase
-from pyparsing import ParseSyntaxException, ParserElement
-from pydbml.definitions.common import comment, _c, note, note_object
+
+from pyparsing import ParseSyntaxException
+from pyparsing import ParserElement
+
+from pydbml.definitions.common import _c
+from pydbml.definitions.common import comment
+from pydbml.definitions.common import note
+from pydbml.definitions.common import note_object
 
 
 ParserElement.setDefaultWhitespaceChars(' \t\r')

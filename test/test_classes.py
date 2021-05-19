@@ -1,7 +1,16 @@
 from unittest import TestCase
-from pydbml.exceptions import AttributeMissingError, ColumnNotFoundError
-from pydbml.classes import (ReferenceBlueprint, SQLOjbect, Note,
-                            TableReference, Column, Table, Index, Enum, EnumItem,)
+
+from pydbml.classes import Column
+from pydbml.classes import Enum
+from pydbml.classes import EnumItem
+from pydbml.classes import Index
+from pydbml.classes import Note
+from pydbml.classes import ReferenceBlueprint
+from pydbml.classes import SQLOjbect
+from pydbml.classes import Table
+from pydbml.classes import TableReference
+from pydbml.exceptions import AttributeMissingError
+from pydbml.exceptions import ColumnNotFoundError
 
 
 class TestDBMLObject(TestCase):

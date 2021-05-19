@@ -1,6 +1,11 @@
-from pyparsing import ParseSyntaxException, ParserElement
-from pydbml.definitions.enum import (enum_settings, enum_item, enum)
 from unittest import TestCase
+
+from pyparsing import ParseSyntaxException
+from pyparsing import ParserElement
+
+from pydbml.definitions.enum import enum
+from pydbml.definitions.enum import enum_item
+from pydbml.definitions.enum import enum_settings
 
 
 ParserElement.setDefaultWhitespaceChars(' \t\r')

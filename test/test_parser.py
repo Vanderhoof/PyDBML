@@ -1,8 +1,11 @@
 import os
+
 from pathlib import Path
 from unittest import TestCase
+
 from pydbml import PyDBML
-from pydbml.exceptions import TableNotFoundError, ColumnNotFoundError
+from pydbml.exceptions import ColumnNotFoundError
+from pydbml.exceptions import TableNotFoundError
 
 
 TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'
