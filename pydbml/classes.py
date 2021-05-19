@@ -280,7 +280,7 @@ class Column(SQLOjbect):
                  not_null: bool = False,
                  pk: bool = False,
                  autoinc: bool = False,
-                 default: Optional[Union[str, int]] = None,
+                 default: Optional[Union[str, int, bool, float]] = None,
                  note: Optional[Note] = None,
                  ref_blueprints: Optional[List[ReferenceBlueprint]] = None,
                  comment: Optional[str] = None):
