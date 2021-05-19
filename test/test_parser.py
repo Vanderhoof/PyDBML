@@ -12,7 +12,7 @@ class TestRefs(TestCase):
     def setUp(self):
         self.results = PyDBML.parse_file(TEST_DATA_PATH / 'general.dbml')
 
-    def test_table_refs(self):
+    def test_table_refs(self) -> None:
         p = PyDBML.parse_file(TEST_DATA_PATH / 'general.dbml')
         r = p['order_items'].refs
         self.assertEqual(r[0].col.name, 'order_id')
@@ -27,7 +27,7 @@ class TestRefs(TestCase):
         self.assertEqual(r[0].ref_table.name, 'countries')
         self.assertEqual(r[0].ref_col.name, 'code')
 
-    def test_refs(self):
+    def test_refs(self) -> None:
         p = PyDBML.parse_file(TEST_DATA_PATH / 'general.dbml')
         r = p.refs
         self.assertEqual(r[0].table1.name, 'orders')
@@ -45,12 +45,12 @@ class TestRefs(TestCase):
 
 
 class TestFaulty(TestCase):
-    def test_bad_reference(self):
+    def test_bad_reference(self) -> None:
         with self.assertRaises(TableNotFoundError):
             PyDBML(TEST_DATA_PATH / 'wrong_inline_ref_table.dbml')
         with self.assertRaises(ColumnNotFoundError):
             PyDBML(TEST_DATA_PATH / 'wrong_inline_ref_column.dbml')
 
-    def test_bad_index(self):
+    def test_bad_index(self) -> None:
         with self.assertRaises(ColumnNotFoundError):
             PyDBML(TEST_DATA_PATH / 'wrong_index.dbml')

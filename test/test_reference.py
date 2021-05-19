@@ -8,19 +8,19 @@ ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 
 class TestRelation(TestCase):
-    def test_ok(self):
+    def test_ok(self) -> None:
         vals = ['>', '-', '<']
         for v in vals:
             relation.parseString(v, parseAll=True)
 
-    def test_nok(self):
+    def test_nok(self) -> None:
         val = 'wrong'
         with self.assertRaises(ParseException):
             relation.parseString(val, parseAll=True)
 
 
 class TestInlineRelation(TestCase):
-    def test_ok(self):
+    def test_ok(self) -> None:
         val = 'ref: < table.column'
         res = ref_inline.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '<')
@@ -29,7 +29,7 @@ class TestInlineRelation(TestCase):
         self.assertIsNone(res[0].table1)
         self.assertIsNone(res[0].col1)
 
-    def test_nok(self):
+    def test_nok(self) -> None:
         vals = [
             'ref:\n< table.column',
             'ref: table.column',
@@ -42,7 +42,7 @@ class TestInlineRelation(TestCase):
 
 
 class TestOnOption(TestCase):
-    def test_ok(self):
+    def test_ok(self) -> None:
         vals = [
             'no action',
             'restrict',
@@ -53,19 +53,19 @@ class TestOnOption(TestCase):
         for v in vals:
             on_option.parseString(v, parseAll=True)
 
-    def test_nok(self):
+    def test_nok(self) -> None:
         val = 'wrong'
         with self.assertRaises(ParseException):
             on_option.parseString(val, parseAll=True)
 
 
 class TestRefSettings(TestCase):
-    def test_one_setting(self):
+    def test_one_setting(self) -> None:
         val = '[delete: cascade]'
         res = ref_settings.parseString(val, parseAll=True)
         self.assertEqual(res[0]['on_delete'], 'cascade')
 
-    def test_two_settings_multiline(self):
+    def test_two_settings_multiline(self) -> None:
         val = '[\ndelete:\ncascade\n,\nupdate:\nrestrict\n]'
         res = ref_settings.parseString(val, parseAll=True)
         self.assertEqual(res[0]['on_delete'], 'cascade')
@@ -73,7 +73,7 @@ class TestRefSettings(TestCase):
 
 
 class TestRefShort(TestCase):
-    def test_no_name(self):
+    def test_no_name(self) -> None:
         val = 'ref: table1.col1 > table2.col2'
         res = ref_short.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -82,7 +82,7 @@ class TestRefShort(TestCase):
         self.assertEqual(res[0].table2, 'table2')
         self.assertEqual(res[0].col2, 'col2')
 
-    def test_name(self):
+    def test_name(self) -> None:
         val = 'ref name: table1.col1 > table2.col2'
         res = ref_short.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -92,7 +92,7 @@ class TestRefShort(TestCase):
         self.assertEqual(res[0].col2, 'col2')
         self.assertEqual(res[0].name, 'name')
 
-    def test_with_settings(self):
+    def test_with_settings(self) -> None:
         val = 'ref name: table1.col1 > table2.col2 [update: cascade, delete: restrict]'
         res = ref_short.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -104,7 +104,7 @@ class TestRefShort(TestCase):
         self.assertEqual(res[0].on_update, 'cascade')
         self.assertEqual(res[0].on_delete, 'restrict')
 
-    def test_newline(self):
+    def test_newline(self) -> None:
         val = 'ref\nname: table1.col1 > table2.col2'
         with self.assertRaises(ParseException):
             ref_short.parseString(val, parseAll=True)
@@ -112,7 +112,7 @@ class TestRefShort(TestCase):
         with self.assertRaises(ParseSyntaxException):
             ref_short.parseString(val2, parseAll=True)
 
-    def test_comment_above(self):
+    def test_comment_above(self) -> None:
         val = '//comment above\nref name: table1.col1 > table2.col2'
         res = ref_short.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -123,7 +123,7 @@ class TestRefShort(TestCase):
         self.assertEqual(res[0].name, 'name')
         self.assertEqual(res[0].comment, 'comment above')
 
-    def test_comment_after(self):
+    def test_comment_after(self) -> None:
         val = 'ref name: table1.col1 > table2.col2 //comment after'
         res = ref_short.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -145,7 +145,7 @@ class TestRefShort(TestCase):
         self.assertEqual(res2[0].on_delete, 'restrict')
         self.assertEqual(res2[0].comment, 'comment after')
 
-    def test_comment_both(self):
+    def test_comment_both(self) -> None:
         val = '//comment above\nref name: table1.col1 > table2.col2 //comment after'
         res = ref_short.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -169,7 +169,7 @@ class TestRefShort(TestCase):
 
 
 class TestRefLong(TestCase):
-    def test_no_name(self):
+    def test_no_name(self) -> None:
         val = 'ref  {table1.col1 > table2.col2}'
         res = ref_long.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -178,7 +178,7 @@ class TestRefLong(TestCase):
         self.assertEqual(res[0].table2, 'table2')
         self.assertEqual(res[0].col2, 'col2')
 
-    def test_name(self):
+    def test_name(self) -> None:
         val = 'ref\nname\n{\ntable1.col1 > table2.col2\n}'
         res = ref_long.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -188,7 +188,7 @@ class TestRefLong(TestCase):
         self.assertEqual(res[0].col2, 'col2')
         self.assertEqual(res[0].name, 'name')
 
-    def test_with_settings(self):
+    def test_with_settings(self) -> None:
         val = 'ref name {\ntable1.col1 > table2.col2 [update: cascade, delete: restrict]\n}'
         res = ref_long.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -200,7 +200,7 @@ class TestRefLong(TestCase):
         self.assertEqual(res[0].on_update, 'cascade')
         self.assertEqual(res[0].on_delete, 'restrict')
 
-    def test_comment_above(self):
+    def test_comment_above(self) -> None:
         val = '//comment above\nref name {\ntable1.col1 > table2.col2\n}'
         res = ref_long.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -211,7 +211,7 @@ class TestRefLong(TestCase):
         self.assertEqual(res[0].name, 'name')
         self.assertEqual(res[0].comment, 'comment above')
 
-    def test_comment_after(self):
+    def test_comment_after(self) -> None:
         val = 'ref name {\ntable1.col1 > table2.col2 //comment after\n}'
         res = ref_long.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')
@@ -233,7 +233,7 @@ class TestRefLong(TestCase):
         self.assertEqual(res2[0].on_delete, 'restrict')
         self.assertEqual(res2[0].comment, 'comment after')
 
-    def test_comment_both(self):
+    def test_comment_both(self) -> None:
         val = '//comment above\nref name {\ntable1.col1 > table2.col2 //comment after\n}'
         res = ref_long.parseString(val, parseAll=True)
         self.assertEqual(res[0].type, '>')

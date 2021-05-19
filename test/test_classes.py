@@ -4,13 +4,13 @@ from pydbml.classes import (ReferenceBlueprint, SQLOjbect, Note,
                             TableReference, Column, Table, Index, Enum, EnumItem,)
 
 
-class TestDBMLObject:
-    def test_check_attributes_for_sql(self):
+class TestDBMLObject(TestCase):
+    def test_check_attributes_for_sql(self) -> None:
         o = SQLOjbect()
         o.a1 = None
         o.b1 = None
         o.c1 = None
-        o.required_attributes = ['a1', 'b1']
+        o.required_attributes = ('a1', 'b1')
         with self.assertRaises(AttributeMissingError):
             o.check_attributes_for_sql()
         o.a1 = 1
@@ -21,7 +21,7 @@ class TestDBMLObject:
 
 
 # class TestReferenceBlueprint(TestCase):
-#     def test_basic_sql(self):
+#     def test_basic_sql(self) -> None:
 #         r = ReferenceBlueprint(
 #             ReferenceBlueprint.MANY_TO_ONE,
 #             table1='bookings',
@@ -37,7 +37,7 @@ class TestDBMLObject:
 #         expected2 = 'ALTER TABLE "ids" ADD FOREIGN KEY ("id") REFERENCES "bookings ("country");'
 #         self.assertEqual(r.sql, expected2)
 
-#     def test_full(self):
+#     def test_full(self) -> None:
 #         r = ReferenceBlueprint(
 #             ReferenceBlueprint.MANY_TO_ONE,
 #             name='refname',
@@ -58,14 +58,14 @@ class TestDBMLObject:
 
 
 # class TestTableReference(TestCase):
-#     def test_basic_sql(self):
+#     def test_basic_sql(self) -> None:
 #         r = TableReference(col='order_id',
 #                            ref_table='orders',
 #                            ref_col='id')
 #         expected = 'FOREIGN KEY ("order_id") REFERENCES "orders ("id")'
 #         self.assertEqual(r.sql, expected)
 
-#     def test_full(self):
+#     def test_full(self) -> None:
 #         r = TableReference(col='order_id',
 #                            ref_table='orders',
 #                            ref_col='id',
@@ -77,13 +77,13 @@ class TestDBMLObject:
 
 
 class TestColumn(TestCase):
-    def test_basic_sql(self):
+    def test_basic_sql(self) -> None:
         r = Column(name='id',
                    type_='integer')
         expected = '"id" integer'
         self.assertEqual(r.sql, expected)
 
-    def test_note(self):
+    def test_note(self) -> None:
         n = Note('Column note')
         r = Column(name='id',
                    type_='integer',
@@ -91,7 +91,7 @@ class TestColumn(TestCase):
         expected = '"id" integer -- Column note'
         self.assertEqual(r.sql, expected)
 
-    def test_pk_autoinc(self):
+    def test_pk_autoinc(self) -> None:
         r = Column(name='id',
                    type_='integer',
                    pk=True,
@@ -99,7 +99,7 @@ class TestColumn(TestCase):
         expected = '"id" integer PRIMARY KEY AUTOINCREMENT'
         self.assertEqual(r.sql, expected)
 
-    def test_unique_not_null(self):
+    def test_unique_not_null(self) -> None:
         r = Column(name='id',
                    type_='integer',
                    unique=True,
@@ -107,14 +107,14 @@ class TestColumn(TestCase):
         expected = '"id" integer UNIQUE NOT NULL'
         self.assertEqual(r.sql, expected)
 
-    def test_default(self):
+    def test_default(self) -> None:
         r = Column(name='order',
                    type_='integer',
                    default=0)
         expected = '"order" integer DEFAULT 0'
         self.assertEqual(r.sql, expected)
 
-    def test_table_setter(self):
+    def test_table_setter(self) -> None:
         r1 = ReferenceBlueprint(
             ReferenceBlueprint.MANY_TO_ONE,
             name='refname',
@@ -145,7 +145,7 @@ class TestColumn(TestCase):
 
 
 class TestIndex(TestCase):
-    def test_basic_sql(self):
+    def test_basic_sql(self) -> None:
         t = Table('products')
         t.add_column(Column('id', 'integer'))
         r = Index(subject_names=['id'],
@@ -154,7 +154,7 @@ class TestIndex(TestCase):
         expected = 'CREATE INDEX ON "products" ("id");'
         self.assertEqual(r.sql, expected)
 
-    def test_note(self):
+    def test_note(self) -> None:
         t = Table('products')
         t.add_column(Column('id', 'integer'))
         n = Note('Index note')
@@ -165,7 +165,7 @@ class TestIndex(TestCase):
         expected = 'CREATE INDEX ON "products" ("id"); -- Index note'
         self.assertEqual(r.sql, expected)
 
-    def test_unique_type_composite(self):
+    def test_unique_type_composite(self) -> None:
         t = Table('products')
         t.add_column(Column('id', 'integer'))
         t.add_column(Column('name', 'varchar'))
@@ -177,7 +177,7 @@ class TestIndex(TestCase):
         expected = 'CREATE UNIQUE INDEX ON "products" USING HASH ("id", "name");'
         self.assertEqual(r.sql, expected)
 
-    def test_pk(self):
+    def test_pk(self) -> None:
         t = Table('products')
         t.add_column(Column('id', 'integer'))
         t.add_column(Column('name', 'varchar'))
@@ -190,14 +190,14 @@ class TestIndex(TestCase):
 
 
 class TestTable(TestCase):
-    def test_one_column(self):
+    def test_one_column(self) -> None:
         t = Table('products')
         c = Column('id', 'integer')
         t.add_column(c)
         expected = 'CREATE TABLE "products" (\n  "id" integer\n);\n'
         self.assertEqual(t.sql, expected)
 
-    def test_ref(self):
+    def test_ref(self) -> None:
         t = Table('products')
         c1 = Column('id', 'integer')
         c2 = Column('name', 'varchar2')
@@ -217,7 +217,7 @@ class TestTable(TestCase):
 '''
         self.assertEqual(t.sql, expected)
 
-    def test_note(self):
+    def test_note(self) -> None:
         n = Note('Table note')
         t = Table('products', note=n)
         c = Column('id', 'integer')
@@ -225,7 +225,7 @@ class TestTable(TestCase):
         expected = 'CREATE TABLE "products" (\n  -- Table note\n  "id" integer\n);\n'
         self.assertEqual(t.sql, expected)
 
-    def test_ref_index(self):
+    def test_ref_index(self) -> None:
         t = Table('products')
         c1 = Column('id', 'integer')
         c2 = Column('name', 'varchar2')
@@ -249,7 +249,7 @@ CREATE INDEX ON "products" ("id", "name");
 '''
         self.assertEqual(t.sql, expected)
 
-    def test_index_inline(self):
+    def test_index_inline(self) -> None:
         t = Table('products')
         c1 = Column('id', 'integer')
         c2 = Column('name', 'varchar2')
@@ -266,7 +266,7 @@ CREATE INDEX ON "products" ("id", "name");
 '''
         self.assertEqual(t.sql, expected)
 
-    def test_add_column(self):
+    def test_add_column(self) -> None:
         t = Table('products')
         c1 = Column('id', 'integer')
         c2 = Column('name', 'varchar2')
@@ -276,7 +276,7 @@ CREATE INDEX ON "products" ("id", "name");
         self.assertEqual(c2.table, t)
         self.assertEqual(t.columns, [c1, c2])
 
-    def test_add_index(self):
+    def test_add_index(self) -> None:
         t = Table('products')
         c1 = Column('id', 'integer')
         c2 = Column('name', 'varchar2')
@@ -290,7 +290,7 @@ CREATE INDEX ON "products" ("id", "name");
         self.assertEqual(i2.table, t)
         self.assertEqual(t.indexes, [i1, i2])
 
-    def test_add_bad_index(self):
+    def test_add_bad_index(self) -> None:
         t = Table('products')
         c = Column('id', 'integer')
         i = Index(['id', 'name'])
@@ -300,7 +300,7 @@ CREATE INDEX ON "products" ("id", "name");
 
 
 class TestEnum(TestCase):
-    def test_simple_enum(self):
+    def test_simple_enum(self) -> None:
         items = [
             EnumItem('created'),
             EnumItem('running'),
@@ -317,7 +317,7 @@ class TestEnum(TestCase):
 );'''
         self.assertEqual(e.sql, expected)
 
-    def test_notes(self):
+    def test_notes(self) -> None:
         n = Note('EnumItem note')
         items = [
             EnumItem('created', note=n),
