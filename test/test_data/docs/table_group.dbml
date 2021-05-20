@@ -1,0 +1,37 @@
+Table table1 {
+    id integer
+    status int
+}
+
+Table table2 {
+    id integer
+    status int
+}
+
+Table table3 {
+    id integer
+    status int
+}
+
+Table merchants {
+    id integer
+    status int
+}
+
+Table countries {
+    id integer
+    status int
+}
+
+
+TableGroup tablegroup_name { // tablegroup is case-insensitive.
+    table1 
+    table2 
+    table3
+}
+
+//example
+TableGroup e_commerce1 {
+    merchants
+    countries
+} 

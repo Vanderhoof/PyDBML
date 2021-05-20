@@ -1,0 +1,10 @@
+Table users {
+  id int [pk]
+  name varchar
+
+  Note: 'This is a note of this table'
+  // or
+  Note {
+    'This is a note of this table'
+  }
+}

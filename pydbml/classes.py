@@ -677,9 +677,15 @@ class EnumType(Enum):
 
 
 class TableGroup:
+    '''
+    TableGroup `items` parameter initially holds just the names of the tables,
+    but after parsing the whole document, PyDBMLParseResults class replaces
+    them with references to actual tables.
+    '''
+
     def __init__(self,
                  name: str,
-                 items: List[str],
+                 items: Union[List[str], List[Table]],
                  comment: Optional[str] = None):
         self.name = name
         self.items = items

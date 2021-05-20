@@ -1,0 +1,12 @@
+enum job_status {
+    created [note: 'Waiting to be processed']
+    running
+    done
+    failure
+}
+
+Table jobs {
+    id integer
+    status job_status
+}
+

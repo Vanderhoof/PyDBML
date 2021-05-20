@@ -101,6 +101,7 @@ class PyDBMLParseResults:
         self._syntax.parseString(self.source, parseAll=True)
         self._validate()
         self._process_refs()
+        self._process_table_groups()
         self._set_enum_types()
 
     def __repr__(self):
@@ -206,8 +207,8 @@ class PyDBMLParseResults:
                     col2,
                     name=ref_.name,
                     comment=ref_.comment,
-                    on_update=ref_.on_delete,
-                    on_delete=ref_.on_update
+                    on_update=ref_.on_update,
+                    on_delete=ref_.on_delete
                 )
             )
 
@@ -253,6 +254,13 @@ class PyDBMLParseResults:
             for table_name in tg:
                 if table_name not in self.table_dict:
                     raise TableNotFoundError(f'Cannot add Table Group "{tg.name}": table "{table_name}" not found.')
+
+    def _process_table_groups(self):
+        '''
+        Fill up each TableGroup's `item` attribute with references to actual tables.
+        '''
+        for tg in self.table_groups:
+            tg.items = [self[i] for i in tg.items]
 
     @property
     def sql(self):

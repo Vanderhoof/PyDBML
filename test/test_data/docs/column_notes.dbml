@@ -1,0 +1,13 @@
+Table users {
+  id int [pk]
+  name varchar
+  column_name column_type [note: 'replace text here']
+  status varchar [
+  note: '''
+  💸 1 = processing, 
+  ✔️ 2 = shipped, 
+  ❌ 3 = cancelled,
+  😔 4 = refunded
+  ''']
+  Note: 'Stores user data'
+}

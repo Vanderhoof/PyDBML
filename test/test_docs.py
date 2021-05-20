@@ -181,3 +181,64 @@ class TestDocs(TestCase):
                 merchants['country_code'],
             ]
         )
+
+    def test_relationship_settings(self) -> None:
+        results = PyDBML.parse_file(TEST_DOCS_PATH / 'relationship_settings.dbml')
+        merchant_periods, merchants = results.tables
+
+        rf = results.refs
+
+        self.assertEqual(len(rf), 1)
+
+        self.assertEqual(rf[0].table1, merchant_periods)
+        self.assertEqual(rf[0].table2, merchants)
+        self.assertEqual(rf[0].type, '>')
+        self.assertEqual(rf[0].on_delete, 'cascade')
+        self.assertEqual(rf[0].on_update, 'no action')
+
+    def test_note_definition(self) -> None:
+        results = PyDBML.parse_file(TEST_DOCS_PATH / 'note_definition.dbml')
+        self.assertEqual(len(results.tables), 1)
+        users = results['users']
+        self.assertEqual(users.note.text, 'This is a note of this table')
+
+    def test_project_notes(self) -> None:
+        results = PyDBML.parse_file(TEST_DOCS_PATH / 'project_notes.dbml')
+        project = results.project
+
+        self.assertEqual(project.name, 'DBML')
+        self.assertTrue(project.note.text.startswith('\n    # DBML - Database Markup Language\n    DBML'))
+
+    def test_column_notes(self) -> None:
+        results = PyDBML.parse_file(TEST_DOCS_PATH / 'column_notes.dbml')
+        users = results['users']
+
+        self.assertEqual(users.note.text, 'Stores user data')
+        self.assertEqual(users['column_name'].note.text, 'replace text here')
+        self.assertTrue('shipped' in users['status'].note.text)
+
+    def test_enum_definition(self) -> None:
+        results = PyDBML.parse_file(TEST_DOCS_PATH / 'enum_definition.dbml')
+        jobs = results['jobs']
+        jobs['status'].type == 'job_status'
+
+        self.assertEqual(len(results.enums), 1)
+        js = results.enums[0]
+
+        self.assertEqual(js.name, 'job_status')
+        self.assertEqual([ei.name for ei in js.items], ['created', 'running', 'done', 'failure'])
+
+    def test_table_group(self) -> None:
+        results = PyDBML.parse_file(TEST_DOCS_PATH / 'table_group.dbml')
+
+        self.assertEqual(len(results.tables), 5)
+        self.assertEqual(len(results.table_groups), 2)
+
+        tb1, tb2, tb3, merchants, countries = results.tables
+
+        tg1, tg2 = results.table_groups
+
+        self.assertEqual(tg1.name, 'tablegroup_name')
+        self.assertEqual(tg1.items, [tb1, tb2, tb3])
+        self.assertEqual(tg2.name, 'e_commerce1')
+        self.assertEqual(tg2.items, [merchants, countries])

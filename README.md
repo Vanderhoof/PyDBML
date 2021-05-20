@@ -273,3 +273,23 @@ Attributes of the `Project` object:
 * **items** (str) — dictionary with project items,
 * **note** (`Note`) — note, if was defined,
 * **comment** (str) — comment, if was added before project definition.
+
+## TableGroup class
+
+After running parser the project info is stored in the `project` attribute of the `PyDBMLParseResults` object.
+
+```python
+>>> from pydbml import PyDBML
+>>> parsed = PyDBML.parse_file('test_schema.dbml')
+>>> parsed.table_groups
+[TableGroup('g1', [Table('users', [Column('id', 'int', pk=True), Column('full_name', 'varchar'), Column('email', 'varchar', unique=True), Column('gender', 'varchar'), Column('date_of_birth', 'varchar'), Column('created_at', 'varchar'), Column('country_code', 'int')]), Table('merchants', [Column('id', 'int', pk=True), Column('merchant_name', 'varchar'), Column('country_code', 'int'), Column('created_at', 'varchar'), Column('admin_id', 'int')])]), TableGroup('g2', [Table('countries', [Column('code', 'int', pk=True), Column('name', 'varchar'), Column('continent_name', 'varchar')]), Table('orders', [Column('id', 'int', pk=True, autoinc=True), Column('user_id', 'int', unique=True, not_null=True), Column('status', EnumType('orders_status', [EnumItem('created'), EnumItem('running'), EnumItem('done'), EnumItem('failure')])), Column('created_at', 'varchar')], header_color='#fff')])]
+
+```
+
+Attributes of the `TableGroup` object:
+
+* **name** (str) — table group name,
+* **items** (str) — dictionary with tables in the group,
+* **comment** (str) — comment, if was added before table group definition.
+
+> TableGroup `items` parameter initially holds just the names of the tables, but after parsing the whole document, `PyDBMLParseResults` class replaces them with references to actual tables.
