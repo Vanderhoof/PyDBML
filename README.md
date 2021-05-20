@@ -2,6 +2,8 @@
 
 # DBML parser for Python
 
+*Compliant with DBML **v2.3.0** syntax*
+
 PyDBML is a Python parser for [DBML](https://www.dbml.org) syntax.
 
 ## Installation
@@ -9,7 +11,7 @@ PyDBML is a Python parser for [DBML](https://www.dbml.org) syntax.
 You can install PyDBML using pip:
 
 ```bash
-pip install pydbml
+pip3 install pydbml
 ```
 
 ## Quick start
