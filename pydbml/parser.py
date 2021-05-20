@@ -181,14 +181,22 @@ class PyDBMLParseResults:
             else:
                 raise TableNotFoundError('Error while parsing reference:'
                                          f'table "{ref_.table2}"" is not defined.')
-            col1 = table1.get(ref_.col1)
-            if not col1:
-                raise ColumnNotFoundError('Error while parsing reference:'
-                                          f'column "{ref_.col1} not defined in table "{table1.name}".')
-            col2 = table2.get(ref_.col2)
-            if not col2:
-                raise ColumnNotFoundError('Error while parsing reference:'
-                                          f'column "{ref_.col2} not defined in table "{table2.name}".')
+            col1_names = [c.strip('() ') for c in ref_.col1.split(',')]
+            col1 = []
+            for col_name in col1_names:
+                try:
+                    col1.append(table1[col_name])
+                except KeyError:
+                    raise ColumnNotFoundError('Error while parsing reference:'
+                                              f'column "{col_name} not defined in table "{table1.name}".')
+            col2_names = [c.strip('() ') for c in ref_.col2.split(',')]
+            col2 = []
+            for col_name in col2_names:
+                try:
+                    col2.append(table2[col_name])
+                except KeyError:
+                    raise ColumnNotFoundError('Error while parsing reference:'
+                                              f'column "{col_name} not defined in table "{table2.name}".')
             self.refs.append(
                 Reference(
                     ref_.type,

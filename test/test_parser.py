@@ -18,33 +18,33 @@ class TestParser(TestCase):
     def test_table_refs(self) -> None:
         p = PyDBML.parse_file(TEST_DATA_PATH / 'general.dbml')
         r = p['order_items'].refs
-        self.assertEqual(r[0].col.name, 'order_id')
+        self.assertEqual(r[0].col[0].name, 'order_id')
         self.assertEqual(r[0].ref_table.name, 'orders')
-        self.assertEqual(r[0].ref_col.name, 'id')
+        self.assertEqual(r[0].ref_col[0].name, 'id')
         r = p['products'].refs
-        self.assertEqual(r[0].col.name, 'merchant_id')
+        self.assertEqual(r[0].col[0].name, 'merchant_id')
         self.assertEqual(r[0].ref_table.name, 'merchants')
-        self.assertEqual(r[0].ref_col.name, 'id')
+        self.assertEqual(r[0].ref_col[0].name, 'id')
         r = p['users'].refs
-        self.assertEqual(r[0].col.name, 'country_code')
+        self.assertEqual(r[0].col[0].name, 'country_code')
         self.assertEqual(r[0].ref_table.name, 'countries')
-        self.assertEqual(r[0].ref_col.name, 'code')
+        self.assertEqual(r[0].ref_col[0].name, 'code')
 
     def test_refs(self) -> None:
         p = PyDBML.parse_file(TEST_DATA_PATH / 'general.dbml')
         r = p.refs
         self.assertEqual(r[0].table1.name, 'orders')
-        self.assertEqual(r[0].col1.name, 'id')
+        self.assertEqual(r[0].col1[0].name, 'id')
         self.assertEqual(r[0].table2.name, 'order_items')
-        self.assertEqual(r[0].col2.name, 'order_id')
+        self.assertEqual(r[0].col2[0].name, 'order_id')
         self.assertEqual(r[2].table1.name, 'users')
-        self.assertEqual(r[2].col1.name, 'country_code')
+        self.assertEqual(r[2].col1[0].name, 'country_code')
         self.assertEqual(r[2].table2.name, 'countries')
-        self.assertEqual(r[2].col2.name, 'code')
+        self.assertEqual(r[2].col2[0].name, 'code')
         self.assertEqual(r[4].table1.name, 'products')
-        self.assertEqual(r[4].col1.name, 'merchant_id')
+        self.assertEqual(r[4].col1[0].name, 'merchant_id')
         self.assertEqual(r[4].table2.name, 'merchants')
-        self.assertEqual(r[4].col2.name, 'id')
+        self.assertEqual(r[4].col2[0].name, 'id')
 
 
 class TestRefs(TestCase):

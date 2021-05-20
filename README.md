@@ -171,7 +171,7 @@ After running parser all references from the schema are stored in `refs` attribu
 >>> parsed = PyDBML.parse_file('test_schema.dbml')
 >>> ref = parsed.refs[0]
 >>> print(ref)
-Reference(orders.id < order_items.order_id)
+Reference(orders[id] < order_items[order_id])
 
 ```
 
@@ -182,9 +182,9 @@ Important attributes of the `Reference` object are:
   * `>` — many to one;
   * `-` — one to one.
 * **table1** (`Table`) — link to the first table of the reference.
-* **col1** (`Column`) — link to the first column of the reference.
+* **col1** (list[`Column`]) — list of Column objects of the first table of the reference.
 * **table2** (`Table`) — link to the second table of the reference.
-* **col2** (`Column`) — link to the second column of the reference.
+* **col2** (list[`Column`]) — list of Column objects of the second table of the reference.
 * **name** (str) — reference name, if defined.
 * **on_update** (str) — reference's on update setting, if defined.
 * **on_delete** (str) — reference's on delete setting, if defined.
@@ -199,15 +199,15 @@ Apart from `Reference` objects, parser also creates `TableReference` objects, wh
 >>> parsed = PyDBML.parse_file('test_schema.dbml')
 >>> order_items_refs = parsed.tables[1].refs
 >>> print(order_items_refs[0])
-TableReference(order_id -> orders.id)
+TableReference(order_id -> orders[id])
 
 ```
 
 Important attributes of the `TableReference` object are:
 
-* **col** (`Column`) — link to the column of the reference.
+* **col** (list[`Column`]) — list of Column objects, which are referenced in this table.
 * **ref_table** (`Table`) — link to the second table of the reference.
-* **ref_col** (`Column`) — link to the second column of the reference.
+* **ref_col** (list[`Column`]) — list of Column objects, which are referenced by this table.
 * **name** (str) — reference name, if defined.
 * **on_update** (str) — reference's on update setting, if defined.
 * **on_delete** (str) — reference's on delete setting, if defined.

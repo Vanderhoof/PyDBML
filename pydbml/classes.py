@@ -123,18 +123,18 @@ class Reference(SQLOjbect):
     def __init__(self,
                  type_: str,
                  table1: Table,
-                 col1: Column,
+                 col1: Union[Column, List[Column]],
                  table2: Table,
-                 col2: Column,
+                 col2: Union[Column, List[Column]],
                  name: Optional[str] = None,
                  comment: Optional[str] = None,
                  on_update: Optional[str] = None,
                  on_delete: Optional[str] = None):
         self.type = type_
         self.table1 = table1
-        self.col1 = col1
+        self.col1 = [col1] if isinstance(col1, Column) else list(col1)
         self.table2 = table2
-        self.col2 = col2
+        self.col2 = [col2] if isinstance(col2, Column) else list(col2)
         self.name = name if name else None
         self.comment = comment
         self.on_update = on_update
@@ -161,12 +161,12 @@ class Reference(SQLOjbect):
         if self.table1:
             components.append(self.table1.name)
         if self.col1:
-            components.append(f'.{self.col1.name}')
+            components.append(f'[{", ".join(c.name for c in self.col1)}]')
         components.append(f' {self.type} ')
         if self.table2:
             components.append(self.table2.name)
         if self.col2:
-            components.append(f'.{self.col2.name}')
+            components.append(f'[{", ".join(c.name for c in self.col2)}]')
         return ''.join(components) + ')'
 
     @property
@@ -182,14 +182,14 @@ class Reference(SQLOjbect):
 
         if self.type in (self.MANY_TO_ONE, self.ONE_TO_ONE):
             t1 = self.table1
-            c1 = self.col1
+            c1 = ', '.join(self.col1)
             t2 = self.table2
-            c2 = self.col2
+            c2 = ', '.join(self.col2)
         else:
             t1 = self.table2
-            c1 = self.col2
+            c1 = ', '.join(self.col2)
             t2 = self.table1
-            c2 = self.col1
+            c2 = ', '.join(self.col1)
 
         result = (
             f'ALTER TABLE "{t1.name}" ADD {c}FOREIGN KEY ("{c1.name}") '
@@ -211,15 +211,15 @@ class TableReference(SQLOjbect):
     required_attributes = ('col', 'ref_table', 'ref_col')
 
     def __init__(self,
-                 col: Column,
+                 col: Union[Column, List[Column]],
                  ref_table: Table,
-                 ref_col: Column,
+                 ref_col: Union[Column, List[Column]],
                  name: Optional[str] = None,
                  on_delete: Optional[str] = None,
                  on_update: Optional[str] = None):
-        self.col = col
+        self.col = [col] if isinstance(col, Column) else list(col)
         self.ref_table = ref_table
-        self.ref_col = ref_col
+        self.ref_col = [ref_col] if isinstance(ref_col, Column) else list(ref_col)
         self.name = name
         self.on_update = on_update
         self.on_delete = on_delete
@@ -235,7 +235,9 @@ class TableReference(SQLOjbect):
         return ', '.join(components) + ')'
 
     def __str__(self):
-        return f"TableReference({self.col.name} -> {self.ref_table.name}.{self.ref_col.name})"
+        cols = '", "'.join(c.name for c in self.col)
+        ref_cols = '", "'.join(c.name for c in self.ref_col)
+        return f"TableReference({cols} -> {self.ref_table.name}[{ref_cols}])"
 
     @property
     def sql(self):
@@ -247,9 +249,11 @@ class TableReference(SQLOjbect):
         '''
         self.check_attributes_for_sql()
         c = f'CONSTRAINT "{self.name}" ' if self.name else ''
+        cols = '", "'.join(c.name for c in self.col)
+        ref_cols = '", "'.join(c.name for c in self.ref_col)
         result = (
-            f'{c}FOREIGN KEY ("{self.col.name}") '
-            f'REFERENCES "{self.ref_table.name} ("{self.ref_col.name}")'
+            f'{c}FOREIGN KEY ("{cols}") '
+            f'REFERENCES "{self.ref_table.name} ("{ref_cols}")'
         )
         if self.on_update:
             result += f' ON UPDATE {self.on_update.upper()}'
