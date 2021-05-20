@@ -34,6 +34,16 @@ class SQLOjbect:
         """
         super().__setattr__(name, value)
 
+    def __eq__(self, other: SQLOjbect) -> bool:
+        """
+        Two instances of the same SQLObject subclass are equal if all their
+        attributes are equal.
+        """
+
+        if self.__class__ == other.__class__:
+            return self.__dict__ == other.__dict__
+        return False
+
 
 class ReferenceBlueprint:
     '''

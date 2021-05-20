@@ -2,6 +2,7 @@
 
 - New: Support references by aliases
 - New: Support indexes with expressions
+- New: You can now compare SQLObjects of same class
 - Fix: minor bug fixes.
 
 # 0.3.4

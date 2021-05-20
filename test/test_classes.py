@@ -28,6 +28,19 @@ class TestDBMLObject(TestCase):
         o.b1 = 'a2'
         o.check_attributes_for_sql()
 
+    def test_comparison(self) -> None:
+        o1 = SQLOjbect()
+        o1.a1 = None
+        o1.b1 = 'c'
+        o1.c1 = 123
+        o2 = SQLOjbect()
+        o2.a1 = None
+        o2.b1 = 'c'
+        o2.c1 = 123
+        self.assertTrue(o1 == o2)
+        o1.a2 = True
+        self.assertFalse(o1 == o2)
+
 
 # class TestReferenceBlueprint(TestCase):
 #     def test_basic_sql(self) -> None:
