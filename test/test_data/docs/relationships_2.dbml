@@ -1,0 +1,16 @@
+Table posts {
+    id integer [primary key]
+    user_id integer
+}
+
+Table reviews {
+    id integer [primary key]
+    user_id integer
+}
+
+// or this
+Table users {
+    id integer [ref: < posts.user_id, ref: < reviews.user_id] // one to many
+}
+
+// The space after '<' is optional

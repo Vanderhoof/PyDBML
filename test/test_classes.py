@@ -11,6 +11,7 @@ from pydbml.classes import Table
 from pydbml.classes import TableReference
 from pydbml.exceptions import AttributeMissingError
 from pydbml.exceptions import ColumnNotFoundError
+from pydbml.exceptions import DuplicateReferenceError
 
 
 class TestDBMLObject(TestCase):
@@ -239,7 +240,7 @@ class TestTable(TestCase):
         c21 = Column('name_val', 'varchar2')
         t2.add_column(c21)
         r = TableReference(c2, t2, c21)
-        t.refs.append(r)
+        t.add_ref(r)
         expected = \
 '''CREATE TABLE "products" (
   "id" integer,
@@ -248,6 +249,22 @@ class TestTable(TestCase):
 );
 '''
         self.assertEqual(t.sql, expected)
+
+    def test_duplicate_ref(self) -> None:
+        t = Table('products')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        t2.add_column(c21)
+        r1 = TableReference(c2, t2, c21)
+        t.add_ref(r1)
+        r2 = TableReference(c2, t2, c21)
+        self.assertEqual(r1, r2)
+        with self.assertRaises(DuplicateReferenceError):
+            t.add_ref(r2)
 
     def test_note(self) -> None:
         n = Note('Table note')
@@ -267,7 +284,7 @@ class TestTable(TestCase):
         c21 = Column('name_val', 'varchar2')
         t2.add_column(c21)
         r = TableReference(c2, t2, c21)
-        t.refs.append(r)
+        t.add_ref(r)
         i = Index(['id', 'name'])
         t.add_index(i)
         expected = \

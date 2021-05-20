@@ -1,0 +1,31 @@
+Table posts as po {
+    id integer [primary key]
+    user_id integer
+}
+
+Table reviews as re {
+    id integer [primary key]
+    user_id integer
+}
+
+// or this
+Table users as us {
+    id integer [ref: < po.user_id, ref: < re.user_id] // one to many
+}
+
+// The space after '<' is optional
+
+Table posts2 as po2 {
+    id integer [primary key]
+    user_id integer [ref: > us2.id] // many-to-one
+}
+
+Table reviews2 as re2 {
+    id integer [primary key]
+    user_id integer [ref: > users2.id] // many-to-one
+}
+
+// or this
+Table users2 as us2 {
+    id integer
+}

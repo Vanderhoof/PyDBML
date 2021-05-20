@@ -9,6 +9,7 @@ from typing import Union
 
 from .exceptions import AttributeMissingError
 from .exceptions import ColumnNotFoundError
+from .exceptions import DuplicateReferenceError
 
 
 class SQLOjbect:
@@ -34,7 +35,7 @@ class SQLOjbect:
         """
         super().__setattr__(name, value)
 
-    def __eq__(self, other: SQLOjbect) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Two instances of the same SQLObject subclass are equal if all their
         attributes are equal.
@@ -487,7 +488,7 @@ class Table(SQLOjbect):
         self.refs = refs or []
         self.comment = comment
 
-    def add_column(self, c: Column):
+    def add_column(self, c: Column) -> None:
         '''
         Adds column to self.columns attribute and sets in this column the
         `table` attribute.
@@ -496,7 +497,7 @@ class Table(SQLOjbect):
         self.columns.append(c)
         self.column_dict[c.name] = c
 
-    def add_index(self, i: Index):
+    def add_index(self, i: Index) -> None:
         '''
         Adds index to self.indexes attribute and sets in this index the
         `table` attribute.
@@ -514,6 +515,15 @@ class Table(SQLOjbect):
 
         i.table = self
         self.indexes.append(i)
+
+    def add_ref(self, r: TableReference) -> None:
+        '''
+        Adds a reference to the table. If reference already present in the table,
+        raises DuplicateReferenceError.
+        '''
+        if r in self.refs:
+            raise DuplicateReferenceError(f'Reference with same endpoints {r} already present in the table.')
+        self.refs.append(r)
 
     def __getitem__(self, k: Union[int, str]) -> Column:
         if isinstance(k, int):

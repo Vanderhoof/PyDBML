@@ -11,7 +11,7 @@ from pydbml.exceptions import TableNotFoundError
 TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'
 
 
-class TestRefs(TestCase):
+class TestParser(TestCase):
     def setUp(self):
         self.results = PyDBML.parse_file(TEST_DATA_PATH / 'general.dbml')
 
@@ -45,6 +45,24 @@ class TestRefs(TestCase):
         self.assertEqual(r[4].col1.name, 'merchant_id')
         self.assertEqual(r[4].table2.name, 'merchants')
         self.assertEqual(r[4].col2.name, 'id')
+
+
+class TestRefs(TestCase):
+    def test_reference_aliases(self):
+        results = PyDBML.parse_file(TEST_DATA_PATH / 'relationships_aliases.dbml')
+        posts, reviews, users = results['posts'], results['reviews'], results['users']
+        posts2, reviews2, users2 = results['posts2'], results['reviews2'], results['users2']
+
+        rs = results.refs
+        self.assertEqual(rs[0].table1, users)
+        self.assertEqual(rs[0].table2, posts)
+        self.assertEqual(rs[1].table1, users)
+        self.assertEqual(rs[1].table2, reviews)
+
+        self.assertEqual(rs[2].table1, posts2)
+        self.assertEqual(rs[2].table2, users2)
+        self.assertEqual(rs[3].table1, reviews2)
+        self.assertEqual(rs[3].table2, users2)
 
 
 class TestFaulty(TestCase):

@@ -1,8 +1,9 @@
 # 0.3.5
 
-- New: Support references by aliases
-- New: Support indexes with expressions
-- New: You can now compare SQLObjects of same class
+- New: Support references by aliases.
+- New: Support indexes with expressions.
+- New: You can now compare SQLObjects of same class.
+- New: Add check for duplicate references on a table.
 - Fix: minor bug fixes.
 
 # 0.3.4

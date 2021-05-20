@@ -223,7 +223,7 @@ class PyDBMLParseResults:
                     'on_update': ref_.on_update,
                     'on_delete': ref_.on_delete
                 }
-            table.refs.append(
+            table.add_ref(
                 TableReference(**init_dict)
             )
 

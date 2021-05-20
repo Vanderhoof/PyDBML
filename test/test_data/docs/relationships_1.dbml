@@ -5,12 +5,10 @@ Table posts {
 
 Table reviews {
     id integer [primary key]
-    user_id integer [ref: - users.id] // one-to-one
+    user_id integer [ref: > users.id] // many-to-one
 }
 
 // or this
 Table users {
-    id integer [ref: < posts.user_id, ref: < reviews.user_id] // one to many
+    id integer
 }
-
-// The space after '<' is optional

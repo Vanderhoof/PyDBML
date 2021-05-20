@@ -8,3 +8,7 @@ class ColumnNotFoundError(Exception):
 
 class AttributeMissingError(Exception):
     pass
+
+
+class DuplicateReferenceError(Exception):
+    pass

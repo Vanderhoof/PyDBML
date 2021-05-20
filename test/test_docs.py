@@ -141,12 +141,4 @@ class TestDocs(TestCase):
 
         self.assertEqual(rf[1].table1, reviews)
         self.assertEqual(rf[1].table2, users)
-        self.assertEqual(rf[1].type, '-')
-
-        self.assertEqual(rf[2].table1, users)
-        self.assertEqual(rf[2].table2, posts)
-        self.assertEqual(rf[2].type, '<')
-
-        self.assertEqual(rf[3].table1, users)
-        self.assertEqual(rf[3].table2, reviews)
-        self.assertEqual(rf[3].type, '<')
+        self.assertEqual(rf[1].type, '>')
