@@ -129,7 +129,7 @@ class TestDocs(TestCase):
 
         self.assertEqual(ix[7].subjects, ['(id*3)', table['id']])
 
-    def test_relationships_1(self) -> None:
+    def test_relationships(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'relationships_1.dbml')
         posts, reviews, users = results.tables
 
@@ -142,3 +142,42 @@ class TestDocs(TestCase):
         self.assertEqual(rf[1].table1, reviews)
         self.assertEqual(rf[1].table2, users)
         self.assertEqual(rf[1].type, '>')
+
+        results = PyDBML.parse_file(TEST_DOCS_PATH / 'relationships_2.dbml')
+        posts, reviews, users = results.tables
+
+        rf = results.refs
+
+        self.assertEqual(rf[0].table1, users)
+        self.assertEqual(rf[0].table2, posts)
+        self.assertEqual(rf[0].type, '<')
+
+        self.assertEqual(rf[1].table1, users)
+        self.assertEqual(rf[1].table2, reviews)
+        self.assertEqual(rf[1].type, '<')
+
+    def test_relationships_composite(self) -> None:
+        results = PyDBML.parse_file(TEST_DOCS_PATH / 'relationships_composite.dbml')
+        merchant_periods, merchants = results.tables
+
+        rf = results.refs
+
+        self.assertEqual(len(rf), 1)
+
+        self.assertEqual(rf[0].table1, merchant_periods)
+        self.assertEqual(rf[0].table2, merchants)
+        self.assertEqual(rf[0].type, '>')
+        self.assertEqual(
+            rf[0].col1,
+            [
+                merchant_periods['merchant_id'],
+                merchant_periods['country_code'],
+            ]
+        )
+        self.assertEqual(
+            rf[0].col2,
+            [
+                merchants['id'],
+                merchants['country_code'],
+            ]
+        )

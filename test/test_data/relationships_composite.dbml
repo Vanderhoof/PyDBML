@@ -1,0 +1,36 @@
+Table posts as po {
+    id integer [primary key]
+    user_id integer
+    post text
+    tag char
+}
+
+Table reviews as re {
+    id integer [primary key]
+    user_id integer
+    review text
+    post_id integer
+    tag char
+}
+
+
+Table posts2 as po2 {
+    id integer [primary key]
+    user_id integer
+    post text
+    tag char
+}
+
+Table reviews2 as re2 {
+    id integer [primary key]
+    user_id integer
+    review text
+    post_id integer
+    tag char
+}
+
+ref refname: posts.(id, tag) > re.(post_id,tag)
+
+Ref refname2 {
+    po2.(id    ,  tag) > reviews2.(post_id , tag)
+}

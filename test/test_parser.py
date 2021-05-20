@@ -64,6 +64,25 @@ class TestRefs(TestCase):
         self.assertEqual(rs[3].table1, reviews2)
         self.assertEqual(rs[3].table2, users2)
 
+    def test_composite_references(self):
+        results = PyDBML.parse_file(TEST_DATA_PATH / 'relationships_composite.dbml')
+        self.assertEqual(len(results.tables), 4)
+        posts, reviews = results['posts'], results['reviews']
+        posts2, reviews2 = results['posts2'], results['reviews2']
+
+        rs = results.refs
+        self.assertEqual(len(rs), 2)
+
+        self.assertEqual(rs[0].table1, posts)
+        self.assertEqual(rs[0].col1, [posts['id'], posts['tag']])
+        self.assertEqual(rs[0].table2, reviews)
+        self.assertEqual(rs[0].col2, [reviews['post_id'], reviews['tag']])
+
+        self.assertEqual(rs[1].table1, posts2)
+        self.assertEqual(rs[1].col1, [posts2['id'], posts2['tag']])
+        self.assertEqual(rs[1].table2, reviews2)
+        self.assertEqual(rs[1].col2, [reviews2['post_id'], reviews2['tag']])
+
 
 class TestFaulty(TestCase):
     def test_bad_reference(self) -> None:

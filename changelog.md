@@ -1,3 +1,7 @@
+# 0.4.0
+
+- New: Support composite references. **Breaks backward compatibility!** `col1`, `col2` attributes on `Reference` and `col`, `ref_col` attributes on `TableReference` are now lists of `Column` instead of `Column`.
+
 # 0.3.5
 
 - New: Support references by aliases.

@@ -100,6 +100,16 @@ class TestRefShort(TestCase):
         self.assertEqual(res[0].col2, 'col2')
         self.assertEqual(res[0].name, 'name')
 
+    def test_composite_with_name(self) -> None:
+        val = 'ref name: table1.(col1 ,  col2,col3) > table2.(col11 ,  col21,col31)'
+        res = ref_short.parseString(val, parseAll=True)
+        self.assertEqual(res[0].type, '>')
+        self.assertEqual(res[0].table1, 'table1')
+        self.assertEqual(res[0].col1, '(col1 ,  col2,col3)')
+        self.assertEqual(res[0].table2, 'table2')
+        self.assertEqual(res[0].col2, '(col11 ,  col21,col31)')
+        self.assertEqual(res[0].name, 'name')
+
     def test_with_settings(self) -> None:
         val = 'ref name: table1.col1 > table2.col2 [update: cascade, delete: restrict]'
         res = ref_short.parseString(val, parseAll=True)

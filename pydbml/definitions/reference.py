@@ -64,16 +64,29 @@ def parse_ref_settings(s, l, t):
 
 ref_settings.setParseAction(parse_ref_settings)
 
+composite_name = (
+    '(' + pp.White()[...]
+    - name + pp.White()[...]
+    + (
+        pp.White()[...] + ","
+        + pp.White()[...] + name
+        + pp.White()[...]
+    )[...]
+    + ')'
+)
+name_or_composite = name | pp.Combine(composite_name)
+
 ref_body = (
     name('table1')
     - '.'
-    - name('field1')
+    - name_or_composite('field1')
     - relation('type')
     - name('table2')
     - '.'
-    - name('field2') + c
+    - name_or_composite('field2') + c
     + ref_settings('settings')[0, 1]
 )
+
 
 ref_short = _c + pp.CaselessLiteral('ref') + name('name')[0, 1] + ':' - ref_body
 ref_long = _c + (
