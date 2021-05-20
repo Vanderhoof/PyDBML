@@ -41,7 +41,7 @@ class SQLOjbect:
         attributes are equal.
         """
 
-        if self.__class__ == other.__class__:
+        if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
         return False
 
