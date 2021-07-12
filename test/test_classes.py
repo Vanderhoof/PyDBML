@@ -448,6 +448,10 @@ CREATE INDEX ON "products" ("id", "name");
         t.add_column(c0)
         t.add_column(c1)
         t.add_column(c2)
+        i1 = Index(['zero', 'id'], unique=True)
+        i2 = Index(['(capitalize(name))'], comment="index comment")
+        t.add_index(i1)
+        t.add_index(i2)
         expected = \
 """// My multiline
 // comment
@@ -461,6 +465,12 @@ Table products as pd {
         My multiline
         note
         '''
+    }
+
+    indexes {
+        (zero, id) [unique]
+        // index comment
+        `capitalize(name)`
     }
 }"""
         self.assertEqual(t.dbml, expected)
