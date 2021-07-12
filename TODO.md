@@ -1,0 +1,3 @@
+- Notes should be converted to COMMENT ON
+- comments should be converted to comments
+- Docs for creating dbml schema in python
