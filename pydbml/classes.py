@@ -240,14 +240,16 @@ class Reference(SQLOjbect):
             result += f' {self.name}'
 
         if len(self.col1) == 1:
-            col1 = self.col1[0].name
+            col1 = f'"{self.col1[0].name}"'
         else:
-            col1 = f'({", ".join(c.name for c in self.col1)})'
+            names = (f'"{c.name}"' for c in self.col1)
+            col1 = f'({", ".join(names)})'
 
         if len(self.col2) == 1:
-            col2 = self.col2[0].name
+            col2 = f'"{self.col2[0].name}"'
         else:
-            col2 = f'({", ".join(c.name for c in self.col2)})'
+            names = (f'"{c.name}"' for c in self.col2)
+            col2 = f'({", ".join(names)})'
 
         options = []
         if self.on_update:
@@ -258,9 +260,9 @@ class Reference(SQLOjbect):
         options_str = f' [{", ".join(options)}]' if options else ''
         result += (
             ' {\n    '
-            f'{self.table1.name}.{col1} '
+            f'"{self.table1.name}".{col1} '
             f'{self.type} '
-            f'{self.table2.name}.{col2}'
+            f'"{self.table2.name}".{col2}'
             f'{options_str}'
             '\n}'
         )
@@ -491,7 +493,7 @@ class Column(SQLOjbect):
                 return val
 
         result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'{self.name} {self.type}'
+        result += f'"{self.name}" {self.type}'
 
         options = []
         if self.pk:
@@ -766,9 +768,9 @@ class Table(SQLOjbect):
     @property
     def dbml(self):
         result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'Table {self.name} '
+        result += f'Table "{self.name}" '
         if self.alias:
-            result += f'as {self.alias} '
+            result += f'as "{self.alias}" '
         result += '{\n'
         columns_str = '\n'.join(c.dbml for c in self.columns)
         result += indent(columns_str) + '\n'
@@ -821,7 +823,7 @@ class EnumItem:
     @property
     def dbml(self):
         result = comment_to_dbml(self.comment) if self.comment else ''
-        result += self.name
+        result += f'"{self.name}"'
         if self.note:
             result += f' [{note_option_to_dbml(self.note)}]'
         return result
@@ -891,7 +893,7 @@ class Enum(SQLOjbect):
     @property
     def dbml(self):
         result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'enum {self.name} {{\n'
+        result += f'Enum "{self.name}" {{\n'
         items_str = '\n'.join(i.dbml for i in self.items)
         result += indent(items_str)
         result += '\n}'
