@@ -174,7 +174,7 @@ class TestColumn(TestCase):
             name='order',
             type_='integer'
         )
-        expected = 'order integer'
+        expected = '"order" integer'
 
         self.assertEqual(c.dbml, expected)
 
@@ -192,7 +192,7 @@ class TestColumn(TestCase):
         )
         expected = \
 '''// Comment on the column
-order integer [pk, increment, default: 'Def_value', unique, not null, note: 'Note on the column']'''
+"order" integer [pk, increment, default: 'Def_value', unique, not null, note: 'Note on the column']'''
 
         self.assertEqual(c.dbml, expected)
 
@@ -206,7 +206,7 @@ order integer [pk, increment, default: 'Def_value', unique, not null, note: 'Not
         )
         expected = \
 """// Comment on the column
-order integer [not null, note: '''Note on the column
+"order" integer [not null, note: '''Note on the column
 multiline''']"""
 
         self.assertEqual(c.dbml, expected)
@@ -217,31 +217,31 @@ multiline''']"""
             type_='integer',
             default='String value'
         )
-        expected = "order integer [default: 'String value']"
+        expected = "\"order\" integer [default: 'String value']"
         self.assertEqual(c.dbml, expected)
 
         c.default = 3
-        expected = 'order integer [default: 3]'
+        expected = '"order" integer [default: 3]'
         self.assertEqual(c.dbml, expected)
 
         c.default = 3.33
-        expected = 'order integer [default: 3.33]'
+        expected = '"order" integer [default: 3.33]'
         self.assertEqual(c.dbml, expected)
 
         c.default = "(now() - interval '5 days')"
-        expected = "order integer [default: `now() - interval '5 days'`]"
+        expected = "\"order\" integer [default: `now() - interval '5 days'`]"
         self.assertEqual(c.dbml, expected)
 
         c.default = 'NULL'
-        expected = 'order integer [default: null]'
+        expected = '"order" integer [default: null]'
         self.assertEqual(c.dbml, expected)
 
         c.default = 'TRue'
-        expected = 'order integer [default: true]'
+        expected = '"order" integer [default: true]'
         self.assertEqual(c.dbml, expected)
 
         c.default = 'false'
-        expected = 'order integer [default: false]'
+        expected = '"order" integer [default: false]'
         self.assertEqual(c.dbml, expected)
 
 class TestIndex(TestCase):
@@ -461,9 +461,9 @@ CREATE INDEX ON "products" ("id", "name");
         t.add_column(c1)
         t.add_column(c2)
         expected = \
-'''Table products {
-    id integer
-    name varchar2
+'''Table "products" {
+    "id" integer
+    "name" varchar2
 }'''
         self.assertEqual(t.dbml, expected)
 
@@ -487,11 +487,11 @@ CREATE INDEX ON "products" ("id", "name");
         expected = \
 """// My multiline
 // comment
-Table products as pd {
-    zero number
-    id integer [unique, note: '''Multiline
+Table "products" as "pd" {
+    "zero" number
+    "id" integer [unique, note: '''Multiline
     comment note''']
-    name varchar2
+    "name" varchar2
     Note {
         '''
         My multiline
@@ -510,14 +510,14 @@ Table products as pd {
 class TestEnumItem(TestCase):
     def test_dbml_simple(self):
         ei = EnumItem('en-US')
-        expected = 'en-US'
+        expected = '"en-US"'
         self.assertEqual(ei.dbml, expected)
 
     def test_dbml_full(self):
         ei = EnumItem('en-US', note='preferred', comment='EnumItem comment')
         expected = \
 '''// EnumItem comment
-en-US [note: 'preferred']'''
+"en-US" [note: 'preferred']'''
         self.assertEqual(ei.dbml, expected)
 
 
@@ -561,10 +561,10 @@ class TestEnum(TestCase):
         items = [EnumItem('en-US'), EnumItem('ru-RU'), EnumItem('en-GB')]
         e = Enum('lang', items)
         expected = \
-'''enum lang {
-    en-US
-    ru-RU
-    en-GB
+'''Enum "lang" {
+    "en-US"
+    "ru-RU"
+    "en-GB"
 }'''
         self.assertEqual(e.dbml, expected)
 
@@ -576,12 +576,12 @@ class TestEnum(TestCase):
         e = Enum('lang', items, comment="Enum comment")
         expected = \
 '''// Enum comment
-enum lang {
-    en-US [note: 'preferred']
+Enum "lang" {
+    "en-US" [note: 'preferred']
     // Multiline
     // comment
-    ru-RU
-    en-GB
+    "ru-RU"
+    "en-GB"
 }'''
         self.assertEqual(e.dbml, expected)
 
@@ -600,7 +600,7 @@ class TestReference(TestCase):
 
         expected = \
 '''Ref {
-    products.name > names.name_val
+    "products"."name" > "names"."name_val"
 }'''
         self.assertEqual(ref.dbml, expected)
 
@@ -633,7 +633,7 @@ class TestReference(TestCase):
 '''// Reference comment
 // multiline
 Ref nameref {
-    products.(name, country) < names.(name_val, country) [update: CASCADE, delete: SET NULL]
+    "products".("name", "country") < "names".("name_val", "country") [update: CASCADE, delete: SET NULL]
 }'''
         self.assertEqual(ref.dbml, expected)
 
