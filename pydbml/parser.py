@@ -273,8 +273,8 @@ class PyDBMLParseResults:
     def dbml(self):
         '''Generates DBML code out of parsed results'''
         items = [self.project] if self.project else []
-        items.update((*self.tables, *self.refs, *self.enums, *self.table_groups))
+        items.extend((*self.tables, *self.refs, *self.enums, *self.table_groups))
         components = (
-            i.dbml for i in ()
+            i.dbml for i in items
         )
         return '\n\n'.join(components)
