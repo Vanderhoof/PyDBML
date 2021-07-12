@@ -211,6 +211,38 @@ multiline''']"""
 
         self.assertEqual(c.dbml, expected)
 
+    def test_dbml_default(self):
+        c = Column(
+            name='order',
+            type_='integer',
+            default='String value'
+        )
+        expected = "order integer [default: 'String value']"
+        self.assertEqual(c.dbml, expected)
+
+        c.default = 3
+        expected = 'order integer [default: 3]'
+        self.assertEqual(c.dbml, expected)
+
+        c.default = 3.33
+        expected = 'order integer [default: 3.33]'
+        self.assertEqual(c.dbml, expected)
+
+        c.default = "(now() - interval '5 days')"
+        expected = "order integer [default: `now() - interval '5 days'`]"
+        self.assertEqual(c.dbml, expected)
+
+        c.default = 'NULL'
+        expected = 'order integer [default: null]'
+        self.assertEqual(c.dbml, expected)
+
+        c.default = 'TRue'
+        expected = 'order integer [default: true]'
+        self.assertEqual(c.dbml, expected)
+
+        c.default = 'false'
+        expected = 'order integer [default: false]'
+        self.assertEqual(c.dbml, expected)
 
 class TestIndex(TestCase):
     def test_basic_sql(self) -> None:
