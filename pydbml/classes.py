@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import Collection
 from typing import Dict
 from typing import List
-from typing import Collection
 from typing import Optional
 from typing import Tuple
 from typing import Union
@@ -11,6 +11,10 @@ from typing import Union
 from .exceptions import AttributeMissingError
 from .exceptions import ColumnNotFoundError
 from .exceptions import DuplicateReferenceError
+from .tools import comment_to_dbml
+from .tools import indent
+from .tools import note_option_to_dbml
+
 
 
 class SQLOjbect:
@@ -228,6 +232,40 @@ class Reference(SQLOjbect):
             result += f' ON DELETE {self.on_delete.upper()}'
         return result + ';'
 
+    @property
+    def dbml(self):
+        result = comment_to_dbml(self.comment) if self.comment else ''
+        result += 'Ref'
+        if self.name:
+            result += f' {self.name}'
+
+        if len(self.col1) == 1:
+            col1 = self.col1[0].name
+        else:
+            col1 = f'({", ".join(c.name for c in self.col1)})'
+
+        if len(self.col2) == 1:
+            col2 = self.col2[0].name
+        else:
+            col2 = f'({", ".join(c.name for c in self.col2)})'
+
+        options = []
+        if self.on_update:
+            options.append(f'update: {self.on_update}')
+        if self.on_delete:
+            options.append(f'delete: {self.on_delete}')
+
+        options_str = f' [{", ".join(options)}]' if options else ''
+        result += (
+            ' {\n    '
+            f'{self.table1.name}.{col1} '
+            f'{self.type} '
+            f'{self.table2.name}.{col2}'
+            f'{options_str}'
+            '\n}'
+        )
+        return result
+
 
 class TableReference(SQLOjbect):
     '''
@@ -312,8 +350,8 @@ class TableReference(SQLOjbect):
 
 
 class Note:
-    def __init__(self, text: str):
-        self.text = text
+    def __init__(self, text: Any):
+        self.text = str(text) if text else ''
 
     def __str__(self):
         '''
@@ -340,6 +378,36 @@ class Note:
             return '\n'.join(f'-- {line}' for line in self.text.split('\n'))
         else:
             return ''
+
+    @property
+    def dbml(self):
+        lines = []
+        line = ''
+        for word in self.text.split(' '):
+            if len(line) > 80:
+                lines.append(line)
+                line = ''
+            if '\n' in word:
+                sublines = word.split('\n')
+                for sl in sublines[:-1]:
+                    line += sl
+                    lines.append(line)
+                    line = ''
+                line = sublines[-1] + ' '
+            else:
+                line += f'{word} '
+        if line:
+            lines.append(line)
+        result = 'Note {\n    '
+
+        if len(lines) > 1:
+            lines_str = '\n    '.join(lines)[:-1] + '\n'
+            result += f"'''\n    {lines_str}    '''"
+        else:
+            result += f"'{lines[0][:-1]}'"
+
+        result += '\n}'
+        return result
 
 
 class Column(SQLOjbect):
@@ -368,7 +436,7 @@ class Column(SQLOjbect):
 
         self.default = default
 
-        self.note = note or Note('')
+        self.note = Note(note)
         self.ref_blueprints = ref_blueprints or []
         for ref in self.ref_blueprints:
             ref.col1 = self.name
@@ -409,6 +477,43 @@ class Column(SQLOjbect):
             components.append(self.note.sql)
         return ' '.join(components)
 
+    @property
+    def dbml(self):
+        def default_to_str(val: str) -> str:
+            if val.lower() in ('null', 'true', 'false'):
+                return val.lower()
+            if val.isdigit():
+                return val
+            try:
+                float(val)
+                return val
+            except ValueError:
+                pass
+            if val.startswith('(') and val.endswith(')'):
+                return f'`{val[1:-1]}`'
+            return f"'{val}'"
+
+        result = comment_to_dbml(self.comment) if self.comment else ''
+        result += f'{self.name} {self.type}'
+
+        options = []
+        if self.pk:
+            options.append('pk')
+        if self.autoinc:
+            options.append('increment')
+        if self.default:
+            options.append(f'default: {default_to_str(self.default)}')
+        if self.unique:
+            options.append('unique')
+        if self.not_null:
+            options.append('not null')
+        if self.note:
+            options.append(note_option_to_dbml(self.note))
+
+        if options:
+            result += f' [{", ".join(options)}]'
+        return result
+
     def __repr__(self):
         '''
         >>> Column('name', 'VARCHAR2')
@@ -447,7 +552,7 @@ class Index(SQLOjbect):
         self.unique = unique
         self.type = type_
         self.pk = pk
-        self.note = note or Note('')
+        self.note = Note(note)
         self.comment = comment
 
     def __repr__(self):
@@ -510,6 +615,37 @@ class Index(SQLOjbect):
             result += f' {self.note.sql}'
         return result
 
+    @property
+    def dbml(self):
+        def subject_to_str(val: str) -> str:
+            if val.startswith('(') and val.endswith(')'):
+                return f'`{val[1:-1]}`'
+            else:
+                return val
+
+        result = comment_to_dbml(self.comment) if self.comment else ''
+
+        if len(self.subject_names) > 1:
+            result += f'({", ".join(subject_to_str(sn) for sn in self.subject_names)})'
+        else:
+            result += self.subject_names[0]
+
+        options = []
+        if self.name:
+            options.append(f"name: '{self.name}'")
+        if self.pk:
+            options.append('pk')
+        if self.unique:
+            options.append('unique')
+        if self.type:
+            options.append(f'type: {self.type}')
+        if self.note:
+            options.append(note_option_to_dbml(self.note))
+
+        if options:
+            result += f' [{", ".join(options)}]'
+        return result
+
 
 class Table(SQLOjbect):
     '''Class representing table.'''
@@ -528,7 +664,7 @@ class Table(SQLOjbect):
         self.indexes: List[Index] = []
         self.column_dict: Dict[str, Column] = {}
         self.alias = alias if alias else None
-        self.note = note or Note('')
+        self.note = Note(note)
         self.header_color = header_color
         self.refs = refs or []
         self.comment = comment
@@ -630,16 +766,30 @@ class Table(SQLOjbect):
         components.extend(i.sql + '\n' for i in self.indexes if not i.pk)
         return '\n'.join(components)
 
+    @property
+    def dbml(self):
+        result = comment_to_dbml(self.comment) if self.comment else ''
+        result += f'Table {self.name} '
+        if self.alias:
+            result += f'as {self.alias} '
+        result += '{\n'
+        columns_str = '\n'.join(c.dbml for c in self.columns)
+        result += indent(columns_str) + '\n'
+        if self.note:
+            result += indent(self.note.dbml) + '\n'
+        result += '}'
+        return result
+
 
 class EnumItem:
-    '''Single enum item. Does not translate into SQL'''
+    '''Single enum item'''
 
     def __init__(self,
                  name: str,
                  note: Optional[Note] = None,
                  comment: Optional[str] = None):
         self.name = name
-        self.note = note or Note('')
+        self.note = Note(note)
         self.comment = comment
 
     def __repr__(self):
@@ -664,6 +814,15 @@ class EnumItem:
         if self.note:
             components.append(self.note.sql)
         return ' '.join(components)
+
+    @property
+    def dbml(self):
+        result = comment_to_dbml(self.comment) if self.comment else ''
+        result += self.name
+        if self.note:
+            result += f' [{note_option_to_dbml(self.note)}]'
+        return result
+
 
 
 class Enum(SQLOjbect):
@@ -726,6 +885,16 @@ class Enum(SQLOjbect):
                '\n'.join(f'  {i.sql}' for i in self.items) +\
                '\n);'
 
+    @property
+    def dbml(self):
+        result = comment_to_dbml(self.comment) if self.comment else ''
+        result += f'enum {self.name} {{\n'
+        items_str = '\n'.join(i.dbml for i in self.items)
+        result += indent(items_str)
+        result += '\n}'
+        return result
+
+
 
 class EnumType(Enum):
     '''
@@ -778,6 +947,21 @@ class TableGroup:
     def __iter__(self):
         return iter(self.items)
 
+    @property
+    def dbml(self):
+        def item_to_str(val: Union[str, Table]) -> str:
+            if isinstance(val, Table):
+                return val.name
+            else:
+                return val
+
+        result = comment_to_dbml(self.comment) if self.comment else ''
+        result += f'TableGroup {self.name} {{\n'
+        for i in self.items:
+            result += f'    {item_to_str(i)}\n'
+        result += '}'
+        return result
+
 
 class Project:
     def __init__(self,
@@ -787,7 +971,7 @@ class Project:
                  comment: Optional[str] = None):
         self.name = name
         self.items = items
-        self.note = note or Note('')
+        self.note = Note(note)
         self.comment = comment
 
     def __repr__(self):
@@ -797,3 +981,20 @@ class Project:
         """
 
         return f'<Project {self.name!r}>'
+
+    @property
+    def dbml(self):
+        result = comment_to_dbml(self.comment) if self.comment else ''
+        result += f'Project {self.name} {{\n'
+        if self.items:
+            items_str = ''
+            for k, v in self.items.items():
+                if '\n' in v:
+                    items_str += f"{k}: '''{v}'''\n"
+                else:
+                    items_str += f"{k}: '{v}'\n"
+            result += indent(items_str[:-1]) + '\n'
+        if self.note:
+            result += indent(self.note.dbml) + '\n'
+        result += '}'
+        return result

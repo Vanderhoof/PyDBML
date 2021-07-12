@@ -5,9 +5,12 @@ from pydbml.classes import Enum
 from pydbml.classes import EnumItem
 from pydbml.classes import Index
 from pydbml.classes import Note
+from pydbml.classes import Project
+from pydbml.classes import Reference
 from pydbml.classes import ReferenceBlueprint
 from pydbml.classes import SQLOjbect
 from pydbml.classes import Table
+from pydbml.classes import TableGroup
 from pydbml.classes import TableReference
 from pydbml.exceptions import AttributeMissingError
 from pydbml.exceptions import ColumnNotFoundError
@@ -166,6 +169,48 @@ class TestColumn(TestCase):
         self.assertEqual(c.ref_blueprints[0].table1, t.name)
         self.assertEqual(c.ref_blueprints[1].table1, t.name)
 
+    def test_dbml_simple(self):
+        c = Column(
+            name='order',
+            type_='integer'
+        )
+        expected = 'order integer'
+
+        self.assertEqual(c.dbml, expected)
+
+    def test_dbml_full(self):
+        c = Column(
+            name='order',
+            type_='integer',
+            unique=True,
+            not_null=True,
+            pk=True,
+            autoinc=True,
+            default='Def_value',
+            note='Note on the column',
+            comment='Comment on the column'
+        )
+        expected = \
+'''// Comment on the column
+order integer [pk, increment, default: 'Def_value', unique, not null, note: 'Note on the column']'''
+
+        self.assertEqual(c.dbml, expected)
+
+    def test_dbml_multiline_note(self):
+        c = Column(
+            name='order',
+            type_='integer',
+            not_null=True,
+            note='Note on the column\nmultiline',
+            comment='Comment on the column'
+        )
+        expected = \
+"""// Comment on the column
+order integer [not null, note: '''Note on the column
+multiline''']"""
+
+        self.assertEqual(c.dbml, expected)
+
 
 class TestIndex(TestCase):
     def test_basic_sql(self) -> None:
@@ -220,6 +265,36 @@ class TestIndex(TestCase):
         self.assertEqual(r.subjects, [t['id'], '(id*3)'])
         expected = 'CREATE INDEX ON "products" ("id", (id*3));'
         self.assertEqual(r.sql, expected)
+
+    def test_dbml_simple(self):
+        i = Index(
+            ['id']
+        )
+
+        expected = 'id'
+        self.assertEqual(i.dbml, expected)
+
+    def test_dbml_composite(self):
+        i = Index(
+            ['id', '(id*3)']
+        )
+
+        expected = '(id, `id*3`)'
+        self.assertEqual(i.dbml, expected)
+
+    def test_dbml_full(self):
+        i = Index(
+            ['id', '(getdate())'],
+            name='Dated id',
+            unique=True,
+            type_='hash',
+            pk=True,
+            note='Note on the column',
+            comment='Comment on the index'
+        )
+        expected = \
+'''// Comment on the index
+(id, `getdate()`) [name: 'Dated id', pk, unique, type: hash, note: 'Note on the column']'''
 
 
 class TestTable(TestCase):
@@ -347,6 +422,62 @@ CREATE INDEX ON "products" ("id", "name");
         with self.assertRaises(ColumnNotFoundError):
             t.add_index(i)
 
+    def test_dbml_simple(self):
+        t = Table('products')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        expected = \
+'''Table products {
+    id integer
+    name varchar2
+}'''
+        self.assertEqual(t.dbml, expected)
+
+    def test_dbml_full(self):
+        t = Table(
+            'products',
+            alias='pd',
+            note='My multiline\nnote',
+            comment='My multiline\ncomment'
+        )
+        c0 = Column('zero', 'number')
+        c1 = Column('id', 'integer', unique=True, note='Multiline\ncomment note')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c0)
+        t.add_column(c1)
+        t.add_column(c2)
+        expected = \
+"""// My multiline
+// comment
+Table products as pd {
+    zero number
+    id integer [unique, note: '''Multiline
+    comment note''']
+    name varchar2
+    Note {
+        '''
+        My multiline
+        note
+        '''
+    }
+}"""
+        self.assertEqual(t.dbml, expected)
+
+class TestEnumItem(TestCase):
+    def test_dbml_simple(self):
+        ei = EnumItem('en-US')
+        expected = 'en-US'
+        self.assertEqual(ei.dbml, expected)
+
+    def test_dbml_full(self):
+        ei = EnumItem('en-US', note='preferred', comment='EnumItem comment')
+        expected = \
+'''// EnumItem comment
+en-US [note: 'preferred']'''
+        self.assertEqual(ei.dbml, expected)
+
 
 class TestEnum(TestCase):
     def test_simple_enum(self) -> None:
@@ -383,3 +514,200 @@ class TestEnum(TestCase):
   'failure',
 );'''
         self.assertEqual(e.sql, expected)
+
+    def test_dbml_simple(self):
+        items = [EnumItem('en-US'), EnumItem('ru-RU'), EnumItem('en-GB')]
+        e = Enum('lang', items)
+        expected = \
+'''enum lang {
+    en-US
+    ru-RU
+    en-GB
+}'''
+        self.assertEqual(e.dbml, expected)
+
+    def test_dbml_full(self):
+        items = [
+            EnumItem('en-US', note='preferred'),
+            EnumItem('ru-RU', comment='Multiline\ncomment'),
+            EnumItem('en-GB')]
+        e = Enum('lang', items, comment="Enum comment")
+        expected = \
+'''// Enum comment
+enum lang {
+    en-US [note: 'preferred']
+    // Multiline
+    // comment
+    ru-RU
+    en-GB
+}'''
+        self.assertEqual(e.dbml, expected)
+
+
+class TestReference(TestCase):
+    def test_dbml_simple(self):
+        t = Table('products')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        t2.add_column(c21)
+        ref = Reference('>', t, c2, t2, c21)
+
+        expected = \
+'''Ref {
+    products.name > names.name_val
+}'''
+        self.assertEqual(ref.dbml, expected)
+
+    def test_dbml_full(self):
+        t = Table('products')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        c3 = Column('country', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        t.add_column(c3)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        c22 = Column('country', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = Reference(
+            '<',
+            t,
+            [c2, c3],
+            t2,
+            (c21, c22),
+            name='nameref',
+            comment='Reference comment\nmultiline',
+            on_update='CASCADE',
+            on_delete='SET NULL'
+        )
+
+        expected = \
+'''// Reference comment
+// multiline
+Ref nameref {
+    products.(name, country) < names.(name_val, country) [update: CASCADE, delete: SET NULL]
+}'''
+        self.assertEqual(ref.dbml, expected)
+
+
+class TestNote(TestCase):
+    def test_init_types(self):
+        n1 = Note('My note text')
+        n2 = Note(3)
+        n3 = Note([1, 2, 3])
+        n4 = Note(None)
+        n5 = Note(n1)
+
+        self.assertEqual(n1.text, 'My note text')
+        self.assertEqual(n2.text, '3')
+        self.assertEqual(n3.text, '[1, 2, 3]')
+        self.assertEqual(n4.text, '')
+        self.assertEqual(n5.text, 'My note text')
+
+    def test_oneline(self):
+        note = Note('One line of note text')
+        expected = \
+'''Note {
+    'One line of note text'
+}'''
+        self.assertEqual(note.dbml, expected)
+
+    def test_multiline(self):
+        note = Note('The number of spaces you use to indent a block string will be the minimum number of leading spaces among all lines. The parser will automatically remove the number of indentation spaces in the final output.')
+        expected = \
+"""Note {
+    '''
+    The number of spaces you use to indent a block string will be the minimum number 
+    of leading spaces among all lines. The parser will automatically remove the number 
+    of indentation spaces in the final output.
+    '''
+}"""
+        self.assertEqual(note.dbml, expected)
+
+
+    def test_forced_multiline(self):
+        note = Note('The number of spaces you use to indent a block string\nwill\nbe the minimum number of leading spaces among all lines. The parser will automatically remove the number of indentation spaces in the final output.')
+        expected = \
+"""Note {
+    '''
+    The number of spaces you use to indent a block string
+    will
+    be the minimum number of leading spaces among all lines. The parser will automatically 
+    remove the number of indentation spaces in the final output.
+    '''
+}"""
+        self.assertEqual(note.dbml, expected)
+
+
+class TestTableGroup(TestCase):
+    def test_dbml(self):
+        tg = TableGroup('mytg', ['merchants', 'countries', 'customers'])
+        expected = \
+'''TableGroup mytg {
+    merchants
+    countries
+    customers
+}'''
+        self.assertEqual(tg.dbml, expected)
+
+    def test_dbml_with_comment_and_real_tables(self):
+        merchants = Table('merchants')
+        countries = Table('countries')
+        customers = Table('customers')
+        tg = TableGroup(
+            'mytg',
+            [merchants, countries, customers],
+            comment='My table group\nmultiline comment'
+        )
+        expected = \
+'''// My table group
+// multiline comment
+TableGroup mytg {
+    merchants
+    countries
+    customers
+}'''
+        self.assertEqual(tg.dbml, expected)
+
+class TestProject(TestCase):
+    def test_dbml_note(self):
+        p = Project('myproject', note='Project note')
+        expected = \
+'''Project myproject {
+    Note {
+        'Project note'
+    }
+}'''
+        self.assertEqual(p.dbml, expected)
+
+    def test_dbml_full(self):
+        p = Project(
+            'myproject',
+            items={
+                'database_type': 'PostgreSQL',
+                'story': "One day I was eating my cantaloupe and\nI thought, why shouldn't I?\nWhy shouldn't I create a database?"
+            },
+            comment='Multiline\nProject comment',
+            note='Multiline\nProject note')
+        expected = \
+"""// Multiline
+// Project comment
+Project myproject {
+    database_type: 'PostgreSQL'
+    story: '''One day I was eating my cantaloupe and
+    I thought, why shouldn't I?
+    Why shouldn't I create a database?'''
+    Note {
+        '''
+        Multiline
+        Project note
+        '''
+    }
+}"""
+        self.assertEqual(p.dbml, expected)
