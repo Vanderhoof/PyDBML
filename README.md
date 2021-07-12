@@ -59,9 +59,9 @@ Or just by getting items by index or table name:
 
 ```python
 >>> parsed['countries']
-Table('countries', [Column('code', 'int', pk=True), Column('name', 'varchar'), Column('continent_name', 'varchar')])
+<Table 'countries'>
 >>> parsed[1]
-Table('order_items', [Column('order_id', 'int'), Column('product_id', 'int'), Column('quantity', 'int', default=1)])
+<Table 'order_items'>
 
 ```
 
@@ -106,8 +106,8 @@ After running parser all tables from the schema are stored in `tables` attribute
 >>> from pydbml import PyDBML
 >>> parsed = PyDBML.parse_file('test_schema.dbml')
 >>> table = parsed.tables[0]
->>> print(table)
-Table orders(id, user_id, status, created_at)
+>>> table
+<Table 'orders'>
 
 ```
 
@@ -125,10 +125,10 @@ Important attributes of the `Table` object are:
 `Table` object may act as a list or a dictionary of columns:
 
 ```python
->>> print(table[0])
-Column(id int pk autoincrement)
->>> print(table['status'])
-Column(status orders_status)
+>>> table[0]
+<Column 'id', 'int'>
+>>> table['status']
+<Column 'status', 'orders_status'>
 
 ```
 
@@ -171,9 +171,8 @@ After running parser all references from the schema are stored in `refs` attribu
 ```python
 >>> from pydbml import PyDBML
 >>> parsed = PyDBML.parse_file('test_schema.dbml')
->>> ref = parsed.refs[0]
->>> print(ref)
-Reference(orders[id] < order_items[order_id])
+>>> parsed.refs[0]
+<Reference '<', 'orders'.['id'], 'order_items'.['order_id']>
 
 ```
 
@@ -200,8 +199,8 @@ Apart from `Reference` objects, parser also creates `TableReference` objects, wh
 >>> from pydbml import PyDBML
 >>> parsed = PyDBML.parse_file('test_schema.dbml')
 >>> order_items_refs = parsed.tables[1].refs
->>> print(order_items_refs[0])
-TableReference(order_id -> orders[id])
+>>> order_items_refs[0]
+<TableReference ['order_id'], 'orders'.['id']>
 
 ```
 
@@ -222,8 +221,8 @@ After running parser all enums from the schema are stored in `enums` attribute o
 >>> from pydbml import PyDBML
 >>> parsed = PyDBML.parse_file('test_schema.dbml')
 >>> enum = parsed.enums[0]
->>> print(enum)
-Enum orders_status (created, running, done, failure)
+>>> enum
+<Enum 'orders_status', ['created', 'running', 'done', 'failure']>
 
 ```
 
@@ -236,8 +235,8 @@ Enum orders_status (created, running, done, failure)
 Enum objects also act as a list of items:
 
 ```python
->>> print(enum[0])
-created
+>>> enum[0]
+<EnumItem 'created'>
 
 ```
 
@@ -265,7 +264,7 @@ After running parser the project info is stored in the `project` attribute of th
 >>> from pydbml import PyDBML
 >>> parsed = PyDBML.parse_file('test_schema.dbml')
 >>> parsed.project
-Project('test_schema', items={'author': 'dbml.org'}, note=Note('This schema is used for PyDBML doctest'))
+<Project 'test_schema'>
 
 ```
 
@@ -284,7 +283,7 @@ After running parser the project info is stored in the `project` attribute of th
 >>> from pydbml import PyDBML
 >>> parsed = PyDBML.parse_file('test_schema.dbml')
 >>> parsed.table_groups
-[TableGroup('g1', [Table('users', [Column('id', 'int', pk=True), Column('full_name', 'varchar'), Column('email', 'varchar', unique=True), Column('gender', 'varchar'), Column('date_of_birth', 'varchar'), Column('created_at', 'varchar'), Column('country_code', 'int')]), Table('merchants', [Column('id', 'int', pk=True), Column('merchant_name', 'varchar'), Column('country_code', 'int'), Column('created_at', 'varchar'), Column('admin_id', 'int')])]), TableGroup('g2', [Table('countries', [Column('code', 'int', pk=True), Column('name', 'varchar'), Column('continent_name', 'varchar')]), Table('orders', [Column('id', 'int', pk=True, autoinc=True), Column('user_id', 'int', unique=True, not_null=True), Column('status', EnumType('orders_status', [EnumItem('created'), EnumItem('running'), EnumItem('done'), EnumItem('failure')])), Column('created_at', 'varchar')], header_color='#fff')])]
+[<TableGroup 'g1', ['users', 'merchants']>, <TableGroup 'g2', ['countries', 'orders']>]
 
 ```
 
