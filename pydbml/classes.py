@@ -628,7 +628,7 @@ class Index(SQLOjbect):
         if len(self.subject_names) > 1:
             result += f'({", ".join(subject_to_str(sn) for sn in self.subject_names)})'
         else:
-            result += self.subject_names[0]
+            result += subject_to_str(self.subject_names[0])
 
         options = []
         if self.name:
@@ -777,6 +777,12 @@ class Table(SQLOjbect):
         result += indent(columns_str) + '\n'
         if self.note:
             result += indent(self.note.dbml) + '\n'
+        if self.indexes:
+            result += '\n    indexes {\n'
+            indexes_str = '\n'.join(i.dbml for i in self.indexes)
+            result += indent(indexes_str, 8) + '\n'
+            result += '    }\n'
+
         result += '}'
         return result
 
