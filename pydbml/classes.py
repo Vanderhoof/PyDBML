@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Collection
 from typing import Optional
 from typing import Tuple
 from typing import Union
@@ -51,6 +52,8 @@ class ReferenceBlueprint:
     Intermediate class for references during parsing. Table and columns are just
     strings at this point, as we can't check their validity until all schema
     is parsed.
+
+    Note: `table2` and `col2` params are technically required (left optional for aesthetics).
     '''
     ONE_TO_MANY = '<'
     MANY_TO_ONE = '>'
@@ -60,9 +63,9 @@ class ReferenceBlueprint:
                  type_: str,
                  name: Optional[str] = None,
                  table1: Optional[str] = None,
-                 col1: Optional[str] = None,
+                 col1: Optional[Union[str, Collection[str]]] = None,
                  table2: Optional[str] = None,
-                 col2: Optional[str] = None,
+                 col2: Optional[Union[str, Collection[str]]] = None,
                  comment: Optional[str] = None,
                  on_update: Optional[str] = None,
                  on_delete: Optional[str] = None):
@@ -77,34 +80,46 @@ class ReferenceBlueprint:
         self.on_delete = on_delete
 
     def __repr__(self):
-        components = [f"ReferenceBlueprint({self.type!r}"]
-        if self.name:
-            components.append(f'name={self.name!r}')
-        if self.table1:
-            components.append(f'table1={self.table1!r}')
-        if self.col1:
-            components.append(f'col1={self.col1!r}')
-        if self.table2:
-            components.append(f'table2={self.table2!r}')
-        if self.col2:
-            components.append(f'col2={self.col2!r}')
-        if self.on_update:
-            components.append(f'on_update={self.on_update!r}')
-        if self.on_delete:
-            components.append(f'on_delete={self.on_delete!r}')
-        return ', '.join(components) + ')'
+        '''
+        >>> ReferenceBlueprint('>', table1='t1', col1='c1', table2='t2', col2='c2')
+        <ReferenceBlueprint '>', 't1'.'c1', 't2'.'c2'>
+        >>> ReferenceBlueprint('<', table2='t2', col2='c2')
+        <ReferenceBlueprint '<', 't2'.'c2'>
+        >>> ReferenceBlueprint('>', table1='t1', col1=('c11', 'c12'), table2='t2', col2=['c21', 'c22'])
+        <ReferenceBlueprint '>', 't1'.('c11', 'c12'), 't2'.['c21', 'c22']>
+        '''
+
+        components = [f"<ReferenceBlueprint {self.type!r}"]
+        if self.table1 or self.col1:
+            components.append(f'{self.table1!r}.{self.col1!r}')
+        components.append(f'{self.table2!r}.{self.col2!r}')
+        return ', '.join(components) + '>'
 
     def __str__(self):
-        components = [f"Reference("]
+        '''
+        >>> r1 = ReferenceBlueprint('>', table1='t1', col1='c1', table2='t2', col2='c2')
+        >>> r2 = ReferenceBlueprint('<', table2='t2', col2='c2')
+        >>> r3 = ReferenceBlueprint('>', table1='t1', col1=('c11', 'c12'), table2='t2', col2=('c21', 'c22'))
+        >>> print(r1, r2)
+        ReferenceBlueprint(t1.c1 > t2.c2) ReferenceBlueprint(< t2.c2)
+        >>> print(r3)
+        ReferenceBlueprint(t1[c11, c12] > t2[c21, c22])
+        '''
+
+        components = [f"ReferenceBlueprint("]
         if self.table1:
             components.append(self.table1)
         if self.col1:
-            components.append(f'.{self.col1}')
-        components.append(f' {self.type} ')
-        if self.table2:
-            components.append(self.table2)
-        if self.col2:
+            if isinstance(self.col1, str):
+                components.append(f'.{self.col1} ')
+            else:  # list or tuple
+                components.append(f'[{", ".join(self.col1)}] ')
+        components.append(f'{self.type} ')
+        components.append(self.table2)
+        if isinstance(self.col2, str):
             components.append(f'.{self.col2}')
+        else:  # list or tuple
+            components.append(f'[{", ".join(self.col2)}]')
         return ''.join(components) + ')'
 
 
@@ -123,9 +138,9 @@ class Reference(SQLOjbect):
     def __init__(self,
                  type_: str,
                  table1: Table,
-                 col1: Union[Column, List[Column]],
+                 col1: Union[Column, Collection[Column]],
                  table2: Table,
-                 col2: Union[Column, List[Column]],
+                 col2: Union[Column, Collection[Column]],
                  name: Optional[str] = None,
                  comment: Optional[str] = None,
                  on_update: Optional[str] = None,
@@ -141,32 +156,44 @@ class Reference(SQLOjbect):
         self.on_delete = on_delete
 
     def __repr__(self):
-        components = [
-            f"Reference({self.type!r}",
-            f"{self.table1!r}",
-            f"{self.col1!r}",
-            f"{self.table2!r}",
-            f"{self.col2!r}",
-        ]
-        if self.name:
-            components.append(f'name={self.name!r}')
-        if self.on_update:
-            components.append(f'on_update={self.on_update!r}')
-        if self.on_delete:
-            components.append(f'on_delete={self.on_delete!r}')
-        return ', '.join(components) + ')'
+        '''
+        >>> c1 = Column('c1', 'int')
+        >>> c2 = Column('c2', 'int')
+        >>> t1 = Table('t1')
+        >>> t2 = Table('t2')
+        >>> Reference('>', table1=t1, col1=c1, table2=t2, col2=c2)
+        <Reference '>', 't1'.['c1'], 't2'.['c2']>
+        >>> c12 = Column('c12', 'int')
+        >>> c22 = Column('c22', 'int')
+        >>> Reference('<', table1=t1, col1=[c1, c12], table2=t2, col2=(c2, c22))
+        <Reference '<', 't1'.['c1', 'c12'], 't2'.['c2', 'c22']>
+        '''
+
+        components = [f"<Reference {self.type!r}"]
+        components.append(f'{self.table1.name!r}.{[x.name for x in self.col1]!r}')
+        components.append(f'{self.table2.name!r}.{[x.name for x in self.col2]!r}')
+        return ', '.join(components) + '>'
 
     def __str__(self):
+        '''
+        >>> c1 = Column('c1', 'int')
+        >>> c2 = Column('c2', 'int')
+        >>> t1 = Table('t1')
+        >>> t2 = Table('t2')
+        >>> print(Reference('>', table1=t1, col1=c1, table2=t2, col2=c2))
+        Reference(t1[c1] > t2[c2])
+        >>> c12 = Column('c12', 'int')
+        >>> c22 = Column('c22', 'int')
+        >>> print(Reference('<', table1=t1, col1=[c1, c12], table2=t2, col2=(c2, c22)))
+        Reference(t1[c1, c12] < t2[c2, c22])
+        '''
+
         components = [f"Reference("]
-        if self.table1:
-            components.append(self.table1.name)
-        if self.col1:
-            components.append(f'[{", ".join(c.name for c in self.col1)}]')
+        components.append(self.table1.name)
+        components.append(f'[{", ".join(c.name for c in self.col1)}]')
         components.append(f' {self.type} ')
-        if self.table2:
-            components.append(self.table2.name)
-        if self.col2:
-            components.append(f'[{", ".join(c.name for c in self.col2)}]')
+        components.append(self.table2.name)
+        components.append(f'[{", ".join(c.name for c in self.col2)}]')
         return ''.join(components) + ')'
 
     @property
@@ -225,19 +252,41 @@ class TableReference(SQLOjbect):
         self.on_delete = on_delete
 
     def __repr__(self):
-        components = [f"TableReference({self.col!r}, {self.ref_table!r}, {self.ref_col!r}"]
-        if self.name:
-            components.append(f'name={self.name!r}')
-        if self.on_update:
-            components.append(f'on_update={self.on_update!r}')
-        if self.on_delete:
-            components.append(f'on_delete={self.on_delete!r}')
-        return ', '.join(components) + ')'
+        '''
+        >>> c1 = Column('c1', 'int')
+        >>> c2 = Column('c2', 'int')
+        >>> t2 = Table('t2')
+        >>> TableReference(col=c1, ref_table=t2, ref_col=c2)
+        <TableReference ['c1'], 't2'.['c2']>
+        >>> c12 = Column('c12', 'int')
+        >>> c22 = Column('c22', 'int')
+        >>> TableReference(col=[c1, c12], ref_table=t2, ref_col=(c2, c22))
+        <TableReference ['c1', 'c12'], 't2'.['c2', 'c22']>
+        '''
+
+        col_names = [c.name for c in self.col]
+        ref_col_names = [c.name for c in self.ref_col]
+        return f"<TableReference {col_names!r}, {self.ref_table.name!r}.{ref_col_names!r}>"
 
     def __str__(self):
-        cols = '", "'.join(c.name for c in self.col)
-        ref_cols = '", "'.join(c.name for c in self.ref_col)
-        return f"TableReference({cols} -> {self.ref_table.name}[{ref_cols}])"
+        '''
+        >>> c1 = Column('c1', 'int')
+        >>> c2 = Column('c2', 'int')
+        >>> t2 = Table('t2')
+        >>> print(TableReference(col=c1, ref_table=t2, ref_col=c2))
+        TableReference([c1] > t2[c2])
+        >>> c12 = Column('c12', 'int')
+        >>> c22 = Column('c22', 'int')
+        >>> print(TableReference(col=[c1, c12], ref_table=t2, ref_col=(c2, c22)))
+        TableReference([c1, c12] > t2[c2, c22])
+        '''
+
+        components = [f"TableReference("]
+        components.append(f'[{", ".join(c.name for c in self.col)}]')
+        components.append(' > ')
+        components.append(self.ref_table.name)
+        components.append(f'[{", ".join(c.name for c in self.ref_col)}]')
+        return ''.join(components) + ')'
 
     @property
     def sql(self):
@@ -267,12 +316,22 @@ class Note:
         self.text = text
 
     def __str__(self):
+        '''
+        >>> print(Note('Note text'))
+        Note text
+        '''
+
         return self.text
 
     def __bool__(self):
         return bool(self.text)
 
     def __repr__(self):
+        '''
+        >>> Note('Note text')
+        Note('Note text')
+        '''
+
         return f'Note({repr(self.text)})'
 
     @property
@@ -332,8 +391,8 @@ class Column(SQLOjbect):
         Returns inline SQL of the column, which should be a part of table definition:
 
         "id" integer PRIMARY KEY AUTOINCREMENT
-
         '''
+
         self.check_attributes_for_sql()
         components = [f'"{self.name}"', str(self.type)]
         if self.pk:
@@ -351,34 +410,20 @@ class Column(SQLOjbect):
         return ' '.join(components)
 
     def __repr__(self):
-        components = [f"Column({self.name!r}, {self.type!r}"]
-        if self.unique:
-            components.append(f'unique=True')
-        if self.not_null:
-            components.append(f'not_null=True')
-        if self.pk:
-            components.append(f'pk=True')
-        if self.autoinc:
-            components.append(f'autoinc=True')
-        if self.default:
-            components.append(f'default={self.default!r}')
-        if self.note:
-            components.append(f'note={self.note!r}')
-        return ', '.join(components) + ')'
+        '''
+        >>> Column('name', 'VARCHAR2')
+        <Column 'name', 'VARCHAR2'>
+        '''
+        type_name = self.type if isinstance(self.type, str) else self.type.name
+        return f'<Column {self.name!r}, {type_name!r}>'
 
     def __str__(self):
-        components = [f"Column({self.name} {self.type}"]
-        if self.unique:
-            components.append(f'unique')
-        if self.not_null:
-            components.append(f'not_null')
-        if self.pk:
-            components.append(f'pk')
-        if self.autoinc:
-            components.append(f'autoincrement')
-        if self.default:
-            components.append(f'default={self.default!r}')
-        return ' '.join(components) + ')'
+        '''
+        >>> print(Column('name', 'VARCHAR2'))
+        name[VARCHAR2]
+        '''
+
+        return f'{self.name}[{self.type}]'
 
 
 class Index(SQLOjbect):
@@ -406,34 +451,30 @@ class Index(SQLOjbect):
         self.comment = comment
 
     def __repr__(self):
-        components = [f"Index({self.subject_names!r}"]
-        if self.name:
-            components.append(f'name={self.name!r}')
-        if self.unique:
-            components.append(f'unique=True')
-        if self.type:
-            components.append(f'type_={self.type!r}')
-        if self.pk:
-            components.append(f'pk=True')
-        if self.note:
-            components.append(f'note_={self.note!r}')
-        return ', '.join(components) + ')'
+        '''
+        >>> Index(['name', 'type'])
+        <Index None, ['name', 'type']>
+        >>> t = Table('t')
+        >>> Index(['name', 'type'], table=t)
+        <Index 't', ['name', 'type']>
+        '''
+
+        table_name = self.table.name if self.table else None
+        return f"<Index {table_name!r}, {self.subject_names!r}>"
+
 
     def __str__(self):
-        components = [f"Index("]
-        if len(self.subjects) == 1:
-            components[0] += self.subjects[0]
-        else:
-            components[0] += '(' + ', '.join(self.subjects) + ')'
-        if self.name:
-            components.append(f'{self.name!r}')
-        if self.unique:
-            components.append(f'unique')
-        if self.type:
-            components.append(f'{self.type}')
-        if self.pk:
-            components.append(f'pk')
-        return ' '.join(components) + ')'
+        '''
+        >>> print(Index(['name', 'type']))
+        Index([name, type])
+        >>> t = Table('t')
+        >>> print(Index(['name', 'type'], table=t))
+        Index(t[name, type])
+        '''
+
+        table_name = self.table.name if self.table else ''
+        subjects = ', '.join(s for s in self.subject_names)
+        return f"Index({table_name}[{subjects}])"
 
     @property
     def sql(self):
@@ -542,23 +583,24 @@ class Table(SQLOjbect):
         return iter(self.columns)
 
     def __repr__(self):
-        components = [f"Table({self.name!r}, {self.columns!r}"]
-        if self.alias:
-            components.append(f'alias={self.alias!r}')
-        if self.indexes:
-            components.append(f'indexes={self.indexes!r}')
-        if self.note:
-            components.append(f'note={self.note!r}')
-        if self.header_color:
-            components.append(f'header_color={self.header_color!r}')
-        return ', '.join(components) + ')'
+        '''
+        >>> table = Table('customers')
+        >>> table
+        <Table 'customers'>
+        '''
+
+        return f'<Table {self.name!r}>'
 
     def __str__(self):
-        components = [f"Table {self.name}"]
-        if self.alias:
-            components.append(f' as {self.alias} ')
-        components.append('(' + ', '.join(c.name for c in self.columns))
-        return ''.join(components) + ')'
+        '''
+        >>> table = Table('customers')
+        >>> table.add_column(Column('id', 'INTEGER'))
+        >>> table.add_column(Column('name', 'VARCHAR2'))
+        >>> print(table)
+        customers(id, name)
+        '''
+
+        return f'{self.name}({", ".join(c.name for c in self.columns)})'
 
     @property
     def sql(self):
@@ -601,12 +643,19 @@ class EnumItem:
         self.comment = comment
 
     def __repr__(self):
-        components = [f'EnumItem({self.name!r}']
-        if self.note:
-            components.append(f'note={self.note!r}')
-        return ', '.join(components) + ')'
+        '''
+        >>> EnumItem('en-US')
+        <EnumItem 'en-US'>
+        '''
+
+        return f'<EnumItem {self.name!r}>'
 
     def __str__(self):
+        '''
+        >>> print(EnumItem('en-US'))
+        en-US
+        '''
+
         return self.name
 
     @property
@@ -638,12 +687,26 @@ class Enum(SQLOjbect):
         return iter(self.items)
 
     def __repr__(self):
-        return f'Enum({self.name!r}, {self.items!r})'
+        '''
+        >>> en = EnumItem('en-US')
+        >>> ru = EnumItem('ru-RU')
+        >>> Enum('languages', [en, ru])
+        <Enum 'languages', ['en-US', 'ru-RU']>
+        '''
+
+        item_names = [i.name for i in self.items]
+        classname = self.__class__.__name__
+        return f'<{classname} {self.name!r}, {item_names!r}>'
 
     def __str__(self):
-        return (
-            f'Enum {self.name} (' + ', '.join(str(i) for i in self.items) + ')'
-        )
+        '''
+        >>> en = EnumItem('en-US')
+        >>> ru = EnumItem('ru-RU')
+        >>> print(Enum('languages', [en, ru]))
+        languages
+        '''
+
+        return self.name
 
     @property
     def sql(self):
@@ -667,13 +730,16 @@ class Enum(SQLOjbect):
 class EnumType(Enum):
     '''
     Enum object, intended to be put in the `type` attribute of a column.
+
+    >>> en = EnumItem('en-US')
+    >>> ru = EnumItem('ru-RU')
+    >>> EnumType('languages', [en, ru])
+    <EnumType 'languages', ['en-US', 'ru-RU']>
+    >>> print(_)
+    languages
     '''
 
-    def __repr__(self):
-        return f'EnumType({self.name!r}, {self.items!r})'
-
-    def __str__(self):
-        return self.name
+    pass
 
 
 class TableGroup:
@@ -692,7 +758,19 @@ class TableGroup:
         self.comment = comment
 
     def __repr__(self):
-        return f'TableGroup({self.name!r}, {self.items!r})'
+        """
+        >>> tg = TableGroup('mygroup', ['t1', 't2'])
+        >>> tg
+        <TableGroup 'mygroup', ['t1', 't2']>
+        >>> t1 = Table('t1')
+        >>> t2 = Table('t2')
+        >>> tg.items = [t1, t2]
+        >>> tg
+        <TableGroup 'mygroup', ['t1', 't2']>
+        """
+
+        items = [i if isinstance(i, str) else i.name for i in self.items]
+        return f'<TableGroup {self.name!r}, {items!r}>'
 
     def __getitem__(self, key) -> str:
         return self.items[key]
@@ -713,9 +791,9 @@ class Project:
         self.comment = comment
 
     def __repr__(self):
-        components = [f'Project({self.name!r}']
-        if self.items:
-            components.append(f'items={self.items!r}')
-        if self.note:
-            components.append(f'note={self.note!r}')
-        return ', '.join(components) + ')'
+        """
+        >>> Project('myproject')
+        <Project 'myproject'>
+        """
+
+        return f'<Project {self.name!r}>'
