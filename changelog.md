@@ -1,3 +1,7 @@
+# 0.4.1
+
+- Reworked `__repr__` and `__str__` methods on all classes.
+
 # 0.4.0
 
 - New: Support composite references. **Breaks backward compatibility!** `col1`, `col2` attributes on `Reference` and `col`, `ref_col` attributes on `TableReference` are now lists of `Column` instead of `Column`.
