@@ -480,18 +480,15 @@ class Column(SQLOjbect):
     @property
     def dbml(self):
         def default_to_str(val: str) -> str:
-            if val.lower() in ('null', 'true', 'false'):
-                return val.lower()
-            if val.isdigit():
+            if isinstance(val, str):
+                if val.lower() in ('null', 'true', 'false'):
+                    return val.lower()
+                elif val.startswith('(') and val.endswith(')'):
+                    return f'`{val[1:-1]}`'
+                else:
+                    return f"'{val}'"
+            else:  # int or float or bool
                 return val
-            try:
-                float(val)
-                return val
-            except ValueError:
-                pass
-            if val.startswith('(') and val.endswith(')'):
-                return f'`{val[1:-1]}`'
-            return f"'{val}'"
 
         result = comment_to_dbml(self.comment) if self.comment else ''
         result += f'{self.name} {self.type}'
