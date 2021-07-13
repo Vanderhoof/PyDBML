@@ -72,7 +72,7 @@ Other meaningful attributes are:
 * **table_groups** — list of all table groups,
 * **project** — the Project object, if was defined.
 
-Finally, you can get the SQL for your DBML schema by accessing `sql` property:
+You can get the SQL for your DBML schema by accessing `sql` property:
 
 ```python
 >>> print(parsed.sql)  # doctest:+ELLIPSIS
@@ -82,16 +82,46 @@ CREATE TYPE "orders_status" AS ENUM (
   'done',
   'failure',
 );
+<BLANKLINE>
 CREATE TYPE "product status" AS ENUM (
   'Out of Stock',
   'In Stock',
 );
+<BLANKLINE>
 CREATE TABLE "orders" (
   "id" int PRIMARY KEY AUTOINCREMENT,
   "user_id" int UNIQUE NOT NULL,
   "status" orders_status,
   "created_at" varchar
 );
+...
+
+```
+
+Finally, you can generate the DBML source from your schema with updated values from the classes:
+
+```python
+>>> parsed.project.items['author'] = 'John Doe'
+>>> print(parsed.dbml)  # doctest:+ELLIPSIS
+Project test_schema {
+    author: 'John Doe'
+    Note {
+        'This schema is used for PyDBML doctest'
+    }
+}
+<BLANKLINE>
+Table "orders" {
+    "id" int [pk, increment]
+    "user_id" int [unique, not null]
+    "status" orders_status
+    "created_at" varchar
+}
+<BLANKLINE>
+Table "order_items" {
+    "order_id" int
+    "product_id" int
+    "quantity" int [default: 1]
+}
 ...
 
 ```
