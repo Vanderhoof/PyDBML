@@ -82,10 +82,12 @@ CREATE TYPE "orders_status" AS ENUM (
   'done',
   'failure',
 );
+<BLANKLINE>
 CREATE TYPE "product status" AS ENUM (
   'Out of Stock',
   'In Stock',
 );
+<BLANKLINE>
 CREATE TABLE "orders" (
   "id" int PRIMARY KEY AUTOINCREMENT,
   "user_id" int UNIQUE NOT NULL,

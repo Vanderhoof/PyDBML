@@ -340,7 +340,7 @@ class TestTable(TestCase):
         t = Table('products')
         c = Column('id', 'integer')
         t.add_column(c)
-        expected = 'CREATE TABLE "products" (\n  "id" integer\n);\n'
+        expected = 'CREATE TABLE "products" (\n  "id" integer\n);'
         self.assertEqual(t.sql, expected)
 
     def test_ref(self) -> None:
@@ -359,8 +359,7 @@ class TestTable(TestCase):
   "id" integer,
   "name" varchar2,
   FOREIGN KEY ("name") REFERENCES "names" ("name_val")
-);
-'''
+);'''
         self.assertEqual(t.sql, expected)
 
     def test_duplicate_ref(self) -> None:
@@ -397,7 +396,6 @@ class TestTable(TestCase):
   "country" varchar
 );
 
-
 COMMENT ON TABLE "products" IS 'Table note';
 
 COMMENT ON COLUMN "products"."id" IS 'First column note';
@@ -426,8 +424,7 @@ multiline note';'''
   FOREIGN KEY ("name") REFERENCES "names" ("name_val")
 );
 
-CREATE INDEX ON "products" ("id", "name");
-'''
+CREATE INDEX ON "products" ("id", "name");'''
         self.assertEqual(t.sql, expected)
 
     def test_index_inline(self) -> None:
@@ -443,8 +440,7 @@ CREATE INDEX ON "products" ("id", "name");
   "id" integer,
   "name" varchar2,
   PRIMARY KEY ("id", "name")
-);
-'''
+);'''
         self.assertEqual(t.sql, expected)
 
     def test_index_inline_and_comments(self) -> None:
@@ -464,8 +460,7 @@ CREATE TABLE "products" (
   -- Multiline
   -- index comment
   PRIMARY KEY ("id", "name")
-);
-'''
+);'''
         self.assertEqual(t.sql, expected)
 
     def test_add_column(self) -> None:

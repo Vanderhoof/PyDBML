@@ -763,8 +763,8 @@ class Table(SQLOjbect):
         body.extend(indent(i.sql, 2) for i in self.indexes if i.pk)
         body.extend(indent(r.sql, 2) for r in self.refs)
         components.append(',\n'.join(body))
-        components.append(');\n')
-        components.extend(i.sql + '\n' for i in self.indexes if not i.pk)
+        components.append(');')
+        components.extend('\n' + i.sql for i in self.indexes if not i.pk)
 
         result = comment_to_sql(self.comment) if self.comment else ''
         result += '\n'.join(components)
