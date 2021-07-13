@@ -98,7 +98,7 @@ CREATE TABLE "orders" (
 
 ```
 
-Finally, you can generate the DBML source from your schema with updated values from the classes:
+Finally, you can generate the DBML source from your schema with updated values from the classes (added in **0.4.1**):
 
 ```python
 >>> parsed.project.items['author'] = 'John Doe'
