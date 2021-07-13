@@ -1,6 +1,9 @@
 # 0.4.1
 
-- Reworked `__repr__` and `__str__` methods on all classes.
+- Reworked `__repr__` and `__str__` methods on all classes. They are now much simplier and more readable.
+- Comments on classes are now rendered as SQL comments in `sql` property (previously notes were rendered as comments on some classes).
+- Notes on `Table` and `Column` classes are rendered as SQL comments in `sql` property: `COMMENT ON TABLE "x" is 'y'`.
+- New: `dbml` property on most classes and on parsed results which returns the DBML code.
 - Fix: sql for Reference and TableReference.
 
 # 0.4.0
