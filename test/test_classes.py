@@ -110,14 +110,6 @@ class TestColumn(TestCase):
         expected = '"id" integer'
         self.assertEqual(r.sql, expected)
 
-    def test_note(self) -> None:
-        n = Note('Column note')
-        r = Column(name='id',
-                   type_='integer',
-                   note=n)
-        expected = '"id" integer -- Column note'
-        self.assertEqual(r.sql, expected)
-
     def test_pk_autoinc(self) -> None:
         r = Column(name='id',
                    type_='integer',
@@ -139,6 +131,17 @@ class TestColumn(TestCase):
                    type_='integer',
                    default=0)
         expected = '"order" integer DEFAULT 0'
+        self.assertEqual(r.sql, expected)
+
+    def test_comment(self) -> None:
+        r = Column(name='id',
+                   type_='integer',
+                   unique=True,
+                   not_null=True,
+                   comment="Column comment")
+        expected = \
+'''-- Column comment
+"id" integer UNIQUE NOT NULL'''
         self.assertEqual(r.sql, expected)
 
     def test_table_setter(self) -> None:
@@ -255,15 +258,17 @@ class TestIndex(TestCase):
         expected = 'CREATE INDEX ON "products" ("id");'
         self.assertEqual(r.sql, expected)
 
-    def test_note(self) -> None:
+    def test_comment(self) -> None:
         t = Table('products')
         t.add_column(Column('id', 'integer'))
-        n = Note('Index note')
         r = Index(subject_names=['id'],
                   table=t,
-                  note=n)
+                  comment='Index comment')
         t.add_index(r)
-        expected = 'CREATE INDEX ON "products" ("id"); -- Index note'
+        expected = \
+'''-- Index comment
+CREATE INDEX ON "products" ("id");'''
+
         self.assertEqual(r.sql, expected)
 
     def test_unique_type_composite(self) -> None:
@@ -374,12 +379,31 @@ class TestTable(TestCase):
         with self.assertRaises(DuplicateReferenceError):
             t.add_ref(r2)
 
-    def test_note(self) -> None:
+    def test_notes(self) -> None:
         n = Note('Table note')
+        nc1 = Note('First column note')
+        nc2 = Note('Another column\nmultiline note')
         t = Table('products', note=n)
-        c = Column('id', 'integer')
-        t.add_column(c)
-        expected = 'CREATE TABLE "products" (\n  -- Table note\n  "id" integer\n);\n'
+        c1 = Column('id', 'integer', note=nc1)
+        c2 = Column('name', 'varchar')
+        c3 = Column('country', 'varchar', note=nc2)
+        t.add_column(c1)
+        t.add_column(c2)
+        t.add_column(c3)
+        expected = \
+'''CREATE TABLE "products" (
+  "id" integer,
+  "name" varchar,
+  "country" varchar
+);
+
+
+COMMENT ON TABLE "products" IS 'Table note';
+
+COMMENT ON COLUMN "products"."id" IS 'First column note';
+
+COMMENT ON COLUMN "products"."country" IS 'Another column
+multiline note';'''
         self.assertEqual(t.sql, expected)
 
     def test_ref_index(self) -> None:
@@ -418,6 +442,27 @@ CREATE INDEX ON "products" ("id", "name");
 '''CREATE TABLE "products" (
   "id" integer,
   "name" varchar2,
+  PRIMARY KEY ("id", "name")
+);
+'''
+        self.assertEqual(t.sql, expected)
+
+    def test_index_inline_and_comments(self) -> None:
+        t = Table('products', comment='Multiline\ntable comment')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        i = Index(['id', 'name'], pk=True, comment='Multiline\nindex comment')
+        t.add_index(i)
+        expected = \
+'''-- Multiline
+-- table comment
+CREATE TABLE "products" (
+  "id" integer,
+  "name" varchar2,
+  -- Multiline
+  -- index comment
   PRIMARY KEY ("id", "name")
 );
 '''
@@ -514,6 +559,11 @@ class TestEnumItem(TestCase):
         expected = '"en-US"'
         self.assertEqual(ei.dbml, expected)
 
+    def test_sql(self):
+        ei = EnumItem('en-US')
+        expected = "'en-US',"
+        self.assertEqual(ei.sql, expected)
+
     def test_dbml_full(self):
         ei = EnumItem('en-US', note='preferred', comment='EnumItem comment')
         expected = \
@@ -540,20 +590,23 @@ class TestEnum(TestCase):
 );'''
         self.assertEqual(e.sql, expected)
 
-    def test_notes(self) -> None:
-        n = Note('EnumItem note')
+    def test_comments(self) -> None:
         items = [
-            EnumItem('created', note=n),
+            EnumItem('created', comment='EnumItem comment'),
             EnumItem('running'),
-            EnumItem('donef', note=n),
+            EnumItem('donef', comment='EnumItem\nmultiline comment'),
             EnumItem('failure'),
         ]
-        e = Enum('job_status', items)
+        e = Enum('job_status', items, comment='Enum comment')
         expected = \
-'''CREATE TYPE "job_status" AS ENUM (
-  'created', -- EnumItem note
+'''-- Enum comment
+CREATE TYPE "job_status" AS ENUM (
+  -- EnumItem comment
+  'created',
   'running',
-  'donef', -- EnumItem note
+  -- EnumItem
+  -- multiline comment
+  'donef',
   'failure',
 );'''
         self.assertEqual(e.sql, expected)
