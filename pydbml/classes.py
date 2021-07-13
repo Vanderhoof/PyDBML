@@ -12,6 +12,7 @@ from .exceptions import AttributeMissingError
 from .exceptions import ColumnNotFoundError
 from .exceptions import DuplicateReferenceError
 from .tools import comment_to_dbml
+from .tools import comment_to_sql
 from .tools import indent
 from .tools import note_option_to_dbml
 
@@ -213,18 +214,19 @@ class Reference(SQLOjbect):
 
         if self.type in (self.MANY_TO_ONE, self.ONE_TO_ONE):
             t1 = self.table1
-            c1 = ', '.join(self.col1)
+            c1 = ', '.join(f'"{c.name}"' for c in self.col1)
             t2 = self.table2
-            c2 = ', '.join(self.col2)
+            c2 = ', '.join(f'"{c.name}"' for c in self.col2)
         else:
             t1 = self.table2
-            c1 = ', '.join(self.col2)
+            c1 = ', '.join(f'"{c.name}"' for c in self.col2)
             t2 = self.table1
-            c2 = ', '.join(self.col1)
+            c2 = ', '.join(f'"{c.name}"' for c in self.col1)
 
-        result = (
-            f'ALTER TABLE "{t1.name}" ADD {c}FOREIGN KEY ("{c1.name}") '
-            f'REFERENCES "{t2.name} ("{c2.name}")'
+        result = comment_to_sql(self.comment) if self.comment else ''
+        result += (
+            f'ALTER TABLE "{t1.name}" ADD {c}FOREIGN KEY ({c1}) '
+            f'REFERENCES "{t2.name}" ({c2})'
         )
         if self.on_update:
             result += f' ON UPDATE {self.on_update.upper()}'
@@ -342,7 +344,7 @@ class TableReference(SQLOjbect):
         ref_cols = '", "'.join(c.name for c in self.ref_col)
         result = (
             f'{c}FOREIGN KEY ("{cols}") '
-            f'REFERENCES "{self.ref_table.name} ("{ref_cols}")'
+            f'REFERENCES "{self.ref_table.name}" ("{ref_cols}")'
         )
         if self.on_update:
             result += f' ON UPDATE {self.on_update.upper()}'
@@ -475,9 +477,10 @@ class Column(SQLOjbect):
             components.append('NOT NULL')
         if self.default is not None:
             components.append('DEFAULT ' + str(self.default))
-        if self.note:
-            components.append(self.note.sql)
-        return ' '.join(components)
+
+        result = comment_to_sql(self.comment) if self.comment else ''
+        result += ' '.join(components)
+        return result
 
     @property
     def dbml(self):
@@ -597,7 +600,9 @@ class Index(SQLOjbect):
         self.check_attributes_for_sql()
         keys = ', '.join(f'"{key.name}"' if isinstance(key, Column) else key for key in self.subjects)
         if self.pk:
-            return f'PRIMARY KEY ({keys})'
+            result = comment_to_sql(self.comment) if self.comment else ''
+            result += f'PRIMARY KEY ({keys})'
+            return result
 
         components = ['CREATE']
         if self.unique:
@@ -609,9 +614,8 @@ class Index(SQLOjbect):
         if self.type:
             components.append(f'USING {self.type.upper()}')
         components.append(f'({keys})')
-        result = ' '.join(components) + ';'
-        if self.note:
-            result += f' {self.note.sql}'
+        result = comment_to_sql(self.comment) if self.comment else ''
+        result += ' '.join(components) + ';'
         return result
 
     @property
@@ -754,16 +758,28 @@ class Table(SQLOjbect):
         '''
         self.check_attributes_for_sql()
         components = [f'CREATE TABLE "{self.name}" (']
-        if self.note:
-            components.append(f'  {self.note.sql}')
         body = []
-        body.extend('  ' + c.sql for c in self.columns)
-        body.extend('  ' + i.sql for i in self.indexes if i.pk)
-        body.extend('  ' + r.sql for r in self.refs)
+        body.extend(indent(c.sql, 2) for c in self.columns)
+        body.extend(indent(i.sql, 2) for i in self.indexes if i.pk)
+        body.extend(indent(r.sql, 2) for r in self.refs)
         components.append(',\n'.join(body))
-        components.append(');\n')
-        components.extend(i.sql + '\n' for i in self.indexes if not i.pk)
-        return '\n'.join(components)
+        components.append(');')
+        components.extend('\n' + i.sql for i in self.indexes if not i.pk)
+
+        result = comment_to_sql(self.comment) if self.comment else ''
+        result += '\n'.join(components)
+
+        if self.note:
+            quoted_note = f"'{self.note.text}'"
+            note_sql = f'COMMENT ON TABLE "{self.name}" IS {quoted_note};'
+            result += f'\n\n{note_sql}'
+
+        for col in self.columns:
+            if col.note:
+                quoted_note = f"'{col.note.text}'"
+                note_sql = f'COMMENT ON COLUMN "{self.name}"."{col.name}" IS {quoted_note};'
+                result += f'\n\n{note_sql}'
+        return result
 
     @property
     def dbml(self):
@@ -815,10 +831,9 @@ class EnumItem:
 
     @property
     def sql(self):
-        components = [f"'{self.name}',"]
-        if self.note:
-            components.append(self.note.sql)
-        return ' '.join(components)
+        result = comment_to_sql(self.comment) if self.comment else ''
+        result += f"'{self.name}',"
+        return result
 
     @property
     def dbml(self):
@@ -886,9 +901,11 @@ class Enum(SQLOjbect):
 
         '''
         self.check_attributes_for_sql()
-        return f'CREATE TYPE "{self.name}" AS ENUM (\n' +\
-               '\n'.join(f'  {i.sql}' for i in self.items) +\
-               '\n);'
+        result = comment_to_sql(self.comment) if self.comment else ''
+        result += f'CREATE TYPE "{self.name}" AS ENUM (\n'
+        result +='\n'.join(f'{indent(i.sql, 2)}' for i in self.items)
+        result += '\n);'
+        return result
 
     @property
     def dbml(self):

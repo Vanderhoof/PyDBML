@@ -7,6 +7,7 @@ from pydbml.classes import Index
 from pydbml.classes import Note
 from pydbml.classes import Project
 from pydbml.classes import Reference
+from pydbml.classes import TableReference
 from pydbml.classes import ReferenceBlueprint
 from pydbml.classes import SQLOjbect
 from pydbml.classes import Table
@@ -109,14 +110,6 @@ class TestColumn(TestCase):
         expected = '"id" integer'
         self.assertEqual(r.sql, expected)
 
-    def test_note(self) -> None:
-        n = Note('Column note')
-        r = Column(name='id',
-                   type_='integer',
-                   note=n)
-        expected = '"id" integer -- Column note'
-        self.assertEqual(r.sql, expected)
-
     def test_pk_autoinc(self) -> None:
         r = Column(name='id',
                    type_='integer',
@@ -138,6 +131,17 @@ class TestColumn(TestCase):
                    type_='integer',
                    default=0)
         expected = '"order" integer DEFAULT 0'
+        self.assertEqual(r.sql, expected)
+
+    def test_comment(self) -> None:
+        r = Column(name='id',
+                   type_='integer',
+                   unique=True,
+                   not_null=True,
+                   comment="Column comment")
+        expected = \
+'''-- Column comment
+"id" integer UNIQUE NOT NULL'''
         self.assertEqual(r.sql, expected)
 
     def test_table_setter(self) -> None:
@@ -254,15 +258,17 @@ class TestIndex(TestCase):
         expected = 'CREATE INDEX ON "products" ("id");'
         self.assertEqual(r.sql, expected)
 
-    def test_note(self) -> None:
+    def test_comment(self) -> None:
         t = Table('products')
         t.add_column(Column('id', 'integer'))
-        n = Note('Index note')
         r = Index(subject_names=['id'],
                   table=t,
-                  note=n)
+                  comment='Index comment')
         t.add_index(r)
-        expected = 'CREATE INDEX ON "products" ("id"); -- Index note'
+        expected = \
+'''-- Index comment
+CREATE INDEX ON "products" ("id");'''
+
         self.assertEqual(r.sql, expected)
 
     def test_unique_type_composite(self) -> None:
@@ -334,7 +340,7 @@ class TestTable(TestCase):
         t = Table('products')
         c = Column('id', 'integer')
         t.add_column(c)
-        expected = 'CREATE TABLE "products" (\n  "id" integer\n);\n'
+        expected = 'CREATE TABLE "products" (\n  "id" integer\n);'
         self.assertEqual(t.sql, expected)
 
     def test_ref(self) -> None:
@@ -352,9 +358,8 @@ class TestTable(TestCase):
 '''CREATE TABLE "products" (
   "id" integer,
   "name" varchar2,
-  FOREIGN KEY ("name") REFERENCES "names ("name_val")
-);
-'''
+  FOREIGN KEY ("name") REFERENCES "names" ("name_val")
+);'''
         self.assertEqual(t.sql, expected)
 
     def test_duplicate_ref(self) -> None:
@@ -373,12 +378,30 @@ class TestTable(TestCase):
         with self.assertRaises(DuplicateReferenceError):
             t.add_ref(r2)
 
-    def test_note(self) -> None:
+    def test_notes(self) -> None:
         n = Note('Table note')
+        nc1 = Note('First column note')
+        nc2 = Note('Another column\nmultiline note')
         t = Table('products', note=n)
-        c = Column('id', 'integer')
-        t.add_column(c)
-        expected = 'CREATE TABLE "products" (\n  -- Table note\n  "id" integer\n);\n'
+        c1 = Column('id', 'integer', note=nc1)
+        c2 = Column('name', 'varchar')
+        c3 = Column('country', 'varchar', note=nc2)
+        t.add_column(c1)
+        t.add_column(c2)
+        t.add_column(c3)
+        expected = \
+'''CREATE TABLE "products" (
+  "id" integer,
+  "name" varchar,
+  "country" varchar
+);
+
+COMMENT ON TABLE "products" IS 'Table note';
+
+COMMENT ON COLUMN "products"."id" IS 'First column note';
+
+COMMENT ON COLUMN "products"."country" IS 'Another column
+multiline note';'''
         self.assertEqual(t.sql, expected)
 
     def test_ref_index(self) -> None:
@@ -398,11 +421,10 @@ class TestTable(TestCase):
 '''CREATE TABLE "products" (
   "id" integer,
   "name" varchar2,
-  FOREIGN KEY ("name") REFERENCES "names ("name_val")
+  FOREIGN KEY ("name") REFERENCES "names" ("name_val")
 );
 
-CREATE INDEX ON "products" ("id", "name");
-'''
+CREATE INDEX ON "products" ("id", "name");'''
         self.assertEqual(t.sql, expected)
 
     def test_index_inline(self) -> None:
@@ -418,8 +440,27 @@ CREATE INDEX ON "products" ("id", "name");
   "id" integer,
   "name" varchar2,
   PRIMARY KEY ("id", "name")
-);
-'''
+);'''
+        self.assertEqual(t.sql, expected)
+
+    def test_index_inline_and_comments(self) -> None:
+        t = Table('products', comment='Multiline\ntable comment')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        i = Index(['id', 'name'], pk=True, comment='Multiline\nindex comment')
+        t.add_index(i)
+        expected = \
+'''-- Multiline
+-- table comment
+CREATE TABLE "products" (
+  "id" integer,
+  "name" varchar2,
+  -- Multiline
+  -- index comment
+  PRIMARY KEY ("id", "name")
+);'''
         self.assertEqual(t.sql, expected)
 
     def test_add_column(self) -> None:
@@ -513,6 +554,11 @@ class TestEnumItem(TestCase):
         expected = '"en-US"'
         self.assertEqual(ei.dbml, expected)
 
+    def test_sql(self):
+        ei = EnumItem('en-US')
+        expected = "'en-US',"
+        self.assertEqual(ei.sql, expected)
+
     def test_dbml_full(self):
         ei = EnumItem('en-US', note='preferred', comment='EnumItem comment')
         expected = \
@@ -539,20 +585,23 @@ class TestEnum(TestCase):
 );'''
         self.assertEqual(e.sql, expected)
 
-    def test_notes(self) -> None:
-        n = Note('EnumItem note')
+    def test_comments(self) -> None:
         items = [
-            EnumItem('created', note=n),
+            EnumItem('created', comment='EnumItem comment'),
             EnumItem('running'),
-            EnumItem('donef', note=n),
+            EnumItem('donef', comment='EnumItem\nmultiline comment'),
             EnumItem('failure'),
         ]
-        e = Enum('job_status', items)
+        e = Enum('job_status', items, comment='Enum comment')
         expected = \
-'''CREATE TYPE "job_status" AS ENUM (
-  'created', -- EnumItem note
+'''-- Enum comment
+CREATE TYPE "job_status" AS ENUM (
+  -- EnumItem comment
+  'created',
   'running',
-  'donef', -- EnumItem note
+  -- EnumItem
+  -- multiline comment
+  'donef',
   'failure',
 );'''
         self.assertEqual(e.sql, expected)
@@ -586,7 +635,135 @@ Enum "lang" {
         self.assertEqual(e.dbml, expected)
 
 
+
+class TestTableReference(TestCase):
+    def test_sql_single(self):
+        t = Table('products')
+        c1 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t2 = Table('names')
+        c2 = Column('name_val', 'varchar2')
+        t2.add_column(c2)
+        ref = TableReference(
+            c1, t2, c2)
+
+        expected = 'FOREIGN KEY ("name") REFERENCES "names" ("name_val")'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_multiple(self):
+        t = Table('products')
+        c11 = Column('name', 'varchar2')
+        c12 = Column('country', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        c22 = Column('country_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = TableReference(
+            [c11, c12],
+            t2,
+            (c21, c22)
+        )
+
+        expected = 'FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val")'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_full(self):
+        t = Table('products')
+        c11 = Column('name', 'varchar2')
+        c12 = Column('country', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        c22 = Column('country_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = TableReference(
+            [c11, c12],
+            t2,
+            (c21, c22),
+            name="country_name",
+            on_delete='SET NULL',
+            on_update='CASCADE'
+        )
+
+        expected = 'CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val") ON UPDATE CASCADE ON DELETE SET NULL'
+        self.assertEqual(ref.sql, expected)
+
 class TestReference(TestCase):
+    def test_sql_single(self):
+        t = Table('products')
+        c1 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t2 = Table('names')
+        c2 = Column('name_val', 'varchar2')
+        t2.add_column(c2)
+        ref = Reference('>', t, c1, t2, c2)
+
+        expected = 'ALTER TABLE "products" ADD FOREIGN KEY ("name") REFERENCES "names" ("name_val");'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_reverse(self):
+        t = Table('products')
+        c1 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t2 = Table('names')
+        c2 = Column('name_val', 'varchar2')
+        t2.add_column(c2)
+        ref = Reference('<', t, c1, t2, c2)
+
+        expected = 'ALTER TABLE "names" ADD FOREIGN KEY ("name_val") REFERENCES "products" ("name");'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_multiple(self):
+        t = Table('products')
+        c11 = Column('name', 'varchar2')
+        c12 = Column('country', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        c22 = Column('country_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = Reference('>', t, [c11, c12], t2, (c21, c22))
+
+        expected = 'ALTER TABLE "products" ADD FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val");'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_full(self):
+        t = Table('products')
+        c11 = Column('name', 'varchar2')
+        c12 = Column('country', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        c22 = Column('country_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = Reference(
+            '>',
+            t,
+            [c11, c12],
+            t2,
+            (c21, c22),
+            name="country_name",
+            comment="Multiline\ncomment for the constraint",
+            on_update="CASCADE",
+            on_delete="SET NULL"
+        )
+
+        expected = \
+'''-- Multiline
+-- comment for the constraint
+ALTER TABLE "products" ADD CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val") ON UPDATE CASCADE ON DELETE SET NULL;'''
+
+        self.assertEqual(ref.sql, expected)
+
     def test_dbml_simple(self):
         t = Table('products')
         c1 = Column('id', 'integer')

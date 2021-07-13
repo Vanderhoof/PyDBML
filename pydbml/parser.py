@@ -267,7 +267,7 @@ class PyDBMLParseResults:
         '''Returs SQL of the parsed results'''
 
         components = (i.sql for i in (*self.enums, *self.tables))
-        return '\n'.join(components)
+        return '\n\n'.join(components)
 
     @property
     def dbml(self):
