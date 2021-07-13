@@ -7,6 +7,7 @@ from pydbml.classes import Index
 from pydbml.classes import Note
 from pydbml.classes import Project
 from pydbml.classes import Reference
+from pydbml.classes import TableReference
 from pydbml.classes import ReferenceBlueprint
 from pydbml.classes import SQLOjbect
 from pydbml.classes import Table
@@ -352,7 +353,7 @@ class TestTable(TestCase):
 '''CREATE TABLE "products" (
   "id" integer,
   "name" varchar2,
-  FOREIGN KEY ("name") REFERENCES "names ("name_val")
+  FOREIGN KEY ("name") REFERENCES "names" ("name_val")
 );
 '''
         self.assertEqual(t.sql, expected)
@@ -398,7 +399,7 @@ class TestTable(TestCase):
 '''CREATE TABLE "products" (
   "id" integer,
   "name" varchar2,
-  FOREIGN KEY ("name") REFERENCES "names ("name_val")
+  FOREIGN KEY ("name") REFERENCES "names" ("name_val")
 );
 
 CREATE INDEX ON "products" ("id", "name");
@@ -586,6 +587,64 @@ Enum "lang" {
         self.assertEqual(e.dbml, expected)
 
 
+
+class TestTableReference(TestCase):
+    def test_sql_single(self):
+        t = Table('products')
+        c1 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t2 = Table('names')
+        c2 = Column('name_val', 'varchar2')
+        t2.add_column(c2)
+        ref = TableReference(
+            c1, t2, c2)
+
+        expected = 'FOREIGN KEY ("name") REFERENCES "names" ("name_val")'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_multiple(self):
+        t = Table('products')
+        c11 = Column('name', 'varchar2')
+        c12 = Column('country', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        c22 = Column('country_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = TableReference(
+            [c11, c12],
+            t2,
+            (c21, c22)
+        )
+
+        expected = 'FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val")'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_full(self):
+        t = Table('products')
+        c11 = Column('name', 'varchar2')
+        c12 = Column('country', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        c22 = Column('country_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = TableReference(
+            [c11, c12],
+            t2,
+            (c21, c22),
+            name="country_name",
+            on_delete='SET NULL',
+            on_update='CASCADE'
+        )
+
+        expected = 'CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val") ON UPDATE CASCADE ON DELETE SET NULL'
+        self.assertEqual(ref.sql, expected)
+
 class TestReference(TestCase):
     def test_sql_single(self):
         t = Table('products')
@@ -597,6 +656,18 @@ class TestReference(TestCase):
         ref = Reference('>', t, c1, t2, c2)
 
         expected = 'ALTER TABLE "products" ADD FOREIGN KEY ("name") REFERENCES "names" ("name_val");'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_reverse(self):
+        t = Table('products')
+        c1 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t2 = Table('names')
+        c2 = Column('name_val', 'varchar2')
+        t2.add_column(c2)
+        ref = Reference('<', t, c1, t2, c2)
+
+        expected = 'ALTER TABLE "names" ADD FOREIGN KEY ("name_val") REFERENCES "products" ("name");'
         self.assertEqual(ref.sql, expected)
 
     def test_sql_multiple(self):

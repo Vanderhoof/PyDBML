@@ -1,6 +1,7 @@
 # 0.4.1
 
 - Reworked `__repr__` and `__str__` methods on all classes.
+- Fix: sql for Reference and TableReference.
 
 # 0.4.0
 

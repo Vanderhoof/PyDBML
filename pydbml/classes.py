@@ -344,7 +344,7 @@ class TableReference(SQLOjbect):
         ref_cols = '", "'.join(c.name for c in self.ref_col)
         result = (
             f'{c}FOREIGN KEY ("{cols}") '
-            f'REFERENCES "{self.ref_table.name} ("{ref_cols}")'
+            f'REFERENCES "{self.ref_table.name}" ("{ref_cols}")'
         )
         if self.on_update:
             result += f' ON UPDATE {self.on_update.upper()}'
