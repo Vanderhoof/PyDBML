@@ -12,6 +12,7 @@ from .exceptions import AttributeMissingError
 from .exceptions import ColumnNotFoundError
 from .exceptions import DuplicateReferenceError
 from .tools import comment_to_dbml
+from .tools import comment_to_sql
 from .tools import indent
 from .tools import note_option_to_dbml
 
@@ -213,18 +214,19 @@ class Reference(SQLOjbect):
 
         if self.type in (self.MANY_TO_ONE, self.ONE_TO_ONE):
             t1 = self.table1
-            c1 = ', '.join(self.col1)
+            c1 = ', '.join(f'"{c.name}"' for c in self.col1)
             t2 = self.table2
-            c2 = ', '.join(self.col2)
+            c2 = ', '.join(f'"{c.name}"' for c in self.col2)
         else:
             t1 = self.table2
-            c1 = ', '.join(self.col2)
+            c1 = ', '.join(f'"{c.name}"' for c in self.col2)
             t2 = self.table1
-            c2 = ', '.join(self.col1)
+            c2 = ', '.join(f'"{c.name}"' for c in self.col1)
 
-        result = (
-            f'ALTER TABLE "{t1.name}" ADD {c}FOREIGN KEY ("{c1.name}") '
-            f'REFERENCES "{t2.name} ("{c2.name}")'
+        result = comment_to_sql(self.comment) if self.comment else ''
+        result += (
+            f'ALTER TABLE "{t1.name}" ADD {c}FOREIGN KEY ({c1}) '
+            f'REFERENCES "{t2.name}" ({c2})'
         )
         if self.on_update:
             result += f' ON UPDATE {self.on_update.upper()}'

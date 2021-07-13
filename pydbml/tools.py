@@ -6,6 +6,10 @@ def comment_to_dbml(val: str) -> str:
     return '\n'.join(f'// {cl}' for cl in val.split('\n')) + '\n'
 
 
+def comment_to_sql(val: str) -> str:
+    return '\n'.join(f'-- {cl}' for cl in val.split('\n')) + '\n'
+
+
 def note_option_to_dbml(val: 'Note') -> str:
     if '\n' in val.text:
         return f"note: '''{val.text}'''"
