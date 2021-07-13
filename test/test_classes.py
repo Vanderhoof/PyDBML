@@ -587,6 +587,64 @@ Enum "lang" {
 
 
 class TestReference(TestCase):
+    def test_sql_single(self):
+        t = Table('products')
+        c1 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t2 = Table('names')
+        c2 = Column('name_val', 'varchar2')
+        t2.add_column(c2)
+        ref = Reference('>', t, c1, t2, c2)
+
+        expected = 'ALTER TABLE "products" ADD FOREIGN KEY ("name") REFERENCES "names" ("name_val");'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_multiple(self):
+        t = Table('products')
+        c11 = Column('name', 'varchar2')
+        c12 = Column('country', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        c22 = Column('country_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = Reference('>', t, [c11, c12], t2, (c21, c22))
+
+        expected = 'ALTER TABLE "products" ADD FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val");'
+        self.assertEqual(ref.sql, expected)
+
+    def test_sql_full(self):
+        t = Table('products')
+        c11 = Column('name', 'varchar2')
+        c12 = Column('country', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        c22 = Column('country_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = Reference(
+            '>',
+            t,
+            [c11, c12],
+            t2,
+            (c21, c22),
+            name="country_name",
+            comment="Multiline\ncomment for the constraint",
+            on_update="CASCADE",
+            on_delete="SET NULL"
+        )
+
+        expected = \
+'''-- Multiline
+-- comment for the constraint
+ALTER TABLE "products" ADD CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val") ON UPDATE CASCADE ON DELETE SET NULL;'''
+
+        self.assertEqual(ref.sql, expected)
+
     def test_dbml_simple(self):
         t = Table('products')
         c1 = Column('id', 'integer')
