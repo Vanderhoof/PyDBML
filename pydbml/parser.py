@@ -240,8 +240,9 @@ class PyDBMLParseResults:
         enum_dict = {enum.name: enum for enum in self.enums}
         for table_ in self.tables:
             for col in table_:
-                if str(col.type) in enum_dict:
-                    col.type = enum_dict[str(col.type)].get_type()
+                col_type = str(col.type).strip('"')
+                if col_type in enum_dict:
+                    col.type = enum_dict[col_type]
 
     def _validate(self):
         self._validate_table_groups()

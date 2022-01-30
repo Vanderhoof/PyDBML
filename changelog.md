@@ -1,3 +1,11 @@
+# 0.4.2
+
+- Fix: after editing column name index dbml was not updated.
+- Fix: enums with spaces in name were not applied.
+- Fix: after editing column name table dict was not updated.
+- Fix: after editing enum column type was not updated.
+- Removed EnumType class. Only Enum is used now.
+
 # 0.4.1
 
 - Reworked `__repr__` and `__str__` methods on all classes. They are now much simplier and more readable.

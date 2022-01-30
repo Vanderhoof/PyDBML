@@ -81,3 +81,16 @@ class TestColumn(EditingTestCase):
         col.name = 'changed_merchant_id'
         table_ref = products.refs[0]
         self.assertIn('FOREIGN KEY ("changed_merchant_id")', table_ref.sql)
+
+
+class TestEnum(EditingTestCase):
+    def test_enum_name(self):
+        products = self.dbml['products']
+        enum = self.dbml.enums[0]
+        enum.name = 'changed product status'
+        self.assertIn('CREATE TYPE "changed product status"', enum.sql)
+        self.assertIn('Enum "changed product status"', enum.dbml)
+
+        col = products['status']
+        self.assertEqual(col.sql, '"status" changed product status')
+        self.assertEqual(col.dbml, '"status" changed product status')
