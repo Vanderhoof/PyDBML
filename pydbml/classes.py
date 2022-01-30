@@ -857,7 +857,7 @@ class Enum(SQLOjbect):
         self.comment = comment
 
     def get_type(self):
-        return EnumType(self.name, self.items)
+        return self
 
     def __getitem__(self, key) -> EnumItem:
         return self.items[key]
