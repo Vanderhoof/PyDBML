@@ -17,7 +17,6 @@ from .tools import indent
 from .tools import note_option_to_dbml
 
 
-
 class SQLOjbect:
     '''
     Base class for all SQL objects.
@@ -546,7 +545,7 @@ class Index(SQLOjbect):
                  pk: bool = False,
                  note: Optional[Note] = None,
                  comment: Optional[str] = None):
-        self.subject_names = subject_names
+        self._subject_names = subject_names
         self.subjects: List[Union[Column, str]] = []
 
         self.name = name if name else None
@@ -556,6 +555,16 @@ class Index(SQLOjbect):
         self.pk = pk
         self.note = Note(note)
         self.comment = comment
+
+    @property
+    def subject_names(self):
+        '''
+        For backward compatibility. Returns updated list of subject names.
+        '''
+        if self.subjects:
+            return [s.name if isinstance(s, Column) else s for s in self.subjects]
+        else:
+            return self._subject_names
 
     def __repr__(self):
         '''
@@ -569,7 +578,6 @@ class Index(SQLOjbect):
         table_name = self.table.name if self.table else None
         return f"<Index {table_name!r}, {self.subject_names!r}>"
 
-
     def __str__(self):
         '''
         >>> print(Index(['name', 'type']))
@@ -580,7 +588,7 @@ class Index(SQLOjbect):
         '''
 
         table_name = self.table.name if self.table else ''
-        subjects = ', '.join(s for s in self.subject_names)
+        subjects = ', '.join(self.subject_names)
         return f"Index({table_name}[{subjects}])"
 
     @property
@@ -628,10 +636,12 @@ class Index(SQLOjbect):
 
         result = comment_to_dbml(self.comment) if self.comment else ''
 
-        if len(self.subject_names) > 1:
-            result += f'({", ".join(subject_to_str(sn) for sn in self.subject_names)})'
+        subject_names = self.subject_names
+
+        if len(subject_names) > 1:
+            result += f'({", ".join(subject_to_str(sn) for sn in subject_names)})'
         else:
-            result += subject_to_str(self.subject_names[0])
+            result += subject_to_str(subject_names[0])
 
         options = []
         if self.name:
@@ -665,7 +675,6 @@ class Table(SQLOjbect):
         self.name = name
         self.columns: List[Column] = []
         self.indexes: List[Index] = []
-        self.column_dict: Dict[str, Column] = {}
         self.alias = alias if alias else None
         self.note = Note(note)
         self.header_color = header_color
@@ -679,14 +688,13 @@ class Table(SQLOjbect):
         '''
         c.table = self
         self.columns.append(c)
-        self.column_dict[c.name] = c
 
     def add_index(self, i: Index) -> None:
         '''
         Adds index to self.indexes attribute and sets in this index the
         `table` attribute.
         '''
-        for subj in i.subject_names:
+        for subj in i._subject_names:
             if subj.startswith('(') and subj.endswith(')'):
                 # subject is an expression, add it as string
                 i.subjects.append(subj)
@@ -713,10 +721,16 @@ class Table(SQLOjbect):
         if isinstance(k, int):
             return self.columns[k]
         else:
-            return self.column_dict[k]
+            for c in self.columns:
+                if c.name == k:
+                    return c
+            raise KeyError(k)
 
     def get(self, k, default=None):
-        return self.column_dict.get(k, default)
+        try:
+            return self.__getitem__(k)
+        except KeyError:
+            return default
 
     def __iter__(self):
         return iter(self.columns)
@@ -844,7 +858,6 @@ class EnumItem:
         return result
 
 
-
 class Enum(SQLOjbect):
     required_attributes = ('name', 'items')
 
@@ -915,7 +928,6 @@ class Enum(SQLOjbect):
         result += indent(items_str)
         result += '\n}'
         return result
-
 
 
 class EnumType(Enum):
