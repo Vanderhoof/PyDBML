@@ -1,6 +1,6 @@
 import pyparsing as pp
 
-from pydbml.classes import Note
+from pydbml.parser.blueprints import NoteBlueprint
 
 from .generic import string_literal
 
@@ -23,10 +23,10 @@ end = n | pp.StringEnd()
 # n = pp.Suppress('\n')[1, ...]
 
 note = pp.CaselessLiteral("note:") + _ - string_literal('text')
-note.setParseAction(lambda s, l, t: Note(t['text']))
+note.setParseAction(lambda s, l, t: NoteBlueprint(t['text']))
 
 note_object = pp.CaselessLiteral('note') + _ - '{' + _ - string_literal('text') + _ - '}'
-note_object.setParseAction(lambda s, l, t: Note(t['text']))
+note_object.setParseAction(lambda s, l, t: NoteBlueprint(t['text']))
 
 pk = pp.CaselessLiteral("pk")
 unique = pp.CaselessLiteral("unique")

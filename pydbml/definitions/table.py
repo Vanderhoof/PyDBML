@@ -1,6 +1,6 @@
 import pyparsing as pp
 
-from pydbml.classes import Table
+from pydbml.parser.blueprints import TableBlueprint
 
 from .column import table_column
 from .common import _
@@ -79,14 +79,14 @@ def parse_table(s, l, t):
     if 'note' in t:
         # will override one from settings
         init_dict['note'] = t['note'][0]
+    if 'indexes' in t:
+        init_dict['indexes'] = t['indexes']
+    if 'columns' in t:
+        init_dict['columns'] = t['columns']
     if'comment_before' in t:
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment
-    result = Table(**init_dict)
-    for column in t['columns']:
-        result.add_column(column)
-    for index_ in t.get('indexes', []):
-        result.add_index(index_)
+    result = TableBlueprint(**init_dict)
 
     return result
 

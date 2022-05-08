@@ -1,6 +1,6 @@
 import pyparsing as pp
 
-from pydbml.classes import ReferenceBlueprint
+from pydbml.parser.blueprints import ReferenceBlueprint
 
 from .common import _
 from .common import _c
@@ -18,7 +18,8 @@ def parse_inline_relation(s, l, t):
     '''
     ref: < table.column
     '''
-    return ReferenceBlueprint(type_=t['type'],
+    return ReferenceBlueprint(type=t['type'],
+                              inline=True,
                               table2=t['table'],
                               col2=t['field'])
 
@@ -107,7 +108,8 @@ def parse_ref(s, l, t):
     }
     '''
     init_dict = {
-        'type_': t['type'],
+        'type': t['type'],
+        'inline': False,
         'table1': t['table1'],
         'col1': t['field1'],
         'table2': t['table2'],

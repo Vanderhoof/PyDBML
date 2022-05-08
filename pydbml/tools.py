@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .classes import Note
 
+
 def comment_to_dbml(val: str) -> str:
     return '\n'.join(f'// {cl}' for cl in val.split('\n')) + '\n'
 

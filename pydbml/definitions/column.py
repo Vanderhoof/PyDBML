@@ -1,6 +1,6 @@
 import pyparsing as pp
 
-from pydbml.classes import Column
+from pydbml.parser.blueprints import ColumnBlueprint
 
 from .common import _
 from .common import _c
@@ -25,7 +25,7 @@ type_name = (pp.Word(pp.alphanums + '_') | pp.dblQuotedString())('name')
 column_type = (type_name + type_args[0, 1])
 
 
-def parse_column_type(s, l, t):
+def parse_column_type(s, l, t) -> str:
     '''
     int or "mytype" or varchar(255)
     '''
@@ -115,7 +115,7 @@ def parse_column(s, l, t):
     '''
     init_dict = {
         'name': t['name'],
-        'type_': t['type'],
+        'type': t['type'],
     }
     # deprecated
     for constraint in t.get('constraints', []):
@@ -134,7 +134,7 @@ def parse_column(s, l, t):
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment
 
-    return Column(**init_dict)
+    return ColumnBlueprint(**init_dict)
 
 
 table_column.setParseAction(parse_column)
