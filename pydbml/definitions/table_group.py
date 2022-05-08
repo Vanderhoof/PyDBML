@@ -1,6 +1,6 @@
 import pyparsing as pp
 
-from pydbml.classes import TableGroup
+from pydbml.parser.blueprints import TableGroupBlueprint
 
 from .common import _
 from .common import _c
@@ -33,7 +33,7 @@ def parse_table_group(s, l, t):
     if 'comment_before' in t:
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment
-    return TableGroup(**init_dict)
+    return TableGroupBlueprint(**init_dict)
 
 
 table_group.setParseAction(parse_table_group)

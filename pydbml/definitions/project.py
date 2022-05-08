@@ -1,7 +1,7 @@
 import pyparsing as pp
 
-from pydbml.classes import Note
-from pydbml.classes import Project
+from pydbml.parser.blueprints import NoteBlueprint
+from pydbml.parser.blueprints import ProjectBlueprint
 
 from .common import _
 from .common import _c
@@ -37,7 +37,7 @@ def parse_project(s, l, t):
     init_dict = {'name': t['name']}
     items = {}
     for item in t.get('items', []):
-        if isinstance(item, Note):
+        if isinstance(item, NoteBlueprint):
             init_dict['note'] = item
         else:
             k, v = item
@@ -47,7 +47,7 @@ def parse_project(s, l, t):
     if 'comment_before' in t:
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment
-    return Project(**init_dict)
+    return ProjectBlueprint(**init_dict)
 
 
 project.setParseAction(parse_project)

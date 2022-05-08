@@ -1,7 +1,7 @@
 import pyparsing as pp
 
-from pydbml.classes import Enum
-from pydbml.classes import EnumItem
+from pydbml.parser.blueprints import EnumBlueprint
+from pydbml.parser.blueprints import EnumItemBlueprint
 
 from .common import _
 from .common import _c
@@ -48,7 +48,7 @@ def parse_enum_item(s, l, t):
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment
 
-    return EnumItem(**init_dict)
+    return EnumItemBlueprint(**init_dict)
 
 
 enum_item.setParseAction(parse_enum_item)
@@ -82,7 +82,7 @@ def parse_enum(s, l, t):
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment
 
-    return Enum(**init_dict)
+    return EnumBlueprint(**init_dict)
 
 
 enum.setParseAction(parse_enum)

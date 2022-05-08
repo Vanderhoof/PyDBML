@@ -1,6 +1,6 @@
 import pyparsing as pp
 
-from pydbml.classes import Index
+from pydbml.parser.blueprints import IndexBlueprint
 
 from .common import _
 from .common import _c
@@ -41,7 +41,7 @@ def parse_index_settings(s, l, t):
     if 'pk' in t:
         result['pk'] = True
     if 'type' in t:
-        result['type_'] = t['type']
+        result['type'] = t['type']
     if 'note' in t:
         result['note'] = t['note']
     if 'comment' in t:
@@ -99,7 +99,7 @@ def parse_index(s, l, t):
     if 'comment' not in init_dict and 'comment_before' in t:
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment
-    return Index(**init_dict)
+    return IndexBlueprint(**init_dict)
 
 
 index.setParseAction(parse_index)
