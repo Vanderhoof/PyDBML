@@ -21,5 +21,6 @@ class DuplicateReferenceError(Exception):
 class UnknownSchemaError(Exception):
     pass
 
+
 class DBMLError(Exception):
     pass

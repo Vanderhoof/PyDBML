@@ -6,22 +6,20 @@ from typing import Literal
 from typing import Optional
 from typing import Union
 
+from pydbml.constants import MANY_TO_ONE
+from pydbml.constants import ONE_TO_MANY
+from pydbml.constants import ONE_TO_ONE
 from pydbml.classes import Column
+from pydbml.classes import Enum
+from pydbml.classes import EnumItem
 from pydbml.classes import Index
 from pydbml.classes import Note
 from pydbml.classes import Project
 from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
-from pydbml.classes import EnumItem
-from pydbml.classes import Enum
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
-
-
-ONE_TO_MANY = '<'
-MANY_TO_ONE = '>'
-ONE_TO_ONE = '-'
 
 
 class Blueprint:

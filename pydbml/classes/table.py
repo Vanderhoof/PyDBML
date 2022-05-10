@@ -8,9 +8,9 @@ from .column import Column
 from .index import Index
 from .note import Note
 from .reference import Reference
-from pydbml import MANY_TO_ONE
-from pydbml import ONE_TO_MANY
-from pydbml import ONE_TO_ONE
+from pydbml.constants import MANY_TO_ONE
+from pydbml.constants import ONE_TO_MANY
+from pydbml.constants import ONE_TO_ONE
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import IndexNotFoundError
 from pydbml.exceptions import UnknownSchemaError

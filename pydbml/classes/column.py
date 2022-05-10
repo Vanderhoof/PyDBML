@@ -45,6 +45,9 @@ class Column(SQLOjbect):
         self.table: Optional['Table'] = None
 
     def get_refs(self) -> List['Reference']:
+        '''
+        get all references related to this column (where this col is col1 in ref)
+        '''
         if not self.table:
             raise TableNotFoundError('Table for the column is not set')
         return [ref for ref in self.table.get_refs() if ref.col1 == self]
