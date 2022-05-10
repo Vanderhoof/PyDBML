@@ -6,9 +6,9 @@ from typing import Union
 
 from .base import SQLOjbect
 from .column import Column
-from pydbml import MANY_TO_ONE
-from pydbml import ONE_TO_MANY
-from pydbml import ONE_TO_ONE
+from pydbml.constants import MANY_TO_ONE
+from pydbml.constants import ONE_TO_MANY
+from pydbml.constants import ONE_TO_ONE
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
 from pydbml.exceptions import DBMLError
@@ -149,9 +149,10 @@ class Reference(SQLOjbect):
     @property
     def dbml(self):
         if self.inline:
+            # settings are ignored for inline ref
             if len(self.col2) > 1:
                 raise DBMLError('Cannot render DBML: composite ref cannot be inline')
-            return f'ref: {self.type} {self.table2.name}.{self.col2[0].name}'
+            return f'ref: {self.type} "{self.table2.name}"."{self.col2[0].name}"'
         else:
             result = comment_to_dbml(self.comment) if self.comment else ''
             result += 'Ref'

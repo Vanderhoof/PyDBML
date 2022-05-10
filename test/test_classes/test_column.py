@@ -118,3 +118,5 @@ multiline''']"""
         c.default = 'false'
         expected = '"order" integer [default: false]'
         self.assertEqual(c.dbml, expected)
+
+# TODO: test ref inline
