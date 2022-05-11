@@ -31,7 +31,6 @@ class Column(SQLOjbect):
                  note: Optional[Union['Note', str]] = None,
                  # ref_blueprints: Optional[List[ReferenceBlueprint]] = None,
                  comment: Optional[str] = None):
-        self.schema = None
         self.name = name
         self.type = type_
         self.unique = unique
@@ -46,11 +45,15 @@ class Column(SQLOjbect):
 
     def get_refs(self) -> List['Reference']:
         '''
-        get all references related to this column (where this col is col1 in ref)
+        get all references related to this column (where this col is col1 in)
         '''
         if not self.table:
             raise TableNotFoundError('Table for the column is not set')
-        return [ref for ref in self.table.get_refs() if ref.col1 == self]
+        return [ref for ref in self.table.get_refs() if self in ref.col1]
+
+    @property
+    def schema(self):
+        return self.table.schema if self.table else None
 
     @property
     def sql(self):
@@ -93,7 +96,7 @@ class Column(SQLOjbect):
         result = comment_to_dbml(self.comment) if self.comment else ''
         result += f'"{self.name}" {self.type}'
 
-        options = [ref.dbml() for ref in self.get_refs() if ref.inline]
+        options = [ref.dbml for ref in self.get_refs() if ref.inline]
         if self.pk:
             options.append('pk')
         if self.autoinc:

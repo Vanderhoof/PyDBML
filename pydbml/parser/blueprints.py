@@ -71,9 +71,7 @@ class ReferenceBlueprint(Blueprint):
         return Reference(
             type_=self.type,
             inline=self.inline,
-            table1=table1,
             col1=col1,
-            table2=table2,
             col2=col2,
             name=self.name,
             comment=self.comment,

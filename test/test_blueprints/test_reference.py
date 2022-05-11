@@ -39,9 +39,7 @@ class TestReferenceBlueprint(TestCase):
         self.assertEqual(result.type, bp.type)
         self.assertEqual(result.inline, bp.inline)
         self.assertEqual(parserMock.locate_table.call_count, 2)
-        self.assertEqual(result.table1, t1)
         self.assertEqual(result.col1, [c1])
-        self.assertEqual(result.table2, t2)
         self.assertEqual(result.col2, [c2])
 
     def test_tables_and_cols_are_set(self) -> None:

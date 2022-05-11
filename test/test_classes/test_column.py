@@ -1,6 +1,9 @@
 from unittest import TestCase
 
+from pydbml.schema import Schema
 from pydbml.classes import Column
+from pydbml.classes import Table
+from pydbml.classes import Reference
 
 
 class TestColumn(TestCase):
@@ -49,6 +52,10 @@ class TestColumn(TestCase):
             name='order',
             type_='integer'
         )
+        t = Table(name='Test')
+        t.add_column(c)
+        s = Schema()
+        s.add(t)
         expected = '"order" integer'
 
         self.assertEqual(c.dbml, expected)
@@ -65,6 +72,10 @@ class TestColumn(TestCase):
             note='Note on the column',
             comment='Comment on the column'
         )
+        t = Table(name='Test')
+        t.add_column(c)
+        s = Schema()
+        s.add(t)
         expected = \
 '''// Comment on the column
 "order" integer [pk, increment, default: 'Def_value', unique, not null, note: 'Note on the column']'''
@@ -79,6 +90,10 @@ class TestColumn(TestCase):
             note='Note on the column\nmultiline',
             comment='Comment on the column'
         )
+        t = Table(name='Test')
+        t.add_column(c)
+        s = Schema()
+        s.add(t)
         expected = \
 """// Comment on the column
 "order" integer [not null, note: '''Note on the column
@@ -92,6 +107,11 @@ multiline''']"""
             type_='integer',
             default='String value'
         )
+        t = Table(name='Test')
+        t.add_column(c)
+        s = Schema()
+        s.add(t)
+
         expected = "\"order\" integer [default: 'String value']"
         self.assertEqual(c.dbml, expected)
 
@@ -119,4 +139,73 @@ multiline''']"""
         expected = '"order" integer [default: false]'
         self.assertEqual(c.dbml, expected)
 
-# TODO: test ref inline
+    def test_schema(self):
+        c1 = Column(name='client_id', type_='integer')
+        t1 = Table(name='products')
+
+        self.assertIsNone(c1.schema)
+        t1.add_column(c1)
+        self.assertIsNone(c1.schema)
+        s = Schema()
+        s.add(t1)
+        self.assertIs(c1.schema, s)
+
+    def test_get_refs(self) -> None:
+        c1 = Column(name='client_id', type_='integer')
+        t1 = Table(name='products')
+        t1.add_column(c1)
+        c2 = Column(name='id', type_='integer', autoinc=True, pk=True)
+        t2 = Table(name='clients')
+        t2.add_column(c2)
+
+        ref = Reference(type_='>', col1=c1, col2=c2, inline=True)
+        s = Schema()
+        s.add(t1)
+        s.add(t2)
+        s.add(ref)
+
+        self.assertEqual(c1.get_refs(), [ref])
+
+    def test_dbml_with_ref(self) -> None:
+        c1 = Column(name='client_id', type_='integer')
+        t1 = Table(name='products')
+        t1.add_column(c1)
+        c2 = Column(name='id', type_='integer', autoinc=True, pk=True)
+        t2 = Table(name='clients')
+        t2.add_column(c2)
+
+        ref = Reference(type_='>', col1=c1, col2=c2)
+        s = Schema()
+        s.add(t1)
+        s.add(t2)
+        s.add(ref)
+
+        expected = '"client_id" integer'
+        self.assertEqual(c1.dbml, expected)
+        ref.inline = True
+        expected = '"client_id" integer [ref: > "clients"."id"]'
+        self.assertEqual(c1.dbml, expected)
+        expected = '"id" integer [pk, increment]'
+        self.assertEqual(c2.dbml, expected)
+
+    def test_dbml_with_ref_and_properties(self) -> None:
+        c1 = Column(name='client_id', type_='integer')
+        t1 = Table(name='products')
+        t1.add_column(c1)
+        c2 = Column(name='id', type_='integer', autoinc=True, pk=True)
+        t2 = Table(name='clients')
+        t2.add_column(c2)
+
+        ref = Reference(type_='<', col1=c2, col2=c1)
+        s = Schema()
+        s.add(t1)
+        s.add(t2)
+        s.add(ref)
+
+        expected = '"id" integer [pk, increment]'
+        self.assertEqual(c2.dbml, expected)
+        ref.inline = True
+        expected = '"id" integer [ref: < "products"."client_id", pk, increment]'
+        self.assertEqual(c2.dbml, expected)
+        expected = '"client_id" integer'
+        self.assertEqual(c1.dbml, expected)

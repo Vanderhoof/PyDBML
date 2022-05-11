@@ -3,6 +3,7 @@ from pydbml.classes import Column
 from pydbml.classes import Table
 from pydbml.classes import Reference
 from pydbml.exceptions import DBMLError
+from pydbml.exceptions import TableNotFoundError
 
 
 class TestReference(TestCase):
@@ -13,7 +14,7 @@ class TestReference(TestCase):
         t2 = Table('names')
         c2 = Column('name_val', 'varchar2')
         t2.add_column(c2)
-        ref = Reference('>', t, c1, t2, c2)
+        ref = Reference('>', c1, c2)
 
         expected = 'ALTER TABLE "products" ADD FOREIGN KEY ("name") REFERENCES "names" ("name_val");'
         self.assertEqual(ref.sql, expected)
@@ -25,7 +26,7 @@ class TestReference(TestCase):
         t2 = Table('names')
         c2 = Column('name_val', 'varchar2')
         t2.add_column(c2)
-        ref = Reference('<', t, c1, t2, c2)
+        ref = Reference('<', c1, c2)
 
         expected = 'ALTER TABLE "names" ADD FOREIGN KEY ("name_val") REFERENCES "products" ("name");'
         self.assertEqual(ref.sql, expected)
@@ -41,7 +42,7 @@ class TestReference(TestCase):
         c22 = Column('country_val', 'varchar2')
         t2.add_column(c21)
         t2.add_column(c22)
-        ref = Reference('>', t, [c11, c12], t2, (c21, c22))
+        ref = Reference('>', [c11, c12], (c21, c22))
 
         expected = 'ALTER TABLE "products" ADD FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val");'
         self.assertEqual(ref.sql, expected)
@@ -59,9 +60,7 @@ class TestReference(TestCase):
         t2.add_column(c22)
         ref = Reference(
             '>',
-            t,
             [c11, c12],
-            t2,
             (c21, c22),
             name="country_name",
             comment="Multiline\ncomment for the constraint",
@@ -85,7 +84,7 @@ ALTER TABLE "products" ADD CONSTRAINT "country_name" FOREIGN KEY ("name", "count
         t2 = Table('names')
         c21 = Column('name_val', 'varchar2')
         t2.add_column(c21)
-        ref = Reference('>', t, c2, t2, c21)
+        ref = Reference('>', c2, c21)
 
         expected = \
 '''Ref {
@@ -108,9 +107,7 @@ ALTER TABLE "products" ADD CONSTRAINT "country_name" FOREIGN KEY ("name", "count
         t2.add_column(c22)
         ref = Reference(
             '<',
-            t,
             [c2, c3],
-            t2,
             (c21, c22),
             name='nameref',
             comment='Reference comment\nmultiline',
@@ -135,7 +132,7 @@ class TestReferenceInline(TestCase):
         t2 = Table('names')
         c2 = Column('name_val', 'varchar2')
         t2.add_column(c2)
-        ref = Reference('>', t, c1, t2, c2, inline=True)
+        ref = Reference('>', c1, c2, inline=True)
 
         expected = 'FOREIGN KEY ("name") REFERENCES "names" ("name_val")'
         self.assertEqual(ref.sql, expected)
@@ -147,7 +144,7 @@ class TestReferenceInline(TestCase):
         t2 = Table('names')
         c2 = Column('name_val', 'varchar2')
         t2.add_column(c2)
-        ref = Reference('<', t, c1, t2, c2, inline=True)
+        ref = Reference('<', c1, c2, inline=True)
 
         expected = 'FOREIGN KEY ("name_val") REFERENCES "products" ("name")'
         self.assertEqual(ref.sql, expected)
@@ -163,7 +160,7 @@ class TestReferenceInline(TestCase):
         c22 = Column('country_val', 'varchar2')
         t2.add_column(c21)
         t2.add_column(c22)
-        ref = Reference('>', t, [c11, c12], t2, (c21, c22), inline=True)
+        ref = Reference('>', [c11, c12], (c21, c22), inline=True)
 
         expected = 'FOREIGN KEY ("name", "country") REFERENCES "names" ("name_val", "country_val")'
         self.assertEqual(ref.sql, expected)
@@ -181,9 +178,7 @@ class TestReferenceInline(TestCase):
         t2.add_column(c22)
         ref = Reference(
             '>',
-            t,
             [c11, c12],
-            t2,
             (c21, c22),
             name="country_name",
             comment="Multiline\ncomment for the constraint",
@@ -208,7 +203,7 @@ CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("n
         t2 = Table('names')
         c21 = Column('name_val', 'varchar2')
         t2.add_column(c21)
-        ref = Reference('>', t, c2, t2, c21, inline=True)
+        ref = Reference('>', c2, c21, inline=True)
 
         expected = 'ref: > "names"."name_val"'
         self.assertEqual(ref.dbml, expected)
@@ -224,9 +219,7 @@ CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("n
         t2.add_column(c21)
         ref = Reference(
             '<',
-            t,
             c2,
-            t2,
             c21,
             name='nameref',
             comment='Reference comment\nmultiline',
@@ -253,9 +246,7 @@ CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("n
         t2.add_column(c22)
         ref = Reference(
             '<',
-            t,
             [c2, c3],
-            t2,
             (c21, c22),
             name='nameref',
             comment='Reference comment\nmultiline',
@@ -267,3 +258,45 @@ CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("n
         with self.assertRaises(DBMLError):
             ref.dbml
 
+    def test_validate_different_tables(self):
+        t = Table('products')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        t2 = Table('names')
+        c21 = Column('name_val', 'varchar2')
+        t2.add_column(c21)
+        ref = Reference(
+            '<',
+            [c2, c21],
+            [c1],
+            name='nameref',
+            comment='Reference comment\nmultiline',
+            on_update='CASCADE',
+            on_delete='SET NULL',
+            inline=True
+        )
+        with self.assertRaises(DBMLError):
+            ref._validate()
+
+    def test_validate_no_table(self):
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        c3 = Column('age', 'number')
+        c4 = Column('active', 'boolean')
+        ref1 = Reference(
+            '<',
+            c1,
+            c2
+        )
+        with self.assertRaises(TableNotFoundError):
+            ref1._validate()
+
+        ref2 = Reference(
+            '<',
+            [c1, c2],
+            [c3, c4]
+        )
+        with self.assertRaises(TableNotFoundError):
+            ref2._validate()
