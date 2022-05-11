@@ -94,9 +94,6 @@ class Table(SQLOjbect):
         Adds index to self.indexes attribute and sets in this index the
         `table` attribute.
         '''
-        # for subj in i.subjects:
-        #     if isinstance(subj, Column) and (subj not in self.columns):
-        #         raise ColumnNotFoundError(f'Cannot add index, column "{subj}" not defined in table "{self.name}".')
 
         i.table = self
         self.indexes.append(i)
@@ -115,21 +112,21 @@ class Table(SQLOjbect):
     def get_refs(self) -> List[Reference]:
         if not self.schema:
             raise UnknownSchemaError('Schema for the table is not set')
-        return [ref for ref in self.schema.refs if ref.table1 == self]
+        return [ref for ref in self.schema.refs if ref.col1[0].table == self]
 
     def _get_references_for_sql(self) -> List[Reference]:
         '''
         return inline references for this table sql definition
         '''
         if not self.schema:
-            raise UnknownSchemaError('Schema for the table is not set')
+            raise UnknownSchemaError(f'Schema for the table {self} is not set')
         result = []
         for ref in self.schema.refs:
             if ref.inline:
                 if (ref.type in (MANY_TO_ONE, ONE_TO_ONE)) and\
-                        (ref.table1 == self):
+                        (ref.col1[0].table == self):
                     result.append(ref)
-                elif (ref.type == ONE_TO_MANY) and (ref.table2 == self):
+                elif (ref.type == ONE_TO_MANY) and (ref.col2[0].table == self):
                     result.append(ref)
         return result
 

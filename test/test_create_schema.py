@@ -3,8 +3,10 @@ import os
 from pathlib import Path
 from unittest import TestCase
 
+from pydbml.classes import Column
+from pydbml.classes import Index
+from pydbml.classes import Table
 from pydbml.schema import Schema
-from pydbml.classes import Table, Column, Index
 
 
 TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'

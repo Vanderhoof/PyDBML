@@ -1,15 +1,14 @@
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from itertools import chain
+
 from .classes import Enum
 from .classes import Project
 from .classes import Reference
 from .classes import Table
 from .classes import TableGroup
-from pydbml.parser.blueprints import ReferenceBlueprint
-from pydbml.exceptions import ColumnNotFoundError
-from pydbml.exceptions import TableNotFoundError
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
 
 
 class SchemaValidationError(Exception):
@@ -18,13 +17,13 @@ class SchemaValidationError(Exception):
 
 class Schema:
     def __init__(self) -> None:
-        self.tables: List[Table] = []
-        self.tables_dict: Dict[str, Table] = {}
-        self.refs: List[Reference] = []
+        self.tables: List['Table'] = []
+        self.tables_dict: Dict[str, 'Table'] = {}
+        self.refs: List['Reference'] = []
         # self.ref_blueprints: List[ReferenceBlueprint] = []
-        self.enums: List[Enum] = []
-        self.table_groups: List[TableGroup] = []
-        self.project: Optional[Project] = None
+        self.enums: List['Enum'] = []
+        self.table_groups: List['TableGroup'] = []
+        self.project: Optional['Project'] = None
 
     def __repr__(self) -> str:
         return f"<Schema>"
@@ -111,8 +110,8 @@ class Schema:
         return obj
 
     def add_reference(self, obj: Reference):
-        for table in (obj.table1, obj.table2):
-            if table in self.tables:
+        for col in chain(obj.col1, obj.col2):
+            if col.schema == self:
                 break
         else:
             raise SchemaValidationError(
