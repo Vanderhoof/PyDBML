@@ -6,6 +6,7 @@ from pydbml.classes import Note
 from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.exceptions import ColumnNotFoundError
+from pydbml.exceptions import IndexNotFoundError
 from pydbml.schema import Schema
 
 
@@ -170,6 +171,21 @@ CREATE TABLE "products" (
         self.assertEqual(c2.table, t)
         self.assertEqual(t.columns, [c1, c2])
 
+    def test_delete_column(self) -> None:
+        t = Table('products')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        t.delete_column(c1)
+        self.assertIsNone(c1.table)
+        self.assertNotIn(c1, t.columns)
+        t.delete_column(0)
+        self.assertIsNone(c2.table)
+        self.assertNotIn(c2, t.columns)
+        with self.assertRaises(ColumnNotFoundError):
+            t.delete_column(c2)
+
     def test_add_index(self) -> None:
         t = Table('products')
         c1 = Column('id', 'integer')
@@ -184,13 +200,73 @@ CREATE TABLE "products" (
         self.assertEqual(i2.table, t)
         self.assertEqual(t.indexes, [i1, i2])
 
-    # def test_add_bad_index(self) -> None:
-    #     t = Table('products')
-    #     c = Column('id', 'integer')
-    #     i = Index(['id', 'name'])
-    #     t.add_column(c)
-    #     with self.assertRaises(ColumnNotFoundError):
-    #         t.add_index(i)
+    def test_delete_index(self) -> None:
+        t = Table('products')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        i1 = Index([c1])
+        i2 = Index([c2])
+        t.add_column(c1)
+        t.add_column(c2)
+        t.add_index(i1)
+        t.add_index(i2)
+        t.delete_index(0)
+        self.assertIsNone(i1.table)
+        self.assertNotIn(i1, t.indexes)
+        t.delete_index(i2)
+        self.assertIsNone(i2.table)
+        self.assertNotIn(i2, t.indexes)
+        with self.assertRaises(IndexNotFoundError):
+            t.delete_index(i1)
+
+    def test_get_references_for_sql(self):
+        t = Table('products')
+        c11 = Column('id', 'integer')
+        c12 = Column('name', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('id', 'integer')
+        c22 = Column('name_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        s = Schema()
+        s.add(t)
+        s.add(t2)
+        r1 = Reference('>', c12, c22)
+        r2 = Reference('-', c11, c21)
+        r3 = Reference('<', c11, c22)
+        s.add(r1)
+        s.add(r2)
+        s.add(r3)
+        self.assertEqual(t._get_references_for_sql(), [])
+        self.assertEqual(t2._get_references_for_sql(), [])
+        r1.inline = r2.inline = r3.inline = True
+        self.assertEqual(t._get_references_for_sql(), [r1, r2])
+        self.assertEqual(t2._get_references_for_sql(), [r3])
+
+    def test_get_refs(self):
+        t = Table('products')
+        c11 = Column('id', 'integer')
+        c12 = Column('name', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('id', 'integer')
+        c22 = Column('name_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        s = Schema()
+        s.add(t)
+        s.add(t2)
+        r1 = Reference('>', c12, c22)
+        r2 = Reference('-', c11, c21)
+        r3 = Reference('<', c11, c22)
+        s.add(r1)
+        s.add(r2)
+        s.add(r3)
+        self.assertEqual(t.get_refs(), [r1, r2, r3])
+        self.assertEqual(t2.get_refs(), [])
 
     def test_dbml_simple(self):
         t = Table('products')

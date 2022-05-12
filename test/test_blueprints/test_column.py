@@ -1,9 +1,13 @@
 from unittest import TestCase
+from unittest.mock import Mock
 
-from pydbml.classes import Note
 from pydbml.classes import Column
+from pydbml.classes import Enum
+from pydbml.classes import EnumItem
+from pydbml.classes import Note
 from pydbml.parser.blueprints import ColumnBlueprint
 from pydbml.parser.blueprints import NoteBlueprint
+from pydbml.schema import Schema
 
 
 class TestColumn(TestCase):
@@ -41,3 +45,24 @@ class TestColumn(TestCase):
         self.assertIsInstance(result.note, Note)
         self.assertEqual(result.note.text, bp.note.text)
         self.assertEqual(result.comment, bp.comment)
+
+    def test_enum_type(self) -> None:
+        s = Schema()
+        e = Enum(
+            'myenum',
+            items=[
+                EnumItem('i1'),
+                EnumItem('i2')
+            ]
+        )
+        s.add(e)
+        parser = Mock()
+        parser.schema = s
+
+        bp = ColumnBlueprint(
+            name='testcol',
+            type='myenum'
+        )
+        bp.parser = parser
+        result = bp.build()
+        self.assertIs(result.type, e)

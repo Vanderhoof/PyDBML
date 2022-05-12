@@ -1,3 +1,4 @@
 - Creating dbml schema in python
 - pyparsing new var names (+possibly new features)
-- enum type
+* - enum type
+- `_type` -> `type`

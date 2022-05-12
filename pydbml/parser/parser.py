@@ -161,11 +161,11 @@ class PyDBMLParser:
 
     def build_schema(self):
         self.schema = Schema()
+        for enum_bp in self.enums:
+            self.schema.add(enum_bp.build())
         for table_bp in self.tables:
             self.schema.add(table_bp.build())
             self.ref_blueprints.extend(table_bp.get_reference_blueprints())
-        for enum_bp in self.enums:
-            self.schema.add(enum_bp.build())
         for table_group_bp in self.table_groups:
             self.schema.add(table_group_bp.build())
         if self.project:
