@@ -24,3 +24,7 @@ class UnknownSchemaError(Exception):
 
 class DBMLError(Exception):
     pass
+
+
+class SchemaValidationError(Exception):
+    pass

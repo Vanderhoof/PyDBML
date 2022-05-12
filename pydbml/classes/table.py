@@ -35,7 +35,7 @@ class Table(SQLOjbect):
                  header_color: Optional[str] = None,
                  # refs: Optional[List[TableReference]] = None,
                  comment: Optional[str] = None):
-        self.schema = None
+        self.schema: Schema = None
         self.name = name
         self.columns: List[Column] = []
         self.indexes: List[Index] = []

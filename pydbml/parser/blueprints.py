@@ -94,6 +94,11 @@ class ColumnBlueprint(Blueprint):
     comment: Optional[str] = None
 
     def build(self) -> 'Column':
+        if self.parser:
+            for enum in self.parser.schema.enums:
+                if enum.name == self.type:
+                    self.type = enum
+                    break
         return Column(
             name=self.name,
             type_=self.type,
