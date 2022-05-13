@@ -61,11 +61,12 @@ class ReferenceBlueprint(Blueprint):
             raise ColumnNotFoundError("Can't build Reference, col2 unknown")
 
         table1 = self.parser.locate_table(self.table1)
-        col1_list = [self.col1] if isinstance(self.col1, str) else self.col1
+
+        col1_list = [c.strip('() ') for c in self.col1.split(',')]
         col1 = [table1[col] for col in col1_list]
 
         table2 = self.parser.locate_table(self.table2)
-        col2_list = [self.col2] if isinstance(self.col2, str) else self.col2
+        col2_list = [c.strip('() ') for c in self.col2.split(',')]
         col2 = [table2[col] for col in col2_list]
 
         return Reference(
@@ -183,7 +184,7 @@ class TableBlueprint(Blueprint):
         ''' the inline ones '''
         result = []
         for col in self.columns:
-            for ref_bp in col.ref_blueprints:
+            for ref_bp in col.ref_blueprints or []:
                 ref_bp.table1 = self.name
                 ref_bp.col1 = col.name
                 result.append(ref_bp)

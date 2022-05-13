@@ -14,6 +14,7 @@ from pydbml.exceptions import TableNotFoundError
 
 
 TEST_DOCS_PATH = Path(os.path.abspath(__file__)).parent / 'test_data/docs'
+TestCase.maxDiff = None
 
 
 class TestDocs(TestCase):
@@ -25,7 +26,7 @@ class TestDocs(TestCase):
 
         self.assertEqual(len(results.refs), 1)
         ref = results.refs[0]
-        self.assertEqual((posts, users), (ref.table1, ref.table2))
+        self.assertEqual((posts, users), (ref.col1[0].table, ref.col2[0].table))
 
     def test_project(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'project.dbml')
@@ -52,7 +53,7 @@ class TestDocs(TestCase):
 
         self.assertEqual(len(results.refs), 1)
         ref = results.refs[0]
-        self.assertEqual((u, posts), (ref.table1, ref.table2))
+        self.assertEqual((u, posts), (ref.col1[0].table, ref.col2[0].table))
 
     def test_table_notes(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'table_notes.dbml')
@@ -135,12 +136,12 @@ class TestDocs(TestCase):
 
         rf = results.refs
 
-        self.assertEqual(rf[0].table1, posts)
-        self.assertEqual(rf[0].table2, users)
+        self.assertEqual(rf[0].col1[0].table, posts)
+        self.assertEqual(rf[0].col2[0].table, users)
         self.assertEqual(rf[0].type, '>')
 
-        self.assertEqual(rf[1].table1, reviews)
-        self.assertEqual(rf[1].table2, users)
+        self.assertEqual(rf[1].col1[0].table, reviews)
+        self.assertEqual(rf[1].col2[0].table, users)
         self.assertEqual(rf[1].type, '>')
 
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'relationships_2.dbml')
@@ -148,12 +149,12 @@ class TestDocs(TestCase):
 
         rf = results.refs
 
-        self.assertEqual(rf[0].table1, users)
-        self.assertEqual(rf[0].table2, posts)
+        self.assertEqual(rf[0].col1[0].table, users)
+        self.assertEqual(rf[0].col2[0].table, posts)
         self.assertEqual(rf[0].type, '<')
 
-        self.assertEqual(rf[1].table1, users)
-        self.assertEqual(rf[1].table2, reviews)
+        self.assertEqual(rf[1].col1[0].table, users)
+        self.assertEqual(rf[1].col2[0].table, reviews)
         self.assertEqual(rf[1].type, '<')
 
     def test_relationships_composite(self) -> None:
@@ -164,8 +165,8 @@ class TestDocs(TestCase):
 
         self.assertEqual(len(rf), 1)
 
-        self.assertEqual(rf[0].table1, merchant_periods)
-        self.assertEqual(rf[0].table2, merchants)
+        self.assertEqual(rf[0].col1[0].table, merchant_periods)
+        self.assertEqual(rf[0].col2[0].table, merchants)
         self.assertEqual(rf[0].type, '>')
         self.assertEqual(
             rf[0].col1,
@@ -190,8 +191,8 @@ class TestDocs(TestCase):
 
         self.assertEqual(len(rf), 1)
 
-        self.assertEqual(rf[0].table1, merchant_periods)
-        self.assertEqual(rf[0].table2, merchants)
+        self.assertEqual(rf[0].col1[0].table, merchant_periods)
+        self.assertEqual(rf[0].col2[0].table, merchants)
         self.assertEqual(rf[0].type, '>')
         self.assertEqual(rf[0].on_delete, 'cascade')
         self.assertEqual(rf[0].on_update, 'no action')
