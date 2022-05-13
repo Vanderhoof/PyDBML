@@ -70,7 +70,8 @@ class PyDBML:
         if text[0] == '\ufeff':  # removing BOM
             text = text[1:]
 
-        return PyDBMLParser(text)
+        parser = PyDBMLParser(text)
+        return parser.parse()
 
     @staticmethod
     def parse_file(file: Union[str, Path, TextIOWrapper]) -> PyDBMLParser:
@@ -82,8 +83,7 @@ class PyDBML:
         if source[0] == '\ufeff':  # removing BOM
             source = source[1:]
         parser = PyDBMLParser(source)
-        parser.parse()
-        return parser
+        return parser.parse()
 
 
 def parse(source: str):
@@ -108,6 +108,7 @@ class PyDBMLParser:
         self._set_syntax()
         self._syntax.parseString(self.source, parseAll=True)
         self.build_schema()
+        return self.schema
 
     def __repr__(self):
         return "<PyDBMLParser>"
@@ -138,6 +139,10 @@ class PyDBMLParser:
         blueprint = t[0]
         if isinstance(blueprint, TableBlueprint):
             self.tables.append(blueprint)
+            ref_bps = blueprint.get_reference_blueprints()
+            for ref_bp in ref_bps:
+                self.refs.append(ref_bp)
+                ref_bp.parser = self
         elif isinstance(blueprint, ReferenceBlueprint):
             self.refs.append(blueprint)
         elif isinstance(blueprint, EnumBlueprint):
@@ -169,7 +174,7 @@ class PyDBMLParser:
         for table_group_bp in self.table_groups:
             self.schema.add(table_group_bp.build())
         if self.project:
-            self.schema.add(project.build())
+            self.schema.add(self.project.build())
         for ref_bp in self.refs:
             self.schema.add(ref_bp.build())
 
@@ -230,19 +235,4 @@ class PyDBMLParser:
 #             tg.items = [self.schema.tables_dict[i] for i in tg.items]
 #             self.schema.add_table_group(tg)
 
-#     @property
-#     def sql(self):
-#         '''Returs SQL of the parsed results'''
 
-#         components = (i.sql for i in (*self.enums, *self.tables))
-#         return '\n\n'.join(components)
-
-#     @property
-#     def dbml(self):
-#         '''Generates DBML code out of parsed results'''
-#         items = [self.project] if self.project else []
-#         items.extend((*self.tables, *self.refs, *self.enums, *self.table_groups))
-#         components = (
-#             i.dbml for i in items
-#         )
-#         return '\n\n'.join(components)

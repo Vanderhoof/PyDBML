@@ -28,6 +28,25 @@ class TestSchema(TestCase):
         self.assertIs(res, t)
         self.assertIn(t, schema.tables)
 
+    def test_add_table_alias(self) -> None:
+        c = Column('test', 'varchar', True)
+        t = Table('test_table', alias='myalias')
+        t.add_column(c)
+        schema = Schema()
+        schema.add_table(t)
+        self.assertIs(schema[t.alias], t)
+
+    def test_add_table_alias_bad(self) -> None:
+        c = Column('test', 'varchar', True)
+        t = Table('myalias')
+        t.add_column(c)
+        schema = Schema()
+        schema.add_table(t)
+        t2 = Table('test_table', alias='myalias')
+        with self.assertRaises(SchemaValidationError):
+            schema.add_table(t2)
+        self.assertIsNone(t2.schema)
+
     def test_add_table_bad(self) -> None:
         c = Column('test', 'varchar', True)
         t = Table('test_table')
@@ -42,7 +61,7 @@ class TestSchema(TestCase):
 
     def test_delete_table(self) -> None:
         c = Column('test', 'varchar', True)
-        t = Table('test_table')
+        t = Table('test_table', alias='myalias')
         t.add_column(c)
         schema = Schema()
         schema.add_table(t)
@@ -50,6 +69,8 @@ class TestSchema(TestCase):
         self.assertIsNone(t.schema, schema)
         self.assertIs(res, t)
         self.assertNotIn(t, schema.tables)
+        self.assertNotIn('test_table', schema.table_dict)
+        self.assertNotIn('myalias', schema.table_dict)
 
     def test_delete_missing_table(self) -> None:
         t = Table('test_table')
@@ -243,21 +264,88 @@ class TestSchema(TestCase):
         with self.assertRaises(SchemaValidationError):
             schema.delete_project()
 
+    def test_geititem(self) -> None:
+        t1 = Table('table1')
+        t2 = Table('table2')
+        schema = Schema()
+        schema.add_table(t1)
+        schema.add_table(t2)
+        self.assertIs(schema['table1'], t1)
+        self.assertIs(schema['table2'], t2)
+        self.assertIs(schema[0], t1)
+        self.assertIs(schema[1], t2)
+        with self.assertRaises(IndexError):
+            schema[2]
+        with self.assertRaises(KeyError):
+            schema['wrong']
+
+    def test_iter(self) -> None:
+        t1 = Table('table1')
+        t2 = Table('table2')
+        schema = Schema()
+        schema.add_table(t1)
+        schema.add_table(t2)
+        self.assertEqual(list(iter(schema)), [t1, t2])
+
     def test_add(self) -> None:
-        c = Column('test', 'varchar', True)
-        t = Table('test_table')
-        t.add_column(c)
-        c2 = Column('test2', 'integer')
-        t2 = Table('test_table2')
-        t2.add_column(c2)
+        t1 = Table('table1')
+        t2 = Table('table2')
+        tg = TableGroup('mytablegroup', [t1, t2])
         e = Enum('myenum', [EnumItem('a'), EnumItem('b')])
         schema = Schema()
-        res = schema.add(t, t2, e)
-        self.assertEqual(res, [t, t2, e])
-        self.assertEqual(t.schema, schema)
-        self.assertIn(t, schema.tables)
-        self.assertEqual(t2.schema, schema)
+        schema.add(t1)
+        schema.add(t2)
+        schema.add(e)
+        schema.add(tg)
+        self.assertIs(t1.schema, schema)
+        self.assertIs(t2.schema, schema)
+        self.assertIs(e.schema, schema)
+        self.assertIs(tg.schema, schema)
+        self.assertIn(t1, schema.tables)
         self.assertIn(t2, schema.tables)
-        self.assertEqual(e.schema, schema)
+        self.assertIn(tg, schema.table_groups)
         self.assertIn(e, schema.enums)
-# TODO: unset schema if error
+
+    def test_add_bad(self) -> None:
+        class Test:
+            pass
+        t = Test()
+        schema = Schema()
+        with self.assertRaises(SchemaValidationError):
+            schema.add(t)
+        with self.assertRaises(AttributeError):
+            t.schema
+
+    def test_delete(self) -> None:
+        t1 = Table('table1')
+        t2 = Table('table2')
+        tg = TableGroup('mytablegroup', [t1, t2])
+        e = Enum('myenum', [EnumItem('a'), EnumItem('b')])
+        schema = Schema()
+        schema.add(t1)
+        schema.add(t2)
+        schema.add(e)
+        schema.add(tg)
+
+        schema.delete(t1)
+        schema.delete(t2)
+        schema.delete(e)
+        schema.delete(tg)
+        self.assertIsNone(t1.schema)
+        self.assertIsNone(t2.schema)
+        self.assertIsNone(e.schema)
+        self.assertIsNone(tg.schema)
+        self.assertNotIn(t1, schema.tables)
+        self.assertNotIn(t2, schema.tables)
+        self.assertNotIn(tg, schema.table_groups)
+        self.assertNotIn(e, schema.enums)
+
+    def test_delete_bad(self) -> None:
+        class Test:
+            pass
+        t = Test()
+        schema = Schema()
+        with self.assertRaises(SchemaValidationError):
+            schema.delete(t)
+        with self.assertRaises(AttributeError):
+            t.schema
