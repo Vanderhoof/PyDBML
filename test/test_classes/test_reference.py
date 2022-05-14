@@ -259,18 +259,32 @@ CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("n
             ref.dbml
 
     def test_validate_different_tables(self):
-        t = Table('products')
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
+        t1 = Table('products')
+        c11 = Column('id', 'integer')
+        c12 = Column('name', 'varchar2')
+        t1.add_column(c11)
+        t1.add_column(c12)
         t2 = Table('names')
         c21 = Column('name_val', 'varchar2')
+        c22 = Column('product', 'varchar2')
         t2.add_column(c21)
         ref = Reference(
             '<',
-            [c2, c21],
-            [c1],
+            [c12, c21],
+            [c21],
+            name='nameref',
+            comment='Reference comment\nmultiline',
+            on_update='CASCADE',
+            on_delete='SET NULL',
+            inline=True
+        )
+        with self.assertRaises(DBMLError):
+            ref._validate()
+
+        ref = Reference(
+            '<',
+            [c11, c12],
+            [c21, c12],
             name='nameref',
             comment='Reference comment\nmultiline',
             on_update='CASCADE',
@@ -292,11 +306,21 @@ CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("n
         )
         with self.assertRaises(TableNotFoundError):
             ref1._validate()
+        table = Table('name')
+        table.add_column(c1)
+        with self.assertRaises(TableNotFoundError):
+            ref1._validate()
+        table.delete_column(c1)
 
         ref2 = Reference(
             '<',
             [c1, c2],
             [c3, c4]
         )
+        with self.assertRaises(TableNotFoundError):
+            ref2._validate()
+        table = Table('name')
+        table.add_column(c1)
+        table.add_column(c2)
         with self.assertRaises(TableNotFoundError):
             ref2._validate()

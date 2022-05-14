@@ -40,10 +40,9 @@ def parse_enum_item(s, l, t):
     init_dict = {'name': t['name']}
     if 'settings' in t:
         init_dict.update(t['settings'])
-
-    # comments after settings have priority
-    if 'comment' in t:
-        init_dict['comment'] = t['comment'][0]
+        # comments after settings have priority
+        if 'comment' in t['settings']:
+            init_dict['comment'] = t['settings']['comment']
     if 'comment' not in init_dict and 'comment_before' in t:
         comment = '\n'.join(c[0] for c in t['comment_before'])
         init_dict['comment'] = comment

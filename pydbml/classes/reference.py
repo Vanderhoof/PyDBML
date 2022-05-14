@@ -1,7 +1,6 @@
 from typing import Collection
 from typing import Literal
 from typing import Optional
-from typing import TYPE_CHECKING
 from typing import Union
 
 from .base import SQLOjbect
@@ -25,9 +24,7 @@ class Reference(SQLOjbect):
 
     def __init__(self,
                  type_: Literal[MANY_TO_ONE, ONE_TO_MANY, ONE_TO_ONE],
-                 # table1: 'Table',
                  col1: Union[Column, Collection[Column]],
-                 # table2: 'Table',
                  col2: Union[Column, Collection[Column]],
                  name: Optional[str] = None,
                  comment: Optional[str] = None,
@@ -36,9 +33,7 @@ class Reference(SQLOjbect):
                  inline: bool = False):
         self.schema = None
         self.type = type_
-        # self.table1 = table1
         self.col1 = [col1] if isinstance(col1, Column) else list(col1)
-        # self.table2 = table2
         self.col2 = [col2] if isinstance(col2, Column) else list(col2)
         self.name = name if name else None
         self.comment = comment

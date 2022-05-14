@@ -4,9 +4,52 @@ from pydbml.schema import Schema
 from pydbml.classes import Column
 from pydbml.classes import Table
 from pydbml.classes import Reference
+from pydbml.classes import Note
+from pydbml.exceptions import TableNotFoundError
 
 
 class TestColumn(TestCase):
+    def test_attributes(self) -> None:
+        name = 'name'
+        type_ = 'type'
+        unique = True
+        not_null = True
+        pk = True
+        autoinc = True
+        default = '1'
+        note = Note('note')
+        comment = 'comment'
+        col = Column(
+            name=name,
+            type_=type_,
+            unique=unique,
+            not_null=not_null,
+            pk=pk,
+            autoinc=autoinc,
+            default=default,
+            note=note,
+            comment=comment,
+        )
+        self.assertEqual(col.name, name)
+        self.assertEqual(col.type, type_)
+        self.assertEqual(col.unique, unique)
+        self.assertEqual(col.not_null, not_null)
+        self.assertEqual(col.pk, pk)
+        self.assertEqual(col.autoinc, autoinc)
+        self.assertEqual(col.default, default)
+        self.assertEqual(col.note, note)
+        self.assertEqual(col.comment, comment)
+
+    def test_schema_set(self) -> None:
+        col = Column('name', 'int')
+        table = Table('name')
+        self.assertIsNone(col.schema)
+        table.add_column(col)
+        self.assertIsNone(col.schema)
+        schema = Schema()
+        schema.add(table)
+        self.assertIs(col.schema, schema)
+
     def test_basic_sql(self) -> None:
         r = Column(name='id',
                    type_='integer')
@@ -152,6 +195,8 @@ multiline''']"""
 
     def test_get_refs(self) -> None:
         c1 = Column(name='client_id', type_='integer')
+        with self.assertRaises(TableNotFoundError):
+            c1.get_refs()
         t1 = Table(name='products')
         t1.add_column(c1)
         c2 = Column(name='id', type_='integer', autoinc=True, pk=True)

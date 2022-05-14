@@ -37,7 +37,7 @@ class TableGroup:
         items = [i if isinstance(i, str) else i.name for i in self.items]
         return f'<TableGroup {self.name!r}, {items!r}>'
 
-    def __getitem__(self, key) -> str:
+    def __getitem__(self, key: int) -> str:
         return self.items[key]
 
     def __iter__(self):

@@ -1,3 +1,9 @@
+# 1.0.0
+
+- refs don't have tables, only columns
+- tables don't have refs
+- col1 col2 in ref are as they were in dbml
+
 # 0.4.2
 
 - Fix: after editing column name index dbml was not updated.
