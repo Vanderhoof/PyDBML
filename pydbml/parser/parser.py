@@ -140,9 +140,15 @@ class PyDBMLParser:
         if isinstance(blueprint, TableBlueprint):
             self.tables.append(blueprint)
             ref_bps = blueprint.get_reference_blueprints()
+            col_bps = blueprint.columns or []
+            index_bps = blueprint.indexes or []
             for ref_bp in ref_bps:
                 self.refs.append(ref_bp)
                 ref_bp.parser = self
+            for col_bp in col_bps:
+                col_bp.parser = self
+            for index_bp in index_bps:
+                index_bp.parser = self
         elif isinstance(blueprint, ReferenceBlueprint):
             self.refs.append(blueprint)
         elif isinstance(blueprint, EnumBlueprint):

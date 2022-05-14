@@ -79,7 +79,8 @@ class TestColumn(EditingTestCase):
         products = self.dbml['products']
         col = products['merchant_id']
         col.name = 'changed_merchant_id'
-        table_ref = products.refs[0]
+        merchants = self.dbml['merchants']
+        table_ref = merchants.get_refs()[0]
         self.assertIn('FOREIGN KEY ("changed_merchant_id")', table_ref.sql)
 
 

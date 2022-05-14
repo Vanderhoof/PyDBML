@@ -22,7 +22,7 @@ class TestColumnType(TestCase):
         self.assertEqual(res[0], val)
 
     def test_quoted(self) -> None:
-        val = '"mytype"'
+        val = 'mytype'
         res = column_type.parseString(val, parseAll=True)
         self.assertEqual(res[0], val)
 
@@ -181,7 +181,7 @@ class TestColumn(TestCase):
         val = "_test_ \"mytype\" [unique, not null, note: 'to include unit number']\n"
         res = table_column.parseString(val, parseAll=True)
         self.assertEqual(res[0].name, '_test_')
-        self.assertEqual(res[0].type, '\"mytype\"')
+        self.assertEqual(res[0].type, 'mytype')
         self.assertTrue(res[0].unique)
         self.assertTrue(res[0].not_null)
         self.assertTrue(res[0].note is not None)
@@ -190,7 +190,7 @@ class TestColumn(TestCase):
         val = "_test_ \"mytype\" unique pk [not null]\n"
         res = table_column.parseString(val, parseAll=True)
         self.assertEqual(res[0].name, '_test_')
-        self.assertEqual(res[0].type, '\"mytype\"')
+        self.assertEqual(res[0].type, 'mytype')
         self.assertTrue(res[0].unique)
         self.assertTrue(res[0].not_null)
         self.assertTrue(res[0].pk)
@@ -218,7 +218,7 @@ class TestColumn(TestCase):
         val3 = "_test_ \"mytype\" unique pk [not null] //comment after\n"
         res3 = table_column.parseString(val3, parseAll=True)
         self.assertEqual(res3[0].name, '_test_')
-        self.assertEqual(res3[0].type, '\"mytype\"')
+        self.assertEqual(res3[0].type, 'mytype')
         self.assertTrue(res3[0].unique)
         self.assertTrue(res3[0].not_null)
         self.assertTrue(res3[0].pk)
