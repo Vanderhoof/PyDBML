@@ -48,3 +48,15 @@ class TestNote(TestCase):
     '''
 }"""
         self.assertEqual(note.dbml, expected)
+
+    def test_sql(self) -> None:
+        note1 = Note(None)
+        self.assertEqual(note1.sql, '')
+        note2 = Note('One line of note text')
+        self.assertEqual(note2.sql, '-- One line of note text')
+        note3 = Note('The number of spaces you use to indent a block string\nwill\nbe the minimum number of leading spaces among all lines. The parser will automatically remove the number of indentation spaces in the final output.')
+        expected = \
+"""-- The number of spaces you use to indent a block string
+-- will
+-- be the minimum number of leading spaces among all lines. The parser will automatically remove the number of indentation spaces in the final output."""
+        self.assertEqual(note3.sql, expected)

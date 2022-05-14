@@ -64,7 +64,7 @@ class Enum(SQLOjbect):
         self.items = items
         self.comment = comment
 
-    def __getitem__(self, key) -> EnumItem:
+    def __getitem__(self, key: int) -> EnumItem:
         return self.items[key]
 
     def __iter__(self):

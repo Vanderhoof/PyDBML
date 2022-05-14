@@ -54,12 +54,12 @@ class Schema:
             raise SchemaValidationError(f'Unsupported type {type(obj)}.')
 
     def add_table(self, obj: Table) -> Table:
+        if obj in self.tables:
+            raise SchemaValidationError(f'{obj} is already in the schema.')
         if obj.name in self.table_dict:
             raise SchemaValidationError(f'Table {obj.name} is already in the schema.')
         if obj.alias and obj.alias in self.table_dict:
             raise SchemaValidationError(f'Table {obj.alias} is already in the schema.')
-        if obj in self.tables:
-            raise SchemaValidationError(f'{obj} is already in the schema.')
 
         self._set_schema(obj)
 
@@ -86,22 +86,22 @@ class Schema:
         return obj
 
     def add_enum(self, obj: Enum) -> Enum:
+        if obj in self.enums:
+            raise SchemaValidationError(f'{obj} is already in the schema.')
         for enum in self.enums:
             if enum.name == obj.name:
                 raise SchemaValidationError(f'Enum {obj.name} is already in the schema.')
-        if obj in self.enums:
-            raise SchemaValidationError(f'{obj} is already in the schema.')
 
         self._set_schema(obj)
         self.enums.append(obj)
         return obj
 
     def add_table_group(self, obj: TableGroup) -> TableGroup:
+        if obj in self.table_groups:
+            raise SchemaValidationError(f'{obj} is already in the schema.')
         for table_group in self.table_groups:
             if table_group.name == obj.name:
                 raise SchemaValidationError(f'TableGroup {obj.name} is already in the schema.')
-        if obj in self.table_groups:
-            raise SchemaValidationError(f'{obj} is already in the schema.')
 
         self._set_schema(obj)
         self.table_groups.append(obj)

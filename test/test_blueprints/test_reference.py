@@ -42,7 +42,7 @@ class TestReferenceBlueprint(TestCase):
         self.assertEqual(result.col1, [c1])
         self.assertEqual(result.col2, [c2])
 
-    def test_tables_and_cols_are_set(self) -> None:
+    def test_tables_and_cols_are_not_set(self) -> None:
         bp = ReferenceBlueprint(
             type='>',
             inline=True,
@@ -54,6 +54,22 @@ class TestReferenceBlueprint(TestCase):
         with self.assertRaises(TableNotFoundError):
             bp.build()
 
+        bp.table1 = 'table1'
+        bp.table2 = None
+        with self.assertRaises(TableNotFoundError):
+            bp.build()
+
+        bp.table2 = 'table2'
+        bp.col1 = None
+        with self.assertRaises(ColumnNotFoundError):
+            bp.build()
+
+        bp.col1 = 'col1'
+        bp.col2 = None
+        with self.assertRaises(ColumnNotFoundError):
+            bp.build()
+
+    def test_tables_and_cols_are_set(self) -> None:
         bp = ReferenceBlueprint(
             type='>',
             inline=True,

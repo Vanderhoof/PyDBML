@@ -7,6 +7,7 @@ from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import IndexNotFoundError
+from pydbml.exceptions import UnknownSchemaError
 from pydbml.schema import Schema
 
 
@@ -19,6 +20,49 @@ class TestTable(TestCase):
         s.add(t)
         expected = 'CREATE TABLE "products" (\n  "id" integer\n);'
         self.assertEqual(t.sql, expected)
+
+    def test_getitem(self) -> None:
+        t = Table('products')
+        c1 = Column('col1', 'integer')
+        c2 = Column('col2', 'integer')
+        c3 = Column('col3', 'integer')
+        t.add_column(c1)
+        t.add_column(c2)
+        t.add_column(c3)
+        self.assertIs(t['col1'], c1)
+        self.assertIs(t[1], c2)
+        with self.assertRaises(IndexError):
+            t[22]
+        with self.assertRaises(TypeError):
+            t[None]
+        with self.assertRaises(ColumnNotFoundError):
+            t['wrong']
+
+    def test_get(self) -> None:
+        t = Table('products')
+        c1 = Column('col1', 'integer')
+        c2 = Column('col2', 'integer')
+        c3 = Column('col3', 'integer')
+        t.add_column(c1)
+        t.add_column(c2)
+        self.assertIs(t.get(0), c1)
+        self.assertIs(t.get('col2'), c2)
+        self.assertIsNone(t.get('wrong'))
+        self.assertIsNone(t.get(22))
+        self.assertIs(t.get('wrong', c2), c2)
+        self.assertIs(t.get(22, c2), c2)
+        self.assertIs(t.get('wrong', c3), c3)
+
+    def test_iter(self) -> None:
+        t = Table('products')
+        c1 = Column('col1', 'integer')
+        c2 = Column('col2', 'integer')
+        c3 = Column('col3', 'integer')
+        t.add_column(c1)
+        t.add_column(c2)
+        t.add_column(c3)
+        for i1, i2 in zip(t, [c1, c2, c3]):
+            self.assertIs(i1, i2)
 
     def test_ref(self) -> None:
         t = Table('products')
@@ -48,22 +92,6 @@ class TestTable(TestCase):
   FOREIGN KEY ("name") REFERENCES "names" ("name_val")
 );'''
         self.assertEqual(t.sql, expected)
-
-#     def test_duplicate_ref(self) -> None:
-#         t = Table('products')
-#         c1 = Column('id', 'integer')
-#         c2 = Column('name', 'varchar2')
-#         t.add_column(c1)
-#         t.add_column(c2)
-#         t2 = Table('names')
-#         c21 = Column('name_val', 'varchar2')
-#         t2.add_column(c21)
-#         r1 = TableReference(c2, t2, c21)
-#         t.add_ref(r1)
-#         r2 = TableReference(c2, t2, c21)
-#         self.assertEqual(r1, r2)
-#         with self.assertRaises(DuplicateReferenceError):
-#             t.add_ref(r2)
 
     def test_notes(self) -> None:
         n = Note('Table note')
@@ -221,6 +249,8 @@ CREATE TABLE "products" (
 
     def test_get_references_for_sql(self):
         t = Table('products')
+        with self.assertRaises(UnknownSchemaError):
+            t._get_references_for_sql()
         c11 = Column('id', 'integer')
         c12 = Column('name', 'varchar2')
         t.add_column(c11)
@@ -247,6 +277,8 @@ CREATE TABLE "products" (
 
     def test_get_refs(self):
         t = Table('products')
+        with self.assertRaises(UnknownSchemaError):
+            t.get_refs()
         c11 = Column('id', 'integer')
         c12 = Column('name', 'varchar2')
         t.add_column(c11)

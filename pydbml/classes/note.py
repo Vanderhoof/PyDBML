@@ -1,7 +1,9 @@
 from typing import Any
 
+from .base import SQLOjbect
 
-class Note:
+
+class Note(SQLOjbect):
     def __init__(self, text: Any):
         self.text = str(text) if text else ''
 

@@ -31,3 +31,4 @@ class TestDBMLObject(TestCase):
         self.assertTrue(o1 == o2)
         o1.a2 = True
         self.assertFalse(o1 == o2)
+        self.assertFalse(o1 == 123)

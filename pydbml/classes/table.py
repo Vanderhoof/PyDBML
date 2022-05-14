@@ -45,31 +45,6 @@ class Table(SQLOjbect):
         # self.refs = refs or []
         self.comment = comment
 
-    # def _build_index_from_blueprint(self, blueprint: IndexBlueprint) -> None:
-    #     subjects = []
-    #     for subj in blueprint.subject_names:
-    #         if subj.startswith('(') and subj.endswith(')'):
-    #             # subject is an expression, add it as string
-    #             subjects.append(subj)
-    #         else:
-    #             try:
-    #                 col = self[subj]
-    #                 subjects.append(col)
-    #             except KeyError:
-    #                 raise ColumnNotFoundError(f'Cannot add index, column "{subj}" not defined in table "{self.name}".')
-    #     index = Index(
-    #         subjects,
-    #         name=blueprint.name,
-    #         unique=blueprint.unique,
-    #         type_=blueprint.type,
-    #         pk=blueprint.pk,
-    #         note=blueprint.note,
-    #         comment=blueprint.comment
-    #     )
-
-    #     index.table = self
-    #     self.indexes.append(index)
-
     def add_column(self, c: Column) -> None:
         '''
         Adds column to self.columns attribute and sets in this column the
@@ -130,28 +105,21 @@ class Table(SQLOjbect):
                     result.append(ref)
         return result
 
-
-    # def add_ref(self, r: TableReference) -> None:
-    #     '''
-    #     Adds a reference to the table. If reference already present in the table,
-    #     raises DuplicateReferenceError.
-    #     '''
-    #     if r in self.refs:
-    #         raise DuplicateReferenceError(f'Reference with same endpoints {r} already present in the table.')
-    #     self.refs.append(r)
     def __getitem__(self, k: Union[int, str]) -> Column:
         if isinstance(k, int):
             return self.columns[k]
-        else:
+        elif isinstance(k, str):
             for c in self.columns:
                 if c.name == k:
                     return c
             raise ColumnNotFoundError(f'Column {k} not present in table {self.name}')
+        else:
+            raise TypeError('indeces must be str or int')
 
-    def get(self, k, default=None):
+    def get(self, k, default: Optional[Column] = None) -> Optional[Column]:
         try:
             return self.__getitem__(k)
-        except KeyError:
+        except (IndexError, ColumnNotFoundError):
             return default
 
     def __iter__(self):

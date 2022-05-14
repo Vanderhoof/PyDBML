@@ -259,7 +259,7 @@ class TestSchema(TestCase):
         self.assertIs(res, p)
         self.assertIsNone(schema.project)
 
-    def delete_missing_project(self) -> None:
+    def test_delete_missing_project(self) -> None:
         schema = Schema()
         with self.assertRaises(SchemaValidationError):
             schema.delete_project()
@@ -318,27 +318,41 @@ class TestSchema(TestCase):
 
     def test_delete(self) -> None:
         t1 = Table('table1')
+        c1 = Column('col1', 'int')
+        t1.add_column(c1)
         t2 = Table('table2')
+        c2 = Column('col2', 'int')
+        t2.add_column(c2)
+        ref = Reference('>', [c1], [c2])
         tg = TableGroup('mytablegroup', [t1, t2])
         e = Enum('myenum', [EnumItem('a'), EnumItem('b')])
+        p = Project('myproject')
         schema = Schema()
         schema.add(t1)
         schema.add(t2)
         schema.add(e)
         schema.add(tg)
+        schema.add(ref)
+        schema.add(p)
 
         schema.delete(t1)
         schema.delete(t2)
         schema.delete(e)
         schema.delete(tg)
+        schema.delete(ref)
+        schema.delete(p)
         self.assertIsNone(t1.schema)
         self.assertIsNone(t2.schema)
         self.assertIsNone(e.schema)
         self.assertIsNone(tg.schema)
+        self.assertIsNone(ref.schema)
+        self.assertIsNone(p.schema)
+        self.assertIsNone(schema.project)
         self.assertNotIn(t1, schema.tables)
         self.assertNotIn(t2, schema.tables)
         self.assertNotIn(tg, schema.table_groups)
         self.assertNotIn(e, schema.enums)
+        self.assertNotIn(ref, schema.refs)
 
     def test_delete_bad(self) -> None:
         class Test:

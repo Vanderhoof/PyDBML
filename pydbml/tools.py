@@ -3,12 +3,16 @@ if TYPE_CHECKING:
     from .classes import Note
 
 
+def comment(val: str, comb: str) -> str:
+    return '\n'.join(f'{comb} {cl}' for cl in val.split('\n')) + '\n'
+
+
 def comment_to_dbml(val: str) -> str:
-    return '\n'.join(f'// {cl}' for cl in val.split('\n')) + '\n'
+    return comment(val, '//')
 
 
 def comment_to_sql(val: str) -> str:
-    return '\n'.join(f'-- {cl}' for cl in val.split('\n')) + '\n'
+    return comment(val, '--')
 
 
 def note_option_to_dbml(val: 'Note') -> str:
@@ -21,4 +25,4 @@ def note_option_to_dbml(val: 'Note') -> str:
 def indent(val: str, spaces=4) -> str:
     if val == '':
         return val
-    return ' ' * spaces + val.replace('\n', '\n' +' ' * spaces)
+    return ' ' * spaces + val.replace('\n', '\n' + ' ' * spaces)
