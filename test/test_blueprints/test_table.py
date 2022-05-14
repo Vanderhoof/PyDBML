@@ -5,11 +5,13 @@ from pydbml.classes import Note
 from pydbml.classes import Table
 from pydbml.classes import Index
 from pydbml.classes import Column
+from pydbml.classes import Expression
 from pydbml.parser.blueprints import IndexBlueprint
 from pydbml.parser.blueprints import NoteBlueprint
 from pydbml.parser.blueprints import ColumnBlueprint
 from pydbml.parser.blueprints import TableBlueprint
 from pydbml.parser.blueprints import ReferenceBlueprint
+from pydbml.parser.blueprints import ExpressionBlueprint
 
 
 class TestTable(TestCase):
@@ -59,7 +61,7 @@ class TestTable(TestCase):
             ],
             indexes=[
                 IndexBlueprint(subject_names=['name', 'id'], unique=True),
-                IndexBlueprint(subject_names=['id', '(name*2)'], name='ExprIndex')
+                IndexBlueprint(subject_names=['id', ExpressionBlueprint('name*2')], name='ExprIndex')
             ]
         )
         result = bp.build()
@@ -69,6 +71,7 @@ class TestTable(TestCase):
             self.assertIsInstance(col, Column)
         for ind in result.indexes:
             self.assertIsInstance(ind, Index)
+        self.assertIsInstance(result.indexes[1].subjects[1], Expression)
 
     def test_bad_index(self) -> None:
         bp = TableBlueprint(

@@ -4,6 +4,7 @@ import unittest
 from pydbml import schema
 from pydbml.classes import column
 from pydbml.classes import enum
+from pydbml.classes import expression
 from pydbml.classes import index
 from pydbml.classes import note
 from pydbml.classes import project
@@ -15,6 +16,7 @@ from pydbml.classes import table_group
 def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(column))
     tests.addTests(doctest.DocTestSuite(enum))
+    tests.addTests(doctest.DocTestSuite(expression))
     tests.addTests(doctest.DocTestSuite(index))
     tests.addTests(doctest.DocTestSuite(project))
     tests.addTests(doctest.DocTestSuite(note))

@@ -6,18 +6,19 @@ from typing import Literal
 from typing import Optional
 from typing import Union
 
-from pydbml.constants import MANY_TO_ONE
-from pydbml.constants import ONE_TO_MANY
-from pydbml.constants import ONE_TO_ONE
 from pydbml.classes import Column
 from pydbml.classes import Enum
 from pydbml.classes import EnumItem
+from pydbml.classes import Expression
 from pydbml.classes import Index
 from pydbml.classes import Note
 from pydbml.classes import Project
 from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
+from pydbml.constants import MANY_TO_ONE
+from pydbml.constants import ONE_TO_MANY
+from pydbml.constants import ONE_TO_ONE
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
 
@@ -32,6 +33,14 @@ class NoteBlueprint(Blueprint):
 
     def build(self) -> 'Note':
         return Note(self.text)
+
+
+@dataclass
+class ExpressionBlueprint(Blueprint):
+    text: str
+
+    def build(self) -> Expression:
+        return Expression(self.text)
 
 
 @dataclass
@@ -89,12 +98,14 @@ class ColumnBlueprint(Blueprint):
     not_null: bool = False
     pk: bool = False
     autoinc: bool = False
-    default: Optional[Union[str, int, bool, float]] = None
+    default: Optional[Union[str, int, bool, float, ExpressionBlueprint]] = None
     note: Optional[NoteBlueprint] = None
     ref_blueprints: Optional[List[ReferenceBlueprint]] = None
     comment: Optional[str] = None
 
     def build(self) -> 'Column':
+        if isinstance(self.default, ExpressionBlueprint):
+            self.default = self.default.build()
         if self.parser:
             for enum in self.parser.schema.enums:
                 if enum.name == self.type:
@@ -115,7 +126,7 @@ class ColumnBlueprint(Blueprint):
 
 @dataclass
 class IndexBlueprint(Blueprint):
-    subject_names: List[str]
+    subject_names: List[Union[str, ExpressionBlueprint]]
     name: Optional[str] = None
     unique: bool = False
     type: Optional[str] = None
@@ -164,8 +175,8 @@ class TableBlueprint(Blueprint):
             index = index_bp.build()
             new_subjects = []
             for subj in index.subjects:
-                if subj.startswith('(') and subj.endswith(')'):
-                    new_subjects.append(subj)
+                if isinstance(subj, ExpressionBlueprint):
+                    new_subjects.append(subj.build())
                 else:
                     for col in result.columns:
                         if col.name == subj:

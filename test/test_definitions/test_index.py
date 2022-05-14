@@ -12,6 +12,7 @@ from pydbml.definitions.index import index_type
 from pydbml.definitions.index import indexes
 from pydbml.definitions.index import single_index_syntax
 from pydbml.definitions.index import subject
+from pydbml.parser.blueprints import ExpressionBlueprint
 
 
 ParserElement.setDefaultWhitespaceChars(' \t\r')
@@ -105,7 +106,8 @@ class TestSubject(TestCase):
     def test_expression(self) -> None:
         val = '`id*3`'
         res = subject.parseString(val, parseAll=True)
-        self.assertEqual(res[0], '(id*3)')
+        self.assertIsInstance(res[0], ExpressionBlueprint)
+        self.assertEqual(res[0].text, 'id*3')
 
     def test_wrong(self) -> None:
         val = '12d*('
@@ -165,7 +167,8 @@ class TestIndex(TestCase):
     def test_expression(self) -> None:
         val = '(`id*3`)'
         res = index.parseString(val, parseAll=True)
-        self.assertEqual(res[0].subject_names, ['(id*3)'])
+        self.assertIsInstance(res[0].subject_names[0], ExpressionBlueprint)
+        self.assertEqual(res[0].subject_names[0].text, 'id*3')
 
     def test_composite(self) -> None:
         val = '(my_column, my_another_column)'
@@ -175,7 +178,9 @@ class TestIndex(TestCase):
     def test_composite_with_expression(self) -> None:
         val = '(`id*3`, fieldname)'
         res = index.parseString(val, parseAll=True)
-        self.assertEqual(res[0].subject_names, ['(id*3)', 'fieldname'])
+        self.assertIsInstance(res[0].subject_names[0], ExpressionBlueprint)
+        self.assertEqual(res[0].subject_names[0].text, 'id*3')
+        self.assertEqual(res[0].subject_names[1], 'fieldname')
 
     def test_with_settings(self) -> None:
         val = '(my_column, my_another_column) [unique]'
