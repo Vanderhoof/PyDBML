@@ -4,6 +4,7 @@ from pyparsing import ParseException
 from pyparsing import ParseSyntaxException
 from pyparsing import ParserElement
 
+from pydbml.parser.blueprints import ExpressionBlueprint
 from pydbml.definitions.column import column_setting
 from pydbml.definitions.column import column_settings
 from pydbml.definitions.column import column_type
@@ -59,11 +60,14 @@ class TestDefault(TestCase):
         val2 = f"default: `{expr2}`"
         val3 = f"default: ``"
         res = default.parseString(val, parseAll=True)
-        self.assertEqual(res[0], f'({expr1})')
+        self.assertIsInstance(res[0], ExpressionBlueprint)
+        self.assertEqual(res[0].text, expr1)
         res = default.parseString(val2, parseAll=True)
-        self.assertEqual(res[0], f'({expr2})')
+        self.assertIsInstance(res[0], ExpressionBlueprint)
+        self.assertEqual(res[0].text, expr2)
         res = default.parseString(val3, parseAll=True)
-        self.assertEqual(res[0], '()')
+        self.assertIsInstance(res[0], ExpressionBlueprint)
+        self.assertEqual(res[0].text, '')
 
     def test_bool(self) -> None:
         vals = ['true', 'false', 'null']

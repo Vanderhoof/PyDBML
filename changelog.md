@@ -3,6 +3,7 @@
 - refs don't have tables, only columns
 - tables don't have refs
 - col1 col2 in ref are as they were in dbml
+- Expression class
 
 # 0.4.2
 
