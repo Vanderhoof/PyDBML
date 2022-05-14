@@ -21,7 +21,7 @@ from .reference import ref_inline
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 type_args = ("(" + pp.originalTextFor(expression)('args') + ")")
-type_name = (pp.Word(pp.alphanums + '_') | pp.dblQuotedString())('name')
+type_name = (pp.Word(pp.alphanums + '_') | pp.QuotedString('"'))('name')
 column_type = (type_name + type_args[0, 1])
 
 
