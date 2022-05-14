@@ -42,11 +42,14 @@ class Index(SQLOjbect):
 
     def __repr__(self):
         '''
-        >>> Index(['name', 'type'])
-        <Index None, ['name', 'type']>
-        >>> t = Table('t')
-        >>> Index(['name', 'type'], table=t)
-        <Index 't', ['name', 'type']>
+        >>> c = Column('col', 'int')
+        >>> i = Index([c, '(c*2)'])
+        >>> i
+        <Index None, ['col', '(c*2)']>
+        >>> from .table import Table
+        >>> Table('test').add_index(i)
+        >>> i
+        <Index 'test', ['col', '(c*2)']>
         '''
 
         table_name = self.table.name if self.table else None
@@ -54,11 +57,14 @@ class Index(SQLOjbect):
 
     def __str__(self):
         '''
-        >>> print(Index(['name', 'type']))
-        Index([name, type])
-        >>> t = Table('t')
-        >>> print(Index(['name', 'type'], table=t))
-        Index(t[name, type])
+        >>> c = Column('col', 'int')
+        >>> i = Index([c, '(c*2)'])
+        >>> print(i)
+        Index([col, (c*2)])
+        >>> from .table import Table
+        >>> Table('test').add_index(i)
+        >>> print(i)
+        Index(test[col, (c*2)])
         '''
 
         table_name = self.table.name if self.table else ''

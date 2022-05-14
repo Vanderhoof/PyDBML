@@ -13,7 +13,8 @@ from .exceptions import SchemaValidationError
 
 
 class Schema:
-    def __init__(self) -> None:
+    def __init__(self, name: str = 'public') -> None:
+        self.name = name
         self.tables: List['Table'] = []
         self.table_dict: Dict[str, 'Table'] = {}
         self.refs: List['Reference'] = []
@@ -22,7 +23,20 @@ class Schema:
         self.project: Optional['Project'] = None
 
     def __repr__(self) -> str:
-        return f"<Schema>"
+        """
+        >>> Schema("private")
+        <Schema 'private'>
+        """
+
+        return f"<Schema {self.name!r}>"
+
+    def __str__(self) -> str:
+        """
+        >>> print(Schema("private"))
+        <Schema private>
+        """
+
+        return f"<Schema {self.name}>"
 
     def __getitem__(self, k: Union[int, str]) -> Table:
         if isinstance(k, int):
