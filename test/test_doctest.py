@@ -11,6 +11,7 @@ from pydbml.classes import project
 from pydbml.classes import reference
 from pydbml.classes import table
 from pydbml.classes import table_group
+from pydbml.parser import parser
 
 
 def load_tests(loader, tests, ignore):
@@ -24,4 +25,5 @@ def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(schema))
     tests.addTests(doctest.DocTestSuite(table))
     tests.addTests(doctest.DocTestSuite(table_group))
+    tests.addTests(doctest.DocTestSuite(parser))
     return tests

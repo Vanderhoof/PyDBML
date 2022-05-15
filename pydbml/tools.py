@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .classes import Note
 
 
@@ -26,3 +26,9 @@ def indent(val: str, spaces=4) -> str:
     if val == '':
         return val
     return ' ' * spaces + val.replace('\n', '\n' + ' ' * spaces)
+
+
+def remove_bom(source: str) -> str:
+    if source and source[0] == '\ufeff':
+        source = source[1:]
+    return source

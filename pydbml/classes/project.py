@@ -30,7 +30,7 @@ class Project:
     @property
     def dbml(self):
         result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'Project {self.name} {{\n'
+        result += f'Project "{self.name}" {{\n'
         if self.items:
             items_str = ''
             for k, v in self.items.items():

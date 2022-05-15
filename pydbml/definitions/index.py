@@ -1,6 +1,7 @@
 import pyparsing as pp
 
 from pydbml.parser.blueprints import IndexBlueprint
+from pydbml.parser.blueprints import ExpressionBlueprint
 
 from .common import _
 from .common import _c
@@ -84,7 +85,7 @@ def parse_index(s, l, t):
         ]
     '''
     init_dict = {}
-    if isinstance(t['subject'], str):
+    if isinstance(t['subject'], (str, ExpressionBlueprint)):
         subjects = [t['subject']]
     else:
         subjects = list(t['subject'])

@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from pydbml.schema import Schema
 from pydbml.classes import Column
+from pydbml.classes import Expression
 from pydbml.classes import Table
 from pydbml.classes import Reference
 from pydbml.classes import Note
@@ -166,7 +167,7 @@ multiline''']"""
         expected = '"order" integer [default: 3.33]'
         self.assertEqual(c.dbml, expected)
 
-        c.default = "(now() - interval '5 days')"
+        c.default = Expression("now() - interval '5 days'")
         expected = "\"order\" integer [default: `now() - interval '5 days'`]"
         self.assertEqual(c.dbml, expected)
 

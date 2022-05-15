@@ -41,8 +41,10 @@ class Schema:
     def __getitem__(self, k: Union[int, str]) -> Table:
         if isinstance(k, int):
             return self.tables[k]
-        else:
+        elif isinstance(k, str):
             return self.table_dict[k]
+        else:
+            raise TypeError('indeces must be str or int')
 
     def __iter__(self):
         return iter(self.tables)
@@ -85,7 +87,7 @@ class Schema:
 
     def add_reference(self, obj: Reference):
         for col in (*obj.col1, *obj.col2):
-            if col.table.schema == self:
+            if col.table and col.table.schema == self:
                 break
         else:
             raise SchemaValidationError(
@@ -198,7 +200,7 @@ class Schema:
     @property
     def dbml(self):
         '''Generates DBML code out of parsed results'''
-        items = (self.project) if self.project else ()
+        items = [self.project] if self.project else []
         refs = (ref for ref in self.refs if not ref.inline)
         items.extend((*self.enums, *self.tables, *refs, *self.table_groups))
         components = (

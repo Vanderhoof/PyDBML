@@ -6,7 +6,6 @@ from typing import Union
 from .base import SQLOjbect
 from .column import Column
 from pydbml.constants import MANY_TO_ONE
-from pydbml.constants import ONE_TO_MANY
 from pydbml.constants import ONE_TO_ONE
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
@@ -23,7 +22,7 @@ class Reference(SQLOjbect):
     required_attributes = ('type', 'col1', 'col2')
 
     def __init__(self,
-                 type_: Literal[MANY_TO_ONE, ONE_TO_MANY, ONE_TO_ONE],
+                 type_: Literal['>', '<', '-'],
                  col1: Union[Column, Collection[Column]],
                  col2: Union[Column, Collection[Column]],
                  name: Optional[str] = None,

@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from pydbml.classes import Column
+from pydbml.classes import Expression
 from pydbml.classes import Index
 from pydbml.classes import Note
 from pydbml.classes import Reference
@@ -363,7 +364,7 @@ CREATE TABLE "products" (
         t.add_column(c1)
         t.add_column(c2)
         i1 = Index(['zero', 'id'], unique=True)
-        i2 = Index(['(capitalize(name))'], comment="index comment")
+        i2 = Index([Expression('capitalize(name)')], comment="index comment")
         t.add_index(i1)
         t.add_index(i2)
         s = Schema()

@@ -1,13 +1,18 @@
 from typing import Optional
 from typing import Union
 from typing import List
+from typing import TYPE_CHECKING
 
 from .base import SQLOjbect
 from .note import Note
 from .column import Column
+from .expression import Expression
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
 from pydbml.tools import note_option_to_dbml
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .table import Table
 
 
 class Index(SQLOjbect):
@@ -15,7 +20,7 @@ class Index(SQLOjbect):
     required_attributes = ('subjects', 'table')
 
     def __init__(self,
-                 subjects: List[Union[str, 'Column']],
+                 subjects: List[Union[str, 'Column', 'Expression']],
                  name: Optional[str] = None,
                  unique: bool = False,
                  type_: Optional[str] = None,
@@ -24,7 +29,7 @@ class Index(SQLOjbect):
                  comment: Optional[str] = None):
         self.schema = None
         self.subjects = subjects
-        self.table = None
+        self.table: Optional['Table'] = None
 
         self.name = name if name else None
         self.unique = unique
@@ -36,9 +41,9 @@ class Index(SQLOjbect):
     @property
     def subject_names(self):
         '''
-        For backward compatibility. Returns updated list of subject names.
+        Returns updated list of subject names.
         '''
-        return [s.name if isinstance(s, Column) else s for s in self.subjects]
+        return [s.name if isinstance(s, Column) else str(s) for s in self.subjects]
 
     def __repr__(self):
         '''
@@ -86,7 +91,16 @@ class Index(SQLOjbect):
 
         '''
         self.check_attributes_for_sql()
-        keys = ', '.join(f'"{key.name}"' if isinstance(key, Column) else key for key in self.subjects)
+        subjects = []
+
+        for subj in self.subjects:
+            if isinstance(subj, Column):
+                subjects.append(f'"{subj.name}"')
+            elif isinstance(subj, Expression):
+                subjects.append(subj.sql)
+            else:
+                subjects.append(subj)
+        keys = ', '.join(subj for subj in subjects)
         if self.pk:
             result = comment_to_sql(self.comment) if self.comment else ''
             result += f'PRIMARY KEY ({keys})'
@@ -108,20 +122,22 @@ class Index(SQLOjbect):
 
     @property
     def dbml(self):
-        def subject_to_str(val: str) -> str:
-            if val.startswith('(') and val.endswith(')'):
-                return f'`{val[1:-1]}`'
+        subjects = []
+
+        for subj in self.subjects:
+            if isinstance(subj, Column):
+                subjects.append(subj.name)
+            elif isinstance(subj, Expression):
+                subjects.append(subj.dbml)
             else:
-                return val
+                subjects.append(subj)
 
         result = comment_to_dbml(self.comment) if self.comment else ''
 
-        subject_names = self.subject_names
-
-        if len(subject_names) > 1:
-            result += f'({", ".join(subject_to_str(sn) for sn in subject_names)})'
+        if len(subjects) > 1:
+            result += f'({", ".join(subj for subj in subjects)})'
         else:
-            result += subject_to_str(subject_names[0])
+            result += subjects[0]
 
         options = []
         if self.name:

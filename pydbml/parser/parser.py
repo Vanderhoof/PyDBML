@@ -23,27 +23,28 @@ from pydbml.definitions.table import table
 from pydbml.definitions.table_group import table_group
 from pydbml.exceptions import TableNotFoundError
 from pydbml.schema import Schema
+from pydbml.tools import remove_bom
+
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 
 class PyDBML:
     '''
-    PyDBML parser factory. If properly initiated, returns PyDBMLParseResults
-    which contains parse results in attributes.
+    PyDBML parser factory. If properly initiated, returns parsed Schema.
 
     Usage option 1:
 
-    >>> with open('schema.dbml') as f:
+    >>> with open('test_schema.dbml') as f:
     ...     p = PyDBML(f)
     ...     # or
     ...     p = PyDBML(f.read())
 
     Usage option 2:
-    >>> p = PyDBML.parse_file('schema.dbml')
+    >>> p = PyDBML.parse_file('test_schema.dbml')
     >>> # or
     >>> from pathlib import Path
-    >>> p = PyDBML(Path('schema.dbml'))
+    >>> p = PyDBML(Path('test_schema.dbml'))
     '''
 
     def __new__(cls,
@@ -54,41 +55,40 @@ class PyDBML:
             elif isinstance(source_, Path):
                 with open(source_, encoding='utf8') as f:
                     source = f.read()
-            else:  # TextIOWrapper
+            elif isinstance(source_, TextIOWrapper):
                 source = source_.read()
-            if source[0] == '\ufeff':  # removing BOM
-                source = source[1:]
+            else:
+                raise TypeError('Source must be str, path or file stream')
+
+            source = remove_bom(source)
             return cls.parse(source)
         else:
             return super().__new__(cls)
 
     def __repr__(self):
+        """
+        >>> PyDBML()
+        <PyDBML>
+        """
+
         return "<PyDBML>"
 
     @staticmethod
-    def parse(text: str) -> PyDBMLParser:
-        if text[0] == '\ufeff':  # removing BOM
-            text = text[1:]
-
+    def parse(text: str) -> Schema:
+        text = remove_bom(text)
         parser = PyDBMLParser(text)
         return parser.parse()
 
     @staticmethod
-    def parse_file(file: Union[str, Path, TextIOWrapper]) -> PyDBMLParser:
+    def parse_file(file: Union[str, Path, TextIOWrapper]) -> Schema:
         if isinstance(file, TextIOWrapper):
             source = file.read()
         else:
             with open(file, encoding='utf8') as f:
                 source = f.read()
-        if source[0] == '\ufeff':  # removing BOM
-            source = source[1:]
+        source = remove_bom(source)
         parser = PyDBMLParser(source)
         return parser.parse()
-
-
-def parse(source: str):
-    parser = PyDBMLParser(source)
-    return parser.parse()
 
 
 class PyDBMLParser:
@@ -96,13 +96,12 @@ class PyDBMLParser:
         self.schema = None
 
         self.ref_blueprints: List[ReferenceBlueprint] = []
-        self.table_groups = []
+        self.table_groups: List[TableGroupBlueprint] = []
         self.source = source
-        self.tables = []
-        self.refs = []
-        self.enums = []
-        self.table_groups = []
-        self.project = None
+        self.tables: List[TableGroupBlueprint] = []
+        self.refs: List[ReferenceBlueprint] = []
+        self.enums: List[EnumBlueprint] = []
+        self.project: Optional[ProjectBlueprint] = None
 
     def parse(self):
         self._set_syntax()
@@ -111,6 +110,11 @@ class PyDBMLParser:
         return self.schema
 
     def __repr__(self):
+        """
+        >>> PyDBMLParser('')
+        <PyDBMLParser>
+        """
+
         return "<PyDBMLParser>"
 
     def _set_syntax(self):

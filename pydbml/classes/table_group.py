@@ -15,7 +15,7 @@ class TableGroup:
 
     def __init__(self,
                  name: str,
-                 items: Union[List[str], List[Table]],
+                 items: List[Table],
                  comment: Optional[str] = None):
         self.schema = None
         self.name = name
@@ -37,7 +37,7 @@ class TableGroup:
         items = [i if isinstance(i, str) else i.name for i in self.items]
         return f'<TableGroup {self.name!r}, {items!r}>'
 
-    def __getitem__(self, key: int) -> str:
+    def __getitem__(self, key: int) -> Table:
         return self.items[key]
 
     def __iter__(self):

@@ -13,7 +13,7 @@ class TestIndex(TestCase):
         )
         result = bp.build()
         self.assertIsInstance(result, Index)
-        self.assertEqual(result.subjects, bp.subject_names)
+        self.assertEqual(result.subject_names, [])
 
     def test_build_full(self) -> None:
         bp = IndexBlueprint(
@@ -27,7 +27,7 @@ class TestIndex(TestCase):
         )
         result = bp.build()
         self.assertIsInstance(result, Index)
-        self.assertEqual(result.subject_names, bp.subject_names)
+        self.assertEqual(result.subject_names, [])
         self.assertEqual(result.name, bp.name)
         self.assertEqual(result.unique, bp.unique)
         self.assertEqual(result.type, bp.type)

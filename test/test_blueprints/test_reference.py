@@ -31,6 +31,9 @@ class TestReferenceBlueprint(TestCase):
         c2 = Column(name='col2', type_='Varchar')
         t2.add_column(c2)
 
+        with self.assertRaises(RuntimeError):
+            bp.build()
+
         parserMock = Mock()
         parserMock.locate_table.side_effect = [t1, t2]
         bp.parser = parserMock

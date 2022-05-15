@@ -1,1 +1,1 @@
-from .parser import PyDBML, parse
+from .parser import PyDBML

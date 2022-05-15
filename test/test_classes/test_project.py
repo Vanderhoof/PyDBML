@@ -7,7 +7,7 @@ class TestProject(TestCase):
     def test_dbml_note(self):
         p = Project('myproject', note='Project note')
         expected = \
-'''Project myproject {
+'''Project "myproject" {
     Note {
         'Project note'
     }
@@ -26,7 +26,7 @@ class TestProject(TestCase):
         expected = \
 """// Multiline
 // Project comment
-Project myproject {
+Project "myproject" {
     database_type: 'PostgreSQL'
     story: '''One day I was eating my cantaloupe and
     I thought, why shouldn't I?
@@ -38,4 +38,12 @@ Project myproject {
         '''
     }
 }"""
+        self.assertEqual(p.dbml, expected)
+
+    def test_dbml_space(self) -> None:
+        p = Project('My project', {'a': 'b'})
+        expected = \
+'''Project "My project" {
+    a: 'b'
+}'''
         self.assertEqual(p.dbml, expected)
