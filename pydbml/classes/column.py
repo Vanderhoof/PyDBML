@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 
 from .base import SQLOjbect
 from .note import Note
+from .expression import Expression
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
 from pydbml.tools import note_option_to_dbml
 from pydbml.exceptions import TableNotFoundError
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .table import Table
     from .reference import Reference
 
@@ -27,7 +28,7 @@ class Column(SQLOjbect):
                  not_null: bool = False,
                  pk: bool = False,
                  autoinc: bool = False,
-                 default: Optional[Union[str, int, bool, float]] = None,
+                 default: Optional[Union[str, int, bool, float, Expression]] = None,
                  note: Optional[Union['Note', str]] = None,
                  # ref_blueprints: Optional[List[ReferenceBlueprint]] = None,
                  comment: Optional[str] = None):
@@ -74,7 +75,9 @@ class Column(SQLOjbect):
         if self.not_null:
             components.append('NOT NULL')
         if self.default is not None:
-            components.append('DEFAULT ' + str(self.default))
+            default = self.default.sql \
+                if isinstance(self.default, Expression) else self.default
+            components.append(f'DEFAULT {default}')
 
         result = comment_to_sql(self.comment) if self.comment else ''
         result += ' '.join(components)
@@ -82,14 +85,14 @@ class Column(SQLOjbect):
 
     @property
     def dbml(self):
-        def default_to_str(val: str) -> str:
+        def default_to_str(val: Union[Expression, str]) -> str:
             if isinstance(val, str):
                 if val.lower() in ('null', 'true', 'false'):
                     return val.lower()
-                elif val.startswith('(') and val.endswith(')'):
-                    return f'`{val[1:-1]}`'
                 else:
                     return f"'{val}'"
+            elif isinstance(val, Expression):
+                return val.dbml
             else:  # int or float or bool
                 return val
 

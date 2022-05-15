@@ -4,6 +4,7 @@ from typing import Dict
 from typing import List
 from typing import Literal
 from typing import Optional
+from typing import Any
 from typing import Union
 
 from pydbml.classes import Column
@@ -16,9 +17,6 @@ from pydbml.classes import Project
 from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
-from pydbml.constants import MANY_TO_ONE
-from pydbml.constants import ONE_TO_MANY
-from pydbml.constants import ONE_TO_ONE
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
 
@@ -45,7 +43,7 @@ class ExpressionBlueprint(Blueprint):
 
 @dataclass
 class ReferenceBlueprint(Blueprint):
-    type: Literal[MANY_TO_ONE, ONE_TO_MANY, ONE_TO_ONE]
+    type: Literal['>', '<', '-']
     inline: bool
     name: Optional[str] = None
     table1: Optional[str] = None
@@ -69,7 +67,10 @@ class ReferenceBlueprint(Blueprint):
         if self.col2 is None:
             raise ColumnNotFoundError("Can't build Reference, col2 unknown")
 
-        table1 = self.parser.locate_table(self.table1)
+        if self.parser:
+            table1 = self.parser.locate_table(self.table1)
+        else:
+            raise RuntimeError('Parser is not set')
 
         col1_list = [c.strip('() ') for c in self.col1.split(',')]
         col1 = [table1[col] for col in col1_list]
@@ -98,7 +99,7 @@ class ColumnBlueprint(Blueprint):
     not_null: bool = False
     pk: bool = False
     autoinc: bool = False
-    default: Optional[Union[str, int, bool, float, ExpressionBlueprint]] = None
+    default: Optional[Any] = None
     note: Optional[NoteBlueprint] = None
     ref_blueprints: Optional[List[ReferenceBlueprint]] = None
     comment: Optional[str] = None
@@ -139,7 +140,7 @@ class IndexBlueprint(Blueprint):
     def build(self) -> 'Index':
         return Index(
             # TableBlueprint will process subjects
-            subjects=list(self.subject_names),
+            subjects=[],
             name=self.name,
             unique=self.unique,
             type_=self.type,
@@ -173,8 +174,8 @@ class TableBlueprint(Blueprint):
             result.add_column(col_bp.build())
         for index_bp in indexes:
             index = index_bp.build()
-            new_subjects = []
-            for subj in index.subjects:
+            new_subjects: List[Union[str, Column, Expression]] = []
+            for subj in index_bp.subject_names:
                 if isinstance(subj, ExpressionBlueprint):
                     new_subjects.append(subj.build())
                 else:
@@ -253,6 +254,8 @@ class TableGroupBlueprint(Blueprint):
     comment: Optional[str] = None
 
     def build(self) -> 'TableGroup':
+        if not self.parser:
+            raise RuntimeError('Parser is not set')
         return TableGroup(
             name=self.name,
             items=[self.parser.locate_table(table) for table in self.items],

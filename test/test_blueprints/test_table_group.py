@@ -13,6 +13,9 @@ class TestTableGroupBlueprint(TestCase):
             items=['table1', 'table2'],
             comment='Comment text'
         )
+        with self.assertRaises(RuntimeError):
+            bp.build()
+
         parserMock = Mock()
         parserMock.locate_table.side_effect = [
             Table(name='table1'),

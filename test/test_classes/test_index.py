@@ -3,6 +3,7 @@ from unittest import TestCase
 from pydbml.classes import Index
 from pydbml.classes import Table
 from pydbml.classes import Column
+from pydbml.classes import Expression
 
 
 class TestIndex(TestCase):
@@ -13,6 +14,15 @@ class TestIndex(TestCase):
         t.add_index(r)
         self.assertIs(r.table, t)
         expected = 'CREATE INDEX ON "products" ("id");'
+        self.assertEqual(r.sql, expected)
+
+    def test_basic_sql_str(self) -> None:
+        t = Table('products')
+        t.add_column(Column('id', 'integer'))
+        r = Index(subjects=['id'])
+        t.add_index(r)
+        self.assertIs(r.table, t)
+        expected = 'CREATE INDEX ON "products" (id);'
         self.assertEqual(r.sql, expected)
 
     def test_comment(self) -> None:
@@ -62,9 +72,9 @@ CREATE INDEX ON "products" ("id");'''
     def test_composite_with_expression(self) -> None:
         t = Table('products')
         t.add_column(Column('id', 'integer'))
-        r = Index(subjects=[t.columns[0], '(id*3)'])
+        r = Index(subjects=[t.columns[0], Expression('id*3')])
         t.add_index(r)
-        self.assertEqual(r.subjects, [t['id'], '(id*3)'])
+        self.assertEqual(r.subjects, [t['id'], Expression('id*3')])
         expected = 'CREATE INDEX ON "products" ("id", (id*3));'
         self.assertEqual(r.sql, expected)
 
@@ -80,7 +90,7 @@ CREATE INDEX ON "products" ("id");'''
     def test_dbml_composite(self):
         t = Table('products')
         t.add_column(Column('id', 'integer'))
-        i = Index(subjects=[t.columns[0], '(id*3)'])
+        i = Index(subjects=[t.columns[0], Expression('id*3')])
         t.add_index(i)
 
         expected = '(id, `id*3`)'
@@ -90,7 +100,7 @@ CREATE INDEX ON "products" ("id");'''
         t = Table('products')
         t.add_column(Column('id', 'integer'))
         i = Index(
-            subjects=[t.columns[0], '(getdate())'],
+            subjects=[t.columns[0], Expression('getdate()')],
             name='Dated id',
             unique=True,
             type_='hash',

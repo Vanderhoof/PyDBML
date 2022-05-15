@@ -19,7 +19,7 @@ from pydbml.tools import comment_to_sql
 from pydbml.tools import indent
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from pydbml.schema import Schema
 
 
@@ -35,7 +35,7 @@ class Table(SQLOjbect):
                  header_color: Optional[str] = None,
                  # refs: Optional[List[TableReference]] = None,
                  comment: Optional[str] = None):
-        self.schema: Schema = None
+        self.schema: Optional[Schema] = None
         self.name = name
         self.columns: List[Column] = []
         self.indexes: List[Index] = []

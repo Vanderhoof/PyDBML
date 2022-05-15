@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest import TestCase
 
 from pydbml import PyDBML
+from pydbml.parser.parser import PyDBMLParser
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
 
@@ -94,3 +95,12 @@ class TestFaulty(TestCase):
     def test_bad_index(self) -> None:
         with self.assertRaises(ColumnNotFoundError):
             PyDBML(TEST_DATA_PATH / 'wrong_index.dbml')
+
+
+class TestPyDBMLParser(TestCase):
+    def test_edge(self) -> None:
+        p = PyDBMLParser('')
+        with self.assertRaises(RuntimeError):
+            p.locate_table('test')
+        with self.assertRaises(RuntimeError):
+            p.parse_blueprint(1, 1, [1])

@@ -34,6 +34,7 @@ class TestSchema(TestCase):
         t.add_column(c)
         schema = Schema()
         schema.add_table(t)
+        self.assertIsInstance(t.alias, str)
         self.assertIs(schema[t.alias], t)
 
     def test_add_table_alias_bad(self) -> None:
@@ -274,6 +275,8 @@ class TestSchema(TestCase):
         self.assertIs(schema['table2'], t2)
         self.assertIs(schema[0], t1)
         self.assertIs(schema[1], t2)
+        with self.assertRaises(TypeError):
+            schema[None]
         with self.assertRaises(IndexError):
             schema[2]
         with self.assertRaises(KeyError):
