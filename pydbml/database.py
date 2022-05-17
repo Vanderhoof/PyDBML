@@ -9,12 +9,11 @@ from .classes import Project
 from .classes import Reference
 from .classes import Table
 from .classes import TableGroup
-from .exceptions import SchemaValidationError
+from .exceptions import DatabaseValidationError
 
 
-class Schema:
-    def __init__(self, name: str = 'public') -> None:
-        self.name = name
+class Database:
+    def __init__(self) -> None:
         self.tables: List['Table'] = []
         self.table_dict: Dict[str, 'Table'] = {}
         self.refs: List['Reference'] = []
@@ -24,19 +23,11 @@ class Schema:
 
     def __repr__(self) -> str:
         """
-        >>> Schema("private")
-        <Schema 'private'>
+        >>> Database()
+        <Database>
         """
 
-        return f"<Schema {self.name!r}>"
-
-    def __str__(self) -> str:
-        """
-        >>> print(Schema("private"))
-        <Schema private>
-        """
-
-        return f"<Schema {self.name}>"
+        return f"<Database>"
 
     def __getitem__(self, k: Union[int, str]) -> Table:
         if isinstance(k, int):
@@ -49,11 +40,11 @@ class Schema:
     def __iter__(self):
         return iter(self.tables)
 
-    def _set_schema(self, obj: Any) -> None:
-        obj.schema = self
+    def _set_database(self, obj: Any) -> None:
+        obj.database = self
 
-    def _unset_schema(self, obj: Any) -> None:
-        obj.schema = None
+    def _unset_database(self, obj: Any) -> None:
+        obj.database = None
 
     def add(self, obj: Any) -> Any:
         if isinstance(obj, Table):
@@ -67,17 +58,17 @@ class Schema:
         elif isinstance(obj, Project):
             return self.add_project(obj)
         else:
-            raise SchemaValidationError(f'Unsupported type {type(obj)}.')
+            raise DatabaseValidationError(f'Unsupported type {type(obj)}.')
 
     def add_table(self, obj: Table) -> Table:
         if obj in self.tables:
-            raise SchemaValidationError(f'{obj} is already in the schema.')
+            raise DatabaseValidationError(f'{obj} is already in the database.')
         if obj.name in self.table_dict:
-            raise SchemaValidationError(f'Table {obj.name} is already in the schema.')
+            raise DatabaseValidationError(f'Table {obj.name} is already in the database.')
         if obj.alias and obj.alias in self.table_dict:
-            raise SchemaValidationError(f'Table {obj.alias} is already in the schema.')
+            raise DatabaseValidationError(f'Table {obj.alias} is already in the database.')
 
-        self._set_schema(obj)
+        self._set_database(obj)
 
         self.tables.append(obj)
         self.table_dict[obj.name] = obj
@@ -87,46 +78,46 @@ class Schema:
 
     def add_reference(self, obj: Reference):
         for col in (*obj.col1, *obj.col2):
-            if col.table and col.table.schema == self:
+            if col.table and col.table.database == self:
                 break
         else:
-            raise SchemaValidationError(
+            raise DatabaseValidationError(
                 'Cannot add reference. At least one of the referenced tables'
-                ' should belong to this schema'
+                ' should belong to this database'
             )
         if obj in self.refs:
-            raise SchemaValidationError(f'{obj} is already in the schema.')
+            raise DatabaseValidationError(f'{obj} is already in the database.')
 
-        self._set_schema(obj)
+        self._set_database(obj)
         self.refs.append(obj)
         return obj
 
     def add_enum(self, obj: Enum) -> Enum:
         if obj in self.enums:
-            raise SchemaValidationError(f'{obj} is already in the schema.')
+            raise DatabaseValidationError(f'{obj} is already in the database.')
         for enum in self.enums:
             if enum.name == obj.name:
-                raise SchemaValidationError(f'Enum {obj.name} is already in the schema.')
+                raise DatabaseValidationError(f'Enum {obj.name} is already in the database.')
 
-        self._set_schema(obj)
+        self._set_database(obj)
         self.enums.append(obj)
         return obj
 
     def add_table_group(self, obj: TableGroup) -> TableGroup:
         if obj in self.table_groups:
-            raise SchemaValidationError(f'{obj} is already in the schema.')
+            raise DatabaseValidationError(f'{obj} is already in the database.')
         for table_group in self.table_groups:
             if table_group.name == obj.name:
-                raise SchemaValidationError(f'TableGroup {obj.name} is already in the schema.')
+                raise DatabaseValidationError(f'TableGroup {obj.name} is already in the database.')
 
-        self._set_schema(obj)
+        self._set_database(obj)
         self.table_groups.append(obj)
         return obj
 
     def add_project(self, obj: Project) -> Project:
         if self.project:
             self.delete_project()
-        self._set_schema(obj)
+        self._set_database(obj)
         self.project = obj
         return obj
 
@@ -142,14 +133,14 @@ class Schema:
         elif isinstance(obj, Project):
             return self.delete_project()
         else:
-            raise SchemaValidationError(f'Unsupported type {type(obj)}.')
+            raise DatabaseValidationError(f'Unsupported type {type(obj)}.')
 
     def delete_table(self, obj: Table) -> Table:
         try:
             index = self.tables.index(obj)
         except ValueError:
-            raise SchemaValidationError(f'{obj} is not in the schema.')
-        self._unset_schema(self.tables.pop(index))
+            raise DatabaseValidationError(f'{obj} is not in the database.')
+        self._unset_database(self.tables.pop(index))
         result = self.table_dict.pop(obj.name)
         if obj.alias:
             self.table_dict.pop(obj.alias)
@@ -159,35 +150,35 @@ class Schema:
         try:
             index = self.refs.index(obj)
         except ValueError:
-            raise SchemaValidationError(f'{obj} is not in the schema.')
+            raise DatabaseValidationError(f'{obj} is not in the database.')
         result = self.refs.pop(index)
-        self._unset_schema(result)
+        self._unset_database(result)
         return result
 
     def delete_enum(self, obj: Enum) -> Enum:
         try:
             index = self.enums.index(obj)
         except ValueError:
-            raise SchemaValidationError(f'{obj} is not in the schema.')
+            raise DatabaseValidationError(f'{obj} is not in the database.')
         result = self.enums.pop(index)
-        self._unset_schema(result)
+        self._unset_database(result)
         return result
 
     def delete_table_group(self, obj: TableGroup) -> TableGroup:
         try:
             index = self.table_groups.index(obj)
         except ValueError:
-            raise SchemaValidationError(f'{obj} is not in the schema.')
+            raise DatabaseValidationError(f'{obj} is not in the database.')
         result = self.table_groups.pop(index)
-        self._unset_schema(result)
+        self._unset_database(result)
         return result
 
     def delete_project(self) -> Project:
         if self.project is None:
-            raise SchemaValidationError(f'Project is not set.')
+            raise DatabaseValidationError(f'Project is not set.')
         result = self.project
         self.project = None
-        self._unset_schema(result)
+        self._unset_database(result)
         return result
 
     @property

@@ -27,7 +27,7 @@ class Index(SQLOjbect):
                  pk: bool = False,
                  note: Optional[Union['Note', str]] = None,
                  comment: Optional[str] = None):
-        self.schema = None
+        self.database = None
         self.subjects = subjects
         self.table: Optional['Table'] = None
 

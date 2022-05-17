@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pydbml.schema import Schema
+from pydbml.database import Database
 from pydbml.classes import Column
 from pydbml.classes import Expression
 from pydbml.classes import Table
@@ -41,15 +41,15 @@ class TestColumn(TestCase):
         self.assertEqual(col.note, note)
         self.assertEqual(col.comment, comment)
 
-    def test_schema_set(self) -> None:
+    def test_database_set(self) -> None:
         col = Column('name', 'int')
         table = Table('name')
-        self.assertIsNone(col.schema)
+        self.assertIsNone(col.database)
         table.add_column(col)
-        self.assertIsNone(col.schema)
-        schema = Schema()
-        schema.add(table)
-        self.assertIs(col.schema, schema)
+        self.assertIsNone(col.database)
+        database = Database()
+        database.add(table)
+        self.assertIs(col.database, database)
 
     def test_basic_sql(self) -> None:
         r = Column(name='id',
@@ -98,7 +98,7 @@ class TestColumn(TestCase):
         )
         t = Table(name='Test')
         t.add_column(c)
-        s = Schema()
+        s = Database()
         s.add(t)
         expected = '"order" integer'
 
@@ -118,7 +118,7 @@ class TestColumn(TestCase):
         )
         t = Table(name='Test')
         t.add_column(c)
-        s = Schema()
+        s = Database()
         s.add(t)
         expected = \
 '''// Comment on the column
@@ -136,7 +136,7 @@ class TestColumn(TestCase):
         )
         t = Table(name='Test')
         t.add_column(c)
-        s = Schema()
+        s = Database()
         s.add(t)
         expected = \
 """// Comment on the column
@@ -153,7 +153,7 @@ multiline''']"""
         )
         t = Table(name='Test')
         t.add_column(c)
-        s = Schema()
+        s = Database()
         s.add(t)
 
         expected = "\"order\" integer [default: 'String value']"
@@ -183,16 +183,16 @@ multiline''']"""
         expected = '"order" integer [default: false]'
         self.assertEqual(c.dbml, expected)
 
-    def test_schema(self):
+    def test_database(self):
         c1 = Column(name='client_id', type_='integer')
         t1 = Table(name='products')
 
-        self.assertIsNone(c1.schema)
+        self.assertIsNone(c1.database)
         t1.add_column(c1)
-        self.assertIsNone(c1.schema)
-        s = Schema()
+        self.assertIsNone(c1.database)
+        s = Database()
         s.add(t1)
-        self.assertIs(c1.schema, s)
+        self.assertIs(c1.database, s)
 
     def test_get_refs(self) -> None:
         c1 = Column(name='client_id', type_='integer')
@@ -205,7 +205,7 @@ multiline''']"""
         t2.add_column(c2)
 
         ref = Reference(type_='>', col1=c1, col2=c2, inline=True)
-        s = Schema()
+        s = Database()
         s.add(t1)
         s.add(t2)
         s.add(ref)
@@ -221,7 +221,7 @@ multiline''']"""
         t2.add_column(c2)
 
         ref = Reference(type_='>', col1=c1, col2=c2)
-        s = Schema()
+        s = Database()
         s.add(t1)
         s.add(t2)
         s.add(ref)
@@ -243,7 +243,7 @@ multiline''']"""
         t2.add_column(c2)
 
         ref = Reference(type_='<', col1=c2, col2=c1)
-        s = Schema()
+        s = Database()
         s.add(t1)
         s.add(t2)
         s.add(ref)

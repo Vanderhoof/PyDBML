@@ -7,7 +7,7 @@ from pydbml.classes import EnumItem
 from pydbml.classes import Note
 from pydbml.parser.blueprints import ColumnBlueprint
 from pydbml.parser.blueprints import NoteBlueprint
-from pydbml.schema import Schema
+from pydbml.database import Database
 
 
 class TestColumn(TestCase):
@@ -47,7 +47,7 @@ class TestColumn(TestCase):
         self.assertEqual(result.comment, bp.comment)
 
     def test_enum_type(self) -> None:
-        s = Schema()
+        s = Database()
         e = Enum(
             'myenum',
             items=[
@@ -57,7 +57,7 @@ class TestColumn(TestCase):
         )
         s.add(e)
         parser = Mock()
-        parser.schema = s
+        parser.database = s
 
         bp = ColumnBlueprint(
             name='testcol',

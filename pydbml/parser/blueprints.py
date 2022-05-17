@@ -108,7 +108,7 @@ class ColumnBlueprint(Blueprint):
         if isinstance(self.default, ExpressionBlueprint):
             self.default = self.default.build()
         if self.parser:
-            for enum in self.parser.schema.enums:
+            for enum in self.parser.database.enums:
                 if enum.name == self.type:
                     self.type = enum
                     break
@@ -153,7 +153,7 @@ class IndexBlueprint(Blueprint):
 @dataclass
 class TableBlueprint(Blueprint):
     name: str
-    columns: Optional[List[ColumnBlueprint]] = None  # TODO: should it be optional?
+    columns: List[ColumnBlueprint] = None
     indexes: Optional[List[IndexBlueprint]] = None
     alias: Optional[str] = None
     note: Optional[NoteBlueprint] = None

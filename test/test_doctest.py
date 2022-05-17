@@ -1,7 +1,7 @@
 import doctest
 import unittest
 
-from pydbml import schema
+from pydbml import database
 from pydbml.classes import column
 from pydbml.classes import enum
 from pydbml.classes import expression
@@ -22,7 +22,7 @@ def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(project))
     tests.addTests(doctest.DocTestSuite(note))
     tests.addTests(doctest.DocTestSuite(reference))
-    tests.addTests(doctest.DocTestSuite(schema))
+    tests.addTests(doctest.DocTestSuite(database))
     tests.addTests(doctest.DocTestSuite(table))
     tests.addTests(doctest.DocTestSuite(table_group))
     tests.addTests(doctest.DocTestSuite(parser))

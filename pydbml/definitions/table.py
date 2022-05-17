@@ -47,9 +47,11 @@ table_element = _ + (note_element('note') | indexes('indexes')) + _
 
 table_body = table_column[1, ...]('columns') + _ + table_element[...]
 
+table_name = (name('schema') + '.' + name('name')) | (name('name'))
+
 table = _c + (
     pp.CaselessLiteral("table").suppress()
-    + name('name')
+    + table_name
     + alias('alias')[0, 1]
     + table_settings('settings')[0, 1] + _
     + '{' - table_body + _ + '}'
@@ -72,6 +74,8 @@ def parse_table(s, l, t):
     init_dict = {
         'name': t['name'],
     }
+    # if 'schema' in t:
+    #     init_dict['schema'] = t['schema']
     if 'settings' in t:
         init_dict.update(t['settings'])
     if 'alias' in t:

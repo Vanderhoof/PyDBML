@@ -23,6 +23,15 @@ class TestComment(TestCase):
         res = comment.parseString(val)
         self.assertEqual(res[0], 'test comment')
 
+    def test_multiline_comment(self) -> None:
+        val = '/*test comment*/'
+        res = comment.parseString(val)
+        self.assertEqual(res[0], 'test comment')
+
+        val2 = '/*\nline1\nline2\nline3\n*/'
+        res2 = comment.parseString(val2)
+        self.assertEqual(res2[0], '\nline1\nline2\nline3\n')
+
 
 class Test_c(TestCase):
     def test_comment(self) -> None:

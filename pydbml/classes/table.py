@@ -13,14 +13,14 @@ from pydbml.constants import ONE_TO_MANY
 from pydbml.constants import ONE_TO_ONE
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import IndexNotFoundError
-from pydbml.exceptions import UnknownSchemaError
+from pydbml.exceptions import UnknownDatabaseError
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
 from pydbml.tools import indent
 
 
 if TYPE_CHECKING:  # pragma: no cover
-    from pydbml.schema import Schema
+    from pydbml.database import Database
 
 
 class Table(SQLOjbect):
@@ -35,7 +35,7 @@ class Table(SQLOjbect):
                  header_color: Optional[str] = None,
                  # refs: Optional[List[TableReference]] = None,
                  comment: Optional[str] = None):
-        self.schema: Optional[Schema] = None
+        self.database: Optional[Database] = None
         self.name = name
         self.columns: List[Column] = []
         self.indexes: List[Index] = []
@@ -85,18 +85,18 @@ class Table(SQLOjbect):
             return self.indexes.pop(i)
 
     def get_refs(self) -> List[Reference]:
-        if not self.schema:
-            raise UnknownSchemaError('Schema for the table is not set')
-        return [ref for ref in self.schema.refs if ref.col1[0].table == self]
+        if not self.database:
+            raise UnknownDatabaseError('Database for the table is not set')
+        return [ref for ref in self.database.refs if ref.col1[0].table == self]
 
     def _get_references_for_sql(self) -> List[Reference]:
         '''
         return inline references for this table sql definition
         '''
-        if not self.schema:
-            raise UnknownSchemaError(f'Schema for the table {self} is not set')
+        if not self.database:
+            raise UnknownDatabaseError(f'Database for the table {self} is not set')
         result = []
-        for ref in self.schema.refs:
+        for ref in self.database.refs:
             if ref.inline:
                 if (ref.type in (MANY_TO_ONE, ONE_TO_ONE)) and\
                         (ref.col1[0].table == self):

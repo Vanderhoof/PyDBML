@@ -6,7 +6,10 @@ from .generic import string_literal
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
-comment = pp.Suppress("//") + pp.SkipTo(pp.LineEnd())
+comment = (
+    pp.Suppress("//") + pp.SkipTo(pp.LineEnd())
+    | pp.Suppress('/*') + ... + pp.Suppress('*/')
+)
 
 # optional comment or newline
 _ = ('\n' | comment)[...].suppress()

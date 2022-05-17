@@ -30,7 +30,7 @@ class Reference(SQLOjbect):
                  on_update: Optional[str] = None,
                  on_delete: Optional[str] = None,
                  inline: bool = False):
-        self.schema = None
+        self.database = None
         self.type = type_
         self.col1 = [col1] if isinstance(col1, Column) else list(col1)
         self.col2 = [col2] if isinstance(col2, Column) else list(col2)

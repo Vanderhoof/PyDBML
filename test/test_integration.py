@@ -14,7 +14,7 @@ from pydbml.classes import Expression
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
 from pydbml.classes import Note
-from pydbml.schema import Schema
+from pydbml.database import Database
 from pydbml import PyDBML
 
 
@@ -22,8 +22,8 @@ TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'
 
 
 class TestGenerateDBML(TestCase):
-    def create_schema(self) -> Schema:
-        schema = Schema()
+    def create_database(self) -> Database:
+        database = Database()
         emp_level = Enum(
             'level',
             [
@@ -32,7 +32,7 @@ class TestGenerateDBML(TestCase):
                 EnumItem('senior'),
             ]
         )
-        schema.add(emp_level)
+        database.add(emp_level)
 
         t1 = Table('Employees', alias='emp')
         c11 = Column('id', 'integer', pk=True, autoinc=True)
@@ -45,7 +45,7 @@ class TestGenerateDBML(TestCase):
         t1.add_column(c13)
         t1.add_column(c14)
         t1.add_column(c15)
-        schema.add(t1)
+        database.add(t1)
 
         t2 = Table('books')
         c21 = Column('id', 'integer', pk=True, autoinc=True)
@@ -56,7 +56,7 @@ class TestGenerateDBML(TestCase):
         t2.add_column(c22)
         t2.add_column(c23)
         t2.add_column(c24)
-        schema.add(t2)
+        database.add(t2)
 
         t3 = Table('countries')
         c31 = Column('id', 'integer', pk=True, autoinc=True)
@@ -67,57 +67,57 @@ class TestGenerateDBML(TestCase):
         t3.add_index(i31)
         i32 = Index([Expression('UPPER(name)')])
         t3.add_index(i32)
-        schema.add(t3)
+        database.add(t3)
 
         ref1 = Reference('>', c15, c21)
-        schema.add(ref1)
+        database.add(ref1)
 
         ref2 = Reference('<', c31, c24, name='Country Reference', inline=True)
-        schema.add(ref2)
+        database.add(ref2)
 
         tg = TableGroup('Unanimate', [t2, t3])
-        schema.add(tg)
+        database.add(tg)
 
         p = Project('my project', {'author': 'me', 'reason': 'testing'})
-        schema.add(p)
-        return schema
+        database.add(p)
+        return database
 
     def test_generate_dbml(self) -> None:
-        schema = self.create_schema()
+        database = self.create_database()
         with open(TEST_DATA_PATH / 'integration1.dbml') as f:
             expected = f.read()
-        self.assertEqual(schema.dbml, expected)
+        self.assertEqual(database.dbml, expected)
 
     def test_generate_sql(self) -> None:
-        schema = self.create_schema()
+        database = self.create_database()
         with open(TEST_DATA_PATH / 'integration1.sql') as f:
             expected = f.read()
-        self.assertEqual(schema.sql, expected)
+        self.assertEqual(database.sql, expected)
 
     def test_parser(self):
         source_path = TEST_DATA_PATH / 'integration1.dbml'
         with self.assertRaises(TypeError):
             PyDBML(2)
         res1 = PyDBML(source_path)
-        self.assertIsInstance(res1, Schema)
+        self.assertIsInstance(res1, Database)
         with open(source_path) as f:
             res2 = PyDBML(f)
-        self.assertIsInstance(res2, Schema)
+        self.assertIsInstance(res2, Database)
         with open(source_path) as f:
             source = f.read()
         res3 = PyDBML(source)
-        self.assertIsInstance(res3, Schema)
+        self.assertIsInstance(res3, Database)
         res4 = PyDBML('\ufeff' + source)
-        self.assertIsInstance(res4, Schema)
+        self.assertIsInstance(res4, Database)
 
         pydbml = PyDBML()
         self.assertIsInstance(pydbml, PyDBML)
         res5 = pydbml.parse(source)
-        self.assertIsInstance(res5, Schema)
+        self.assertIsInstance(res5, Database)
         res6 = PyDBML.parse('\ufeff' + source)
-        self.assertIsInstance(res6, Schema)
+        self.assertIsInstance(res6, Database)
         res7 = PyDBML.parse_file(str(source_path))
-        self.assertIsInstance(res7, Schema)
+        self.assertIsInstance(res7, Database)
         with open(source_path) as f:
             res8 = PyDBML.parse_file(f)
-        self.assertIsInstance(res8, Schema)
+        self.assertIsInstance(res8, Database)

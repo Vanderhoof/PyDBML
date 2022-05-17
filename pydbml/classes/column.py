@@ -53,8 +53,8 @@ class Column(SQLOjbect):
         return [ref for ref in self.table.get_refs() if self in ref.col1]
 
     @property
-    def schema(self):
-        return self.table.schema if self.table else None
+    def database(self):
+        return self.table.database if self.table else None
 
     @property
     def sql(self):
