@@ -18,7 +18,7 @@ class DuplicateReferenceError(Exception):
     pass
 
 
-class UnknownSchemaError(Exception):
+class UnknownDatabaseError(Exception):
     pass
 
 
@@ -26,5 +26,5 @@ class DBMLError(Exception):
     pass
 
 
-class SchemaValidationError(Exception):
+class DatabaseValidationError(Exception):
     pass

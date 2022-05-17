@@ -4,6 +4,7 @@
 - tables don't have refs
 - col1 col2 in ref are as they were in dbml
 - Expression class
+- add multiline comment
 
 # 0.4.2
 

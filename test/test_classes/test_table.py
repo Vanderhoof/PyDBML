@@ -8,8 +8,8 @@ from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import IndexNotFoundError
-from pydbml.exceptions import UnknownSchemaError
-from pydbml.schema import Schema
+from pydbml.exceptions import UnknownDatabaseError
+from pydbml.database import Database
 
 
 class TestTable(TestCase):
@@ -17,7 +17,7 @@ class TestTable(TestCase):
         t = Table('products')
         c = Column('id', 'integer')
         t.add_column(c)
-        s = Schema()
+        s = Database()
         s.add(t)
         expected = 'CREATE TABLE "products" (\n  "id" integer\n);'
         self.assertEqual(t.sql, expected)
@@ -74,7 +74,7 @@ class TestTable(TestCase):
         t2 = Table('names')
         c21 = Column('name_val', 'varchar2')
         t2.add_column(c21)
-        s = Schema()
+        s = Database()
         s.add(t)
         s.add(t2)
         r = Reference('>', c2, c21)
@@ -105,7 +105,7 @@ class TestTable(TestCase):
         t.add_column(c1)
         t.add_column(c2)
         t.add_column(c3)
-        s = Schema()
+        s = Database()
         s.add(t)
         expected = \
 '''CREATE TABLE "products" (
@@ -131,7 +131,7 @@ multiline note';'''
         t2 = Table('names')
         c21 = Column('name_val', 'varchar2')
         t2.add_column(c21)
-        s = Schema()
+        s = Database()
         s.add(t)
 
         r = Reference('>', c2, c21, inline=True)
@@ -156,7 +156,7 @@ CREATE INDEX ON "products" ("id", "name");'''
         t.add_column(c2)
         i = Index(subjects=[c1, c2], pk=True)
         t.add_index(i)
-        s = Schema()
+        s = Database()
         s.add(t)
 
         expected = \
@@ -175,7 +175,7 @@ CREATE INDEX ON "products" ("id", "name");'''
         t.add_column(c2)
         i = Index(subjects=[c1, c2], pk=True, comment='Multiline\nindex comment')
         t.add_index(i)
-        s = Schema()
+        s = Database()
         s.add(t)
 
         expected = \
@@ -250,7 +250,7 @@ CREATE TABLE "products" (
 
     def test_get_references_for_sql(self):
         t = Table('products')
-        with self.assertRaises(UnknownSchemaError):
+        with self.assertRaises(UnknownDatabaseError):
             t._get_references_for_sql()
         c11 = Column('id', 'integer')
         c12 = Column('name', 'varchar2')
@@ -261,7 +261,7 @@ CREATE TABLE "products" (
         c22 = Column('name_val', 'varchar2')
         t2.add_column(c21)
         t2.add_column(c22)
-        s = Schema()
+        s = Database()
         s.add(t)
         s.add(t2)
         r1 = Reference('>', c12, c22)
@@ -278,7 +278,7 @@ CREATE TABLE "products" (
 
     def test_get_refs(self):
         t = Table('products')
-        with self.assertRaises(UnknownSchemaError):
+        with self.assertRaises(UnknownDatabaseError):
             t.get_refs()
         c11 = Column('id', 'integer')
         c12 = Column('name', 'varchar2')
@@ -289,7 +289,7 @@ CREATE TABLE "products" (
         c22 = Column('name_val', 'varchar2')
         t2.add_column(c21)
         t2.add_column(c22)
-        s = Schema()
+        s = Database()
         s.add(t)
         s.add(t2)
         r1 = Reference('>', c12, c22)
@@ -307,7 +307,7 @@ CREATE TABLE "products" (
         c2 = Column('name', 'varchar2')
         t.add_column(c1)
         t.add_column(c2)
-        s = Schema()
+        s = Database()
         s.add(t)
 
         expected = \
@@ -326,7 +326,7 @@ CREATE TABLE "products" (
         t2 = Table('names')
         c21 = Column('name_val', 'varchar2')
         t2.add_column(c21)
-        s = Schema()
+        s = Database()
         s.add(t)
         s.add(t2)
         r = Reference('>', c2, c21)
@@ -367,7 +367,7 @@ CREATE TABLE "products" (
         i2 = Index([Expression('capitalize(name)')], comment="index comment")
         t.add_index(i1)
         t.add_index(i2)
-        s = Schema()
+        s = Database()
         s.add(t)
 
         expected = \

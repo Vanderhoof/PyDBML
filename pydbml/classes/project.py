@@ -13,7 +13,7 @@ class Project:
                  items: Optional[Dict[str, str]] = None,
                  note: Optional[Union['Note', str]] = None,
                  comment: Optional[str] = None):
-        self.schema = None
+        self.database = None
         self.name = name
         self.items = items
         self.note = Note(note)

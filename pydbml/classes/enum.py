@@ -59,7 +59,7 @@ class Enum(SQLOjbect):
                  name: str,
                  items: List['EnumItem'],
                  comment: Optional[str] = None):
-        self.schema = None
+        self.database = None
         self.name = name
         self.items = items
         self.comment = comment

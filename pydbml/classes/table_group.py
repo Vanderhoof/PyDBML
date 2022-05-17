@@ -17,7 +17,7 @@ class TableGroup:
                  name: str,
                  items: List[Table],
                  comment: Optional[str] = None):
-        self.schema = None
+        self.database = None
         self.name = name
         self.items = items
         self.comment = comment

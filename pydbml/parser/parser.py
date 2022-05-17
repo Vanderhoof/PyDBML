@@ -22,7 +22,7 @@ from pydbml.definitions.reference import ref
 from pydbml.definitions.table import table
 from pydbml.definitions.table_group import table_group
 from pydbml.exceptions import TableNotFoundError
-from pydbml.schema import Schema
+from pydbml.database import Database
 from pydbml.tools import remove_bom
 
 
@@ -31,7 +31,7 @@ pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 class PyDBML:
     '''
-    PyDBML parser factory. If properly initiated, returns parsed Schema.
+    PyDBML parser factory. If properly initiated, returns parsed Database.
 
     Usage option 1:
 
@@ -74,13 +74,13 @@ class PyDBML:
         return "<PyDBML>"
 
     @staticmethod
-    def parse(text: str) -> Schema:
+    def parse(text: str) -> Database:
         text = remove_bom(text)
         parser = PyDBMLParser(text)
         return parser.parse()
 
     @staticmethod
-    def parse_file(file: Union[str, Path, TextIOWrapper]) -> Schema:
+    def parse_file(file: Union[str, Path, TextIOWrapper]) -> Database:
         if isinstance(file, TextIOWrapper):
             source = file.read()
         else:
@@ -93,7 +93,7 @@ class PyDBML:
 
 class PyDBMLParser:
     def __init__(self, source: str):
-        self.schema = None
+        self.database = None
 
         self.ref_blueprints: List[ReferenceBlueprint] = []
         self.table_groups: List[TableGroupBlueprint] = []
@@ -106,8 +106,8 @@ class PyDBMLParser:
     def parse(self):
         self._set_syntax()
         self._syntax.parseString(self.source, parseAll=True)
-        self.build_schema()
-        return self.schema
+        self.build_database()
+        return self.database
 
     def __repr__(self):
         """
@@ -166,24 +166,24 @@ class PyDBMLParser:
         blueprint.parser = self
 
     def locate_table(self, name: str) -> 'Table':
-        if not self.schema:
-            raise RuntimeError('Schema is not ready')
+        if not self.database:
+            raise RuntimeError('Database is not ready')
         try:
-            result = self.schema[name]
+            result = self.database[name]
         except KeyError:
-            raise TableNotFoundError(f'Table {name} not present in the schema')
+            raise TableNotFoundError(f'Table {name} not present in the database')
         return result
 
-    def build_schema(self):
-        self.schema = Schema()
+    def build_database(self):
+        self.database = Database()
         for enum_bp in self.enums:
-            self.schema.add(enum_bp.build())
+            self.database.add(enum_bp.build())
         for table_bp in self.tables:
-            self.schema.add(table_bp.build())
+            self.database.add(table_bp.build())
             self.ref_blueprints.extend(table_bp.get_reference_blueprints())
         for table_group_bp in self.table_groups:
-            self.schema.add(table_group_bp.build())
+            self.database.add(table_group_bp.build())
         if self.project:
-            self.schema.add(self.project.build())
+            self.database.add(self.project.build())
         for ref_bp in self.refs:
-            self.schema.add(ref_bp.build())
+            self.database.add(ref_bp.build())
