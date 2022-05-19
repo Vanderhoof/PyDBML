@@ -6,10 +6,10 @@ from pydbml.classes import Index
 from pydbml.classes import Note
 from pydbml.classes import Reference
 from pydbml.classes import Table
+from pydbml.database import Database
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import IndexNotFoundError
 from pydbml.exceptions import UnknownDatabaseError
-from pydbml.database import Database
 
 
 class TestTable(TestCase):

@@ -1,7 +1,8 @@
 from unittest import TestCase
+
 from pydbml.classes import Column
-from pydbml.classes import Table
 from pydbml.classes import Reference
+from pydbml.classes import Table
 from pydbml.exceptions import DBMLError
 from pydbml.exceptions import TableNotFoundError
 

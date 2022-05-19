@@ -3,8 +3,8 @@ from unittest import TestCase
 from pydbml.classes import Note
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
-from pydbml.tools import note_option_to_dbml
 from pydbml.tools import indent
+from pydbml.tools import note_option_to_dbml
 
 
 class TestCommentToDBML(TestCase):

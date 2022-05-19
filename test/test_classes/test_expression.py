@@ -1,5 +1,6 @@
-from pydbml.classes import Expression
 from unittest import TestCase
+
+from pydbml.classes import Expression
 
 
 class TestNote(TestCase):

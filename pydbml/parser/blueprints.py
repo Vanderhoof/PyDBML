@@ -1,10 +1,10 @@
 from dataclasses import dataclass
+from typing import Any
 from typing import Collection
 from typing import Dict
 from typing import List
 from typing import Literal
 from typing import Optional
-from typing import Any
 from typing import Union
 
 from pydbml.classes import Column
@@ -160,7 +160,7 @@ class IndexBlueprint(Blueprint):
 class TableBlueprint(Blueprint):
     name: str
     schema: str = 'public'
-    columns: List[ColumnBlueprint] = None
+    columns: Optional[List[ColumnBlueprint]] = None
     indexes: Optional[List[IndexBlueprint]] = None
     alias: Optional[str] = None
     note: Optional[NoteBlueprint] = None

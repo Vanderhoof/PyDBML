@@ -8,3 +8,6 @@
 * - 2.4 Multiple Schemas
 - validation on "add_index", "add_table" etc
 * - enum type in table definition with schema
+- add coverage badge
+- add docstrings
+- new docs

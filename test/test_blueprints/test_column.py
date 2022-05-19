@@ -5,9 +5,9 @@ from pydbml.classes import Column
 from pydbml.classes import Enum
 from pydbml.classes import EnumItem
 from pydbml.classes import Note
+from pydbml.database import Database
 from pydbml.parser.blueprints import ColumnBlueprint
 from pydbml.parser.blueprints import NoteBlueprint
-from pydbml.database import Database
 
 
 class TestColumn(TestCase):

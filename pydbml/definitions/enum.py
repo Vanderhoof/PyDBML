@@ -1,8 +1,5 @@
 import pyparsing as pp
 
-from pydbml.parser.blueprints import EnumBlueprint
-from pydbml.parser.blueprints import EnumItemBlueprint
-
 from .common import _
 from .common import _c
 from .common import c
@@ -10,6 +7,8 @@ from .common import end
 from .common import n
 from .common import note
 from .generic import name
+from pydbml.parser.blueprints import EnumBlueprint
+from pydbml.parser.blueprints import EnumItemBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 

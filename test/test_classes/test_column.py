@@ -1,11 +1,11 @@
 from unittest import TestCase
 
-from pydbml.database import Database
 from pydbml.classes import Column
 from pydbml.classes import Expression
-from pydbml.classes import Table
-from pydbml.classes import Reference
 from pydbml.classes import Note
+from pydbml.classes import Reference
+from pydbml.classes import Table
+from pydbml.database import Database
 from pydbml.exceptions import TableNotFoundError
 
 

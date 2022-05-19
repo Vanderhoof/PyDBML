@@ -7,10 +7,10 @@ from .base import SQLOjbect
 from .column import Column
 from pydbml.constants import MANY_TO_ONE
 from pydbml.constants import ONE_TO_ONE
-from pydbml.tools import comment_to_dbml
-from pydbml.tools import comment_to_sql
 from pydbml.exceptions import DBMLError
 from pydbml.exceptions import TableNotFoundError
+from pydbml.tools import comment_to_dbml
+from pydbml.tools import comment_to_sql
 
 
 class Reference(SQLOjbect):

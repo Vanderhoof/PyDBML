@@ -1,5 +1,6 @@
-from typing import Tuple
 from typing import Any
+from typing import Tuple
+
 from pydbml.exceptions import AttributeMissingError
 
 

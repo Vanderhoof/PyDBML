@@ -1,8 +1,7 @@
 import pyparsing as pp
 
-from pydbml.parser.blueprints import NoteBlueprint
-
 from .generic import string_literal
+from pydbml.parser.blueprints import NoteBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 

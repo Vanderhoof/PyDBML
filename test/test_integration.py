@@ -2,20 +2,19 @@ import os
 
 from pathlib import Path
 from unittest import TestCase
-from unittest.mock import patch, Mock
 
+from pydbml import PyDBML
 from pydbml.classes import Column
 from pydbml.classes import Enum
 from pydbml.classes import EnumItem
+from pydbml.classes import Expression
+from pydbml.classes import Index
+from pydbml.classes import Note
 from pydbml.classes import Project
 from pydbml.classes import Reference
-from pydbml.classes import Index
-from pydbml.classes import Expression
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
-from pydbml.classes import Note
 from pydbml.database import Database
-from pydbml import PyDBML
 
 
 TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'

@@ -10,8 +10,8 @@ from pydbml.classes import Project
 from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
-from pydbml.exceptions import DatabaseValidationError
 from pydbml.database import Database
+from pydbml.exceptions import DatabaseValidationError
 
 
 TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'

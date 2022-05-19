@@ -1,15 +1,15 @@
-from typing import Optional
-from typing import Union
 from typing import List
+from typing import Optional
 from typing import TYPE_CHECKING
+from typing import Union
 
 from .base import SQLOjbect
-from .note import Note
 from .expression import Expression
+from .note import Note
+from pydbml.exceptions import TableNotFoundError
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
 from pydbml.tools import note_option_to_dbml
-from pydbml.exceptions import TableNotFoundError
 
 if TYPE_CHECKING:  # pragma: no cover
     from .table import Table

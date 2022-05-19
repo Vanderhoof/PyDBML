@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from pydbml.classes import Note
 from pydbml.classes import Index
+from pydbml.classes import Note
 from pydbml.parser.blueprints import IndexBlueprint
 from pydbml.parser.blueprints import NoteBlueprint
 
