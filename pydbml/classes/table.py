@@ -30,20 +30,24 @@ class Table(SQLOjbect):
 
     def __init__(self,
                  name: str,
+                 schema: str = 'public',
                  alias: Optional[str] = None,
                  note: Optional[Union['Note', str]] = None,
                  header_color: Optional[str] = None,
-                 # refs: Optional[List[TableReference]] = None,
                  comment: Optional[str] = None):
         self.database: Optional[Database] = None
         self.name = name
+        self.schema = schema
         self.columns: List[Column] = []
         self.indexes: List[Index] = []
         self.alias = alias if alias else None
         self.note = Note(note)
         self.header_color = header_color
-        # self.refs = refs or []
         self.comment = comment
+
+    @property
+    def full_name(self) -> str:
+        return f'{self.schema}.{self.name}'
 
     def add_column(self, c: Column) -> None:
         '''
@@ -105,6 +109,12 @@ class Table(SQLOjbect):
                     result.append(ref)
         return result
 
+    def _get_full_name_for_sql(self) -> str:
+        if self.schema == 'public':
+            return f'"{self.name}"'
+        else:
+            return f'"{self.schema}"."{self.name}"'
+
     def __getitem__(self, k: Union[int, str]) -> Column:
         if isinstance(k, int):
             return self.columns[k]
@@ -129,10 +139,10 @@ class Table(SQLOjbect):
         '''
         >>> table = Table('customers')
         >>> table
-        <Table 'customers'>
+        <Table 'public' 'customers'>
         '''
 
-        return f'<Table {self.name!r}>'
+        return f'<Table {self.schema!r} {self.name!r}>'
 
     def __str__(self):
         '''
@@ -140,10 +150,10 @@ class Table(SQLOjbect):
         >>> table.add_column(Column('id', 'INTEGER'))
         >>> table.add_column(Column('name', 'VARCHAR2'))
         >>> print(table)
-        customers(id, name)
+        public.customers(id, name)
         '''
 
-        return f'{self.name}({", ".join(c.name for c in self.columns)})'
+        return f'{self.schema}.{self.name}({", ".join(c.name for c in self.columns)})'
 
     @property
     def sql(self):
@@ -161,7 +171,9 @@ class Table(SQLOjbect):
         CREATE INDEX ON "products" ("id", "name");
         '''
         self.check_attributes_for_sql()
-        components = [f'CREATE TABLE "{self.name}" (']
+        name = self._get_full_name_for_sql()
+        components = [f'CREATE TABLE {name} (']
+
         body = []
         body.extend(indent(c.sql, 2) for c in self.columns)
         body.extend(indent(i.sql, 2) for i in self.indexes if i.pk)
@@ -188,7 +200,10 @@ class Table(SQLOjbect):
     @property
     def dbml(self):
         result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'Table "{self.name}" '
+
+        name = self._get_full_name_for_sql()
+
+        result += f'Table {name} '
         if self.alias:
             result += f'as "{self.alias}" '
         result += '{\n'

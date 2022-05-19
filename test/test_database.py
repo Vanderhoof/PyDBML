@@ -39,7 +39,7 @@ class TestDatabase(TestCase):
 
     def test_add_table_alias_bad(self) -> None:
         c = Column('test', 'varchar', True)
-        t = Table('myalias')
+        t = Table('test', alias='myalias')
         t.add_column(c)
         database = Database()
         database.add_table(t)
@@ -267,12 +267,12 @@ class TestDatabase(TestCase):
 
     def test_geititem(self) -> None:
         t1 = Table('table1')
-        t2 = Table('table2')
+        t2 = Table('table2', schema='myschema')
         database = Database()
         database.add_table(t1)
         database.add_table(t2)
-        self.assertIs(database['table1'], t1)
-        self.assertIs(database['table2'], t2)
+        self.assertIs(database['public.table1'], t1)
+        self.assertIs(database['myschema.table2'], t2)
         self.assertIs(database[0], t1)
         self.assertIs(database[1], t2)
         with self.assertRaises(TypeError):

@@ -66,3 +66,25 @@ class TestColumn(TestCase):
         bp.parser = parser
         result = bp.build()
         self.assertIs(result.type, e)
+
+    def test_enum_type_schema(self) -> None:
+        s = Database()
+        e = Enum(
+            'myenum',
+            schema='myschema',
+            items=[
+                EnumItem('i1'),
+                EnumItem('i2')
+            ]
+        )
+        s.add(e)
+        parser = Mock()
+        parser.database = s
+
+        bp = ColumnBlueprint(
+            name='testcol',
+            type='myschema.myenum'
+        )
+        bp.parser = parser
+        result = bp.build()
+        self.assertIs(result.type, e)

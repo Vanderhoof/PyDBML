@@ -45,15 +45,10 @@ class TableGroup:
 
     @property
     def dbml(self):
-        def item_to_str(val: Union[str, Table]) -> str:
-            if isinstance(val, Table):
-                return val.name
-            else:
-                return val
 
         result = comment_to_dbml(self.comment) if self.comment else ''
         result += f'TableGroup {self.name} {{\n'
         for i in self.items:
-            result += f'    {item_to_str(i)}\n'
+            result += f'    {i._get_full_name_for_sql()}\n'
         result += '}'
         return result

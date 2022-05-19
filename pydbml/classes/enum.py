@@ -58,9 +58,11 @@ class Enum(SQLOjbect):
     def __init__(self,
                  name: str,
                  items: List['EnumItem'],
+                 schema: str = 'public',
                  comment: Optional[str] = None):
         self.database = None
         self.name = name
+        self.schema = schema
         self.items = items
         self.comment = comment
 
@@ -92,6 +94,12 @@ class Enum(SQLOjbect):
 
         return self.name
 
+    def _get_full_name_for_sql(self) -> str:
+        if self.schema == 'public':
+            return f'"{self.name}"'
+        else:
+            return f'"{self.schema}"."{self.name}"'
+
     @property
     def sql(self):
         '''
@@ -107,7 +115,7 @@ class Enum(SQLOjbect):
         '''
         self.check_attributes_for_sql()
         result = comment_to_sql(self.comment) if self.comment else ''
-        result += f'CREATE TYPE "{self.name}" AS ENUM (\n'
+        result += f'CREATE TYPE {self._get_full_name_for_sql()} AS ENUM (\n'
         result += '\n'.join(f'{indent(i.sql, 2)}' for i in self.items)
         result += '\n);'
         return result
@@ -115,7 +123,7 @@ class Enum(SQLOjbect):
     @property
     def dbml(self):
         result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'Enum "{self.name}" {{\n'
+        result += f'Enum {self._get_full_name_for_sql()} {{\n'
         items_str = '\n'.join(i.dbml for i in self.items)
         result += indent(items_str)
         result += '\n}'

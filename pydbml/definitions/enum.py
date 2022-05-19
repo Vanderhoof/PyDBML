@@ -54,9 +54,11 @@ enum_item.setParseAction(parse_enum_item)
 
 enum_body = enum_item[1, ...]
 
+enum_name = pp.Combine(name("schema") + '.' + name("name")) | name("name")
+
 enum = _c + (
     pp.CaselessLiteral('enum')
-    - name('name') + _
+    - enum_name + _
     - '{'
     + enum_body('items') + n
     - '}'
@@ -76,6 +78,9 @@ def parse_enum(s, l, t):
         'name': t['name'],
         'items': list(t['items'])
     }
+
+    if 'schema' in t:
+        init_dict['schema'] = t['schema']
 
     if 'comment_before' in t:
         comment = '\n'.join(c[0] for c in t['comment_before'])

@@ -112,7 +112,7 @@ class Reference(SQLOjbect):
             result = comment_to_sql(self.comment) if self.comment else ''
             result += (
                 f'{c}FOREIGN KEY ("{cols}") '
-                f'REFERENCES "{ref_table.name}" ("{ref_cols}")'
+                f'REFERENCES {ref_table._get_full_name_for_sql()} ("{ref_cols}")'
             )
             if self.on_update:
                 result += f' ON UPDATE {self.on_update.upper()}'
@@ -133,8 +133,8 @@ class Reference(SQLOjbect):
 
             result = comment_to_sql(self.comment) if self.comment else ''
             result += (
-                f'ALTER TABLE "{t1.name}" ADD {c}FOREIGN KEY ({c1}) '
-                f'REFERENCES "{t2.name}" ({c2})'
+                f'ALTER TABLE {t1._get_full_name_for_sql()} ADD {c}FOREIGN KEY ({c1}) '
+                f'REFERENCES {t2._get_full_name_for_sql()} ({c2})'
             )
             if self.on_update:
                 result += f' ON UPDATE {self.on_update.upper()}'
@@ -149,7 +149,8 @@ class Reference(SQLOjbect):
             # settings are ignored for inline ref
             if len(self.col2) > 1:
                 raise DBMLError('Cannot render DBML: composite ref cannot be inline')
-            return f'ref: {self.type} "{self.col2[0].table.name}"."{self.col2[0].name}"'
+            table_name = self.col2[0].table._get_full_name_for_sql()
+            return f'ref: {self.type} {table_name}."{self.col2[0].name}"'
         else:
             result = comment_to_dbml(self.comment) if self.comment else ''
             result += 'Ref'
@@ -177,9 +178,9 @@ class Reference(SQLOjbect):
             options_str = f' [{", ".join(options)}]' if options else ''
             result += (
                 ' {\n    '
-                f'"{self.col1[0].table.name}".{col1} '
+                f'{self.col1[0].table._get_full_name_for_sql()}.{col1} '
                 f'{self.type} '
-                f'"{self.col2[0].table.name}".{col2}'
+                f'{self.col2[0].table._get_full_name_for_sql()}.{col2}'
                 f'{options_str}'
                 '\n}'
             )

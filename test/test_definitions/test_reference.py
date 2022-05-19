@@ -37,6 +37,14 @@ class TestInlineRelation(TestCase):
         self.assertIsNone(res[0].table1)
         self.assertIsNone(res[0].col1)
 
+    def test_schema(self) -> None:
+        val1 = 'ref: < table.column'
+        res1 = ref_inline.parseString(val1, parseAll=True)
+        self.assertEqual(res1[0].schema2, 'public')
+        val2 = 'ref: < myschema.table.column'
+        res2 = ref_inline.parseString(val2, parseAll=True)
+        self.assertEqual(res2[0].schema2, 'myschema')
+
     def test_nok(self) -> None:
         vals = [
             'ref:\n< table.column',
@@ -89,6 +97,16 @@ class TestRefShort(TestCase):
         self.assertEqual(res[0].col1, 'col1')
         self.assertEqual(res[0].table2, 'table2')
         self.assertEqual(res[0].col2, 'col2')
+
+    def test_schema(self) -> None:
+        val1 = 'ref: table1.col1 > table2.col2'
+        res1 = ref_short.parseString(val1, parseAll=True)
+        self.assertEqual(res1[0].schema1, 'public')
+        self.assertEqual(res1[0].schema2, 'public')
+        val2 = 'ref: myschema1.table1.col1 > myschema2.table2.col2'
+        res2 = ref_short.parseString(val2, parseAll=True)
+        self.assertEqual(res2[0].schema1, 'myschema1')
+        self.assertEqual(res2[0].schema2, 'myschema2')
 
     def test_name(self) -> None:
         val = 'ref name: table1.col1 > table2.col2'
@@ -195,6 +213,16 @@ class TestRefLong(TestCase):
         self.assertEqual(res[0].col1, 'col1')
         self.assertEqual(res[0].table2, 'table2')
         self.assertEqual(res[0].col2, 'col2')
+
+    def test_schema(self) -> None:
+        val1 = 'ref  {table1.col1 > table2.col2}'
+        res1 = ref_long.parseString(val1, parseAll=True)
+        self.assertEqual(res1[0].schema1, 'public')
+        self.assertEqual(res1[0].schema2, 'public')
+        val2 = 'ref  {myschema1.table1.col1 > myschema2.table2.col2}'
+        res2 = ref_long.parseString(val2, parseAll=True)
+        self.assertEqual(res2[0].schema1, 'myschema1')
+        self.assertEqual(res2[0].schema2, 'myschema2')
 
     def test_name(self) -> None:
         val = 'ref\nname\n{\ntable1.col1 > table2.col2\n}'

@@ -13,6 +13,12 @@ from pydbml.database import Database
 
 
 class TestTable(TestCase):
+    def test_schema(self) -> None:
+        t = Table('test')
+        self.assertEqual(t.schema, 'public')
+        t2 = Table('test', 'schema1')
+        self.assertEqual(t2.schema, 'schema1')
+
     def test_one_column(self) -> None:
         t = Table('products')
         c = Column('id', 'integer')
@@ -167,6 +173,28 @@ CREATE INDEX ON "products" ("id", "name");'''
 );'''
         self.assertEqual(t.sql, expected)
 
+    def test_schema_sql(self) -> None:
+        t = Table('products')
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        s = Database()
+        s.add(t)
+        expected = \
+'''CREATE TABLE "products" (
+  "id" integer,
+  "name" varchar2
+);'''
+        self.assertEqual(t.sql, expected)
+        t.schema = 'myschema'
+        expected = \
+'''CREATE TABLE "myschema"."products" (
+  "id" integer,
+  "name" varchar2
+);'''
+        self.assertEqual(t.sql, expected)
+
     def test_index_inline_and_comments(self) -> None:
         t = Table('products', comment='Multiline\ntable comment')
         c1 = Column('id', 'integer')
@@ -312,6 +340,22 @@ CREATE TABLE "products" (
 
         expected = \
 '''Table "products" {
+    "id" integer
+    "name" varchar2
+}'''
+        self.assertEqual(t.dbml, expected)
+
+    def test_schema_dbml(self):
+        t = Table('products', schema="myschema")
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        s = Database()
+        s.add(t)
+
+        expected = \
+'''Table "myschema"."products" {
     "id" integer
     "name" varchar2
 }'''

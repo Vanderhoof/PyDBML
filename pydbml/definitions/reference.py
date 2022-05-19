@@ -11,17 +11,33 @@ from .generic import name
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 relation = pp.oneOf("> - <")
-ref_inline = pp.Literal("ref:") - relation('type') - name('table') - '.' - name('field')
+
+col_name = (
+    (
+        name('schema') + '.' + name('table') + '.' - name('field')
+    ) | (
+        name('table') + '.' + name('field')
+    )
+)
+
+ref_inline = pp.Literal("ref:") - relation('type') - col_name
 
 
 def parse_inline_relation(s, l, t):
     '''
     ref: < table.column
+    or
+    ref: < schema1.table.column
     '''
-    return ReferenceBlueprint(type=t['type'],
-                              inline=True,
-                              table2=t['table'],
-                              col2=t['field'])
+    result = {
+        'type': t['type'],
+        'inline': True,
+        'table2': t['table'],
+        'col2': t['field']
+    }
+    if 'schema' in t:
+        result['schema2'] = t['schema']
+    return ReferenceBlueprint(**result)
 
 
 ref_inline.setParseAction(parse_inline_relation)
@@ -77,16 +93,53 @@ composite_name = (
 )
 name_or_composite = name | pp.Combine(composite_name)
 
+ref_cols = (
+    (
+        name('schema')
+        + pp.Suppress('.') + name('table')
+        + pp.Suppress('.') + name_or_composite('field')
+    ) | (
+        name('table')
+        + pp.Suppress('.') + name_or_composite('field')
+    )
+)
+
+
+def parse_ref_cols(s, l, t):
+    '''
+    table1.col1
+    or
+    schema1.table1.col1
+    or
+    schema1.table1.(col1, col2)
+    '''
+    result = {
+        'table': t['table'],
+        'field': t['field'],
+    }
+    if 'schema' in t:
+        result['schema'] = t['schema']
+    return result
+
+
+ref_cols.setParseAction(parse_ref_cols)
+
 ref_body = (
-    name('table1')
-    - '.'
-    - name_or_composite('field1')
+    ref_cols('col1')
     - relation('type')
-    - name('table2')
-    - '.'
-    - name_or_composite('field2') + c
+    - ref_cols('col2') + c
     + ref_settings('settings')[0, 1]
 )
+# ref_body = (
+#     table_name('table1')
+#     - '.'
+#     - name_or_composite('field1')
+#     - relation('type')
+#     - table_name('table2')
+#     - '.'
+#     - name_or_composite('field2') + c
+#     + ref_settings('settings')[0, 1]
+# )
 
 
 ref_short = _c + pp.CaselessLiteral('ref') + name('name')[0, 1] + ':' - ref_body
@@ -110,11 +163,16 @@ def parse_ref(s, l, t):
     init_dict = {
         'type': t['type'],
         'inline': False,
-        'table1': t['table1'],
-        'col1': t['field1'],
-        'table2': t['table2'],
-        'col2': t['field2']
+        'table1': t['col1']['table'],
+        'col1': t['col1']['field'],
+        'table2': t['col2']['table'],
+        'col2': t['col2']['field'],
     }
+
+    if 'schema' in t['col1']:
+        init_dict['schema1'] = t['col1']['schema']
+    if 'schema' in t['col2']:
+        init_dict['schema2'] = t['col2']['schema']
     if 'name' in t:
         init_dict['name'] = t['name']
     if 'settings' in t:

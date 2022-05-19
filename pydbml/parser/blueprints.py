@@ -46,8 +46,10 @@ class ReferenceBlueprint(Blueprint):
     type: Literal['>', '<', '-']
     inline: bool
     name: Optional[str] = None
+    schema1: str = 'public'
     table1: Optional[str] = None
     col1: Optional[Union[str, Collection[str]]] = None
+    schema2: str = 'public'
     table2: Optional[str] = None
     col2: Optional[Union[str, Collection[str]]] = None
     comment: Optional[str] = None
@@ -68,14 +70,14 @@ class ReferenceBlueprint(Blueprint):
             raise ColumnNotFoundError("Can't build Reference, col2 unknown")
 
         if self.parser:
-            table1 = self.parser.locate_table(self.table1)
+            table1 = self.parser.locate_table(self.schema1, self.table1)
         else:
             raise RuntimeError('Parser is not set')
 
         col1_list = [c.strip('() ') for c in self.col1.split(',')]
         col1 = [table1[col] for col in col1_list]
 
-        table2 = self.parser.locate_table(self.table2)
+        table2 = self.parser.locate_table(self.schema2, self.table2)
         col2_list = [c.strip('() ') for c in self.col2.split(',')]
         col2 = [table2[col] for col in col2_list]
 
@@ -108,8 +110,12 @@ class ColumnBlueprint(Blueprint):
         if isinstance(self.default, ExpressionBlueprint):
             self.default = self.default.build()
         if self.parser:
+            if '.' in self.type:
+                schema, name = self.type.split('.')
+            else:
+                schema, name = 'public', self.type
             for enum in self.parser.database.enums:
-                if enum.name == self.type:
+                if (enum.schema, enum.name) == (schema, name):
                     self.type = enum
                     break
         return Column(
@@ -153,6 +159,7 @@ class IndexBlueprint(Blueprint):
 @dataclass
 class TableBlueprint(Blueprint):
     name: str
+    schema: str = 'public'
     columns: List[ColumnBlueprint] = None
     indexes: Optional[List[IndexBlueprint]] = None
     alias: Optional[str] = None
@@ -163,6 +170,7 @@ class TableBlueprint(Blueprint):
     def build(self) -> 'Table':
         result = Table(
             name=self.name,
+            schema=self.schema,
             alias=self.alias,
             note=self.note.build() if self.note else None,
             header_color=self.header_color,
@@ -221,12 +229,14 @@ class EnumItemBlueprint(Blueprint):
 class EnumBlueprint(Blueprint):
     name: str
     items: List[EnumItemBlueprint]
+    schema: str = 'public'
     comment: Optional[str] = None
 
     def build(self) -> 'Enum':
         return Enum(
             name=self.name,
             items=[ei.build() for ei in self.items],
+            schema=self.schema,
             comment=self.comment
         )
 
@@ -256,8 +266,13 @@ class TableGroupBlueprint(Blueprint):
     def build(self) -> 'TableGroup':
         if not self.parser:
             raise RuntimeError('Parser is not set')
+        items = []
+        for table_name in self.items:
+            components = table_name.split('.')
+            schema, table = components if len(components) == 2 else 'public', components[0]
+            items.append(self.parser.locate_table(schema, table))
         return TableGroup(
             name=self.name,
-            items=[self.parser.locate_table(table) for table in self.items],
+            items=items,
             comment=self.comment
         )

@@ -74,8 +74,8 @@ def parse_table(s, l, t):
     init_dict = {
         'name': t['name'],
     }
-    # if 'schema' in t:
-    #     init_dict['schema'] = t['schema']
+    if 'schema' in t:
+        init_dict['schema'] = t['schema']
     if 'settings' in t:
         init_dict.update(t['settings'])
     if 'alias' in t:
