@@ -5,6 +5,8 @@
 - col1 col2 in ref are as they were in dbml
 - Expression class
 - add multiline comment
+- support multiple schemas
+- type_ -> type
 
 # 0.4.2
 

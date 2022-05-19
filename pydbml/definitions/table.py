@@ -1,7 +1,5 @@
 import pyparsing as pp
 
-from pydbml.parser.blueprints import TableBlueprint
-
 from .column import table_column
 from .common import _
 from .common import _c
@@ -10,6 +8,7 @@ from .common import note
 from .common import note_object
 from .generic import name
 from .index import indexes
+from pydbml.parser.blueprints import TableBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 

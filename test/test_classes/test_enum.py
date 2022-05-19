@@ -1,5 +1,5 @@
-from pydbml.classes import EnumItem
 from pydbml.classes import Enum
+from pydbml.classes import EnumItem
 from unittest import TestCase
 
 

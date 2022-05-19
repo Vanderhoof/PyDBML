@@ -73,7 +73,9 @@ class Table(SQLOjbect):
         Adds index to self.indexes attribute and sets in this index the
         `table` attribute.
         '''
-
+        for subject in i.subjects:
+            if isinstance(subject, Column) and subject.table != self:
+                raise ColumnNotFoundError(f'Column {subject} not in the table')
         i.table = self
         self.indexes.append(i)
 

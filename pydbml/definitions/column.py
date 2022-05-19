@@ -1,7 +1,5 @@
 import pyparsing as pp
 
-from pydbml.parser.blueprints import ColumnBlueprint
-
 from .common import _
 from .common import _c
 from .common import c
@@ -16,6 +14,7 @@ from .generic import name
 from .generic import number_literal
 from .generic import string_literal
 from .reference import ref_inline
+from pydbml.parser.blueprints import ColumnBlueprint
 
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')

@@ -1,6 +1,5 @@
 from typing import List
 from typing import Optional
-from typing import Union
 
 from .table import Table
 from pydbml.tools import comment_to_dbml

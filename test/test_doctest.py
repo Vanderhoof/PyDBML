@@ -1,5 +1,4 @@
 import doctest
-import unittest
 
 from pydbml import database
 from pydbml.classes import column

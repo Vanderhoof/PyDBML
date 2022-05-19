@@ -4,9 +4,9 @@ from pathlib import Path
 from unittest import TestCase
 
 from pydbml import PyDBML
-from pydbml.parser.parser import PyDBMLParser
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
+from pydbml.parser.parser import PyDBMLParser
 
 
 TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'

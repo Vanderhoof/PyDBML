@@ -4,13 +4,13 @@ from pyparsing import ParseException
 from pyparsing import ParseSyntaxException
 from pyparsing import ParserElement
 
-from pydbml.parser.blueprints import ExpressionBlueprint
 from pydbml.definitions.column import column_setting
 from pydbml.definitions.column import column_settings
 from pydbml.definitions.column import column_type
 from pydbml.definitions.column import constraint
 from pydbml.definitions.column import default
 from pydbml.definitions.column import table_column
+from pydbml.parser.blueprints import ExpressionBlueprint
 
 
 ParserElement.set_default_whitespace_chars(' \t\r')

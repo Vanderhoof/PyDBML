@@ -1,17 +1,17 @@
 from unittest import TestCase
 
-from pydbml.exceptions import ColumnNotFoundError
-from pydbml.classes import Note
-from pydbml.classes import Table
-from pydbml.classes import Index
 from pydbml.classes import Column
 from pydbml.classes import Expression
+from pydbml.classes import Index
+from pydbml.classes import Note
+from pydbml.classes import Table
+from pydbml.exceptions import ColumnNotFoundError
+from pydbml.parser.blueprints import ColumnBlueprint
+from pydbml.parser.blueprints import ExpressionBlueprint
 from pydbml.parser.blueprints import IndexBlueprint
 from pydbml.parser.blueprints import NoteBlueprint
-from pydbml.parser.blueprints import ColumnBlueprint
-from pydbml.parser.blueprints import TableBlueprint
 from pydbml.parser.blueprints import ReferenceBlueprint
-from pydbml.parser.blueprints import ExpressionBlueprint
+from pydbml.parser.blueprints import TableBlueprint
 
 
 class TestTable(TestCase):

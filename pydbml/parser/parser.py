@@ -1,13 +1,11 @@
 from __future__ import annotations
-
-import pyparsing as pp
-
 from io import TextIOWrapper
 from pathlib import Path
-
 from typing import List
 from typing import Optional
 from typing import Union
+
+import pyparsing as pp
 
 from .blueprints import EnumBlueprint
 from .blueprints import ProjectBlueprint
@@ -15,6 +13,7 @@ from .blueprints import ReferenceBlueprint
 from .blueprints import TableBlueprint
 from .blueprints import TableGroupBlueprint
 from pydbml.classes import Table
+from pydbml.database import Database
 from pydbml.definitions.common import comment
 from pydbml.definitions.enum import enum
 from pydbml.definitions.project import project
@@ -22,7 +21,6 @@ from pydbml.definitions.reference import ref
 from pydbml.definitions.table import table
 from pydbml.definitions.table_group import table_group
 from pydbml.exceptions import TableNotFoundError
-from pydbml.database import Database
 from pydbml.tools import remove_bom
 
 

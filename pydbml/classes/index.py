@@ -52,7 +52,9 @@ class Index(SQLOjbect):
         >>> i
         <Index None, ['col', '(c*2)']>
         >>> from .table import Table
-        >>> Table('test').add_index(i)
+        >>> t = Table('test')
+        >>> t.add_column(c)
+        >>> t.add_index(i)
         >>> i
         <Index 'test', ['col', '(c*2)']>
         '''
@@ -67,7 +69,9 @@ class Index(SQLOjbect):
         >>> print(i)
         Index([col, (c*2)])
         >>> from .table import Table
-        >>> Table('test').add_index(i)
+        >>> t = Table('test')
+        >>> t.add_column(c)
+        >>> t.add_index(i)
         >>> print(i)
         Index(test[col, (c*2)])
         '''
