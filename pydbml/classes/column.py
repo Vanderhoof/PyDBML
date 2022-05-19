@@ -23,7 +23,7 @@ class Column(SQLOjbect):
 
     def __init__(self,
                  name: str,
-                 type_: str,
+                 type: str,
                  unique: bool = False,
                  not_null: bool = False,
                  pk: bool = False,
@@ -33,7 +33,7 @@ class Column(SQLOjbect):
                  # ref_blueprints: Optional[List[ReferenceBlueprint]] = None,
                  comment: Optional[str] = None):
         self.name = name
-        self.type = type_
+        self.type = type
         self.unique = unique
         self.not_null = not_null
         self.pk = pk

@@ -23,7 +23,7 @@ class Index(SQLOjbect):
                  subjects: List[Union[str, 'Column', 'Expression']],
                  name: Optional[str] = None,
                  unique: bool = False,
-                 type_: Optional[str] = None,
+                 type: Optional[str] = None,
                  pk: bool = False,
                  note: Optional[Union['Note', str]] = None,
                  comment: Optional[str] = None):
@@ -33,7 +33,7 @@ class Index(SQLOjbect):
 
         self.name = name if name else None
         self.unique = unique
-        self.type = type_
+        self.type = type
         self.pk = pk
         self.note = Note(note)
         self.comment = comment

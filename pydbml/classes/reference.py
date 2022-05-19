@@ -22,7 +22,7 @@ class Reference(SQLOjbect):
     required_attributes = ('type', 'col1', 'col2')
 
     def __init__(self,
-                 type_: Literal['>', '<', '-'],
+                 type: Literal['>', '<', '-'],
                  col1: Union[Column, Collection[Column]],
                  col2: Union[Column, Collection[Column]],
                  name: Optional[str] = None,
@@ -31,7 +31,7 @@ class Reference(SQLOjbect):
                  on_delete: Optional[str] = None,
                  inline: bool = False):
         self.database = None
-        self.type = type_
+        self.type = type
         self.col1 = [col1] if isinstance(col1, Column) else list(col1)
         self.col2 = [col2] if isinstance(col2, Column) else list(col2)
         self.name = name if name else None

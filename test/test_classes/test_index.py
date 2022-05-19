@@ -47,7 +47,7 @@ CREATE INDEX ON "products" ("id");'''
                 t.columns[0],
                 t.columns[1]
             ],
-            type_='hash',
+            type='hash',
             unique=True
         )
         t.add_index(r)
@@ -103,7 +103,7 @@ CREATE INDEX ON "products" ("id");'''
             subjects=[t.columns[0], Expression('getdate()')],
             name='Dated id',
             unique=True,
-            type_='hash',
+            type='hash',
             pk=True,
             note='Note on the column',
             comment='Comment on the index'

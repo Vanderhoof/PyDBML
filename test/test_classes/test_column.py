@@ -12,7 +12,7 @@ from pydbml.exceptions import TableNotFoundError
 class TestColumn(TestCase):
     def test_attributes(self) -> None:
         name = 'name'
-        type_ = 'type'
+        type = 'type'
         unique = True
         not_null = True
         pk = True
@@ -22,7 +22,7 @@ class TestColumn(TestCase):
         comment = 'comment'
         col = Column(
             name=name,
-            type_=type_,
+            type=type,
             unique=unique,
             not_null=not_null,
             pk=pk,
@@ -32,7 +32,7 @@ class TestColumn(TestCase):
             comment=comment,
         )
         self.assertEqual(col.name, name)
-        self.assertEqual(col.type, type_)
+        self.assertEqual(col.type, type)
         self.assertEqual(col.unique, unique)
         self.assertEqual(col.not_null, not_null)
         self.assertEqual(col.pk, pk)
@@ -53,13 +53,13 @@ class TestColumn(TestCase):
 
     def test_basic_sql(self) -> None:
         r = Column(name='id',
-                   type_='integer')
+                   type='integer')
         expected = '"id" integer'
         self.assertEqual(r.sql, expected)
 
     def test_pk_autoinc(self) -> None:
         r = Column(name='id',
-                   type_='integer',
+                   type='integer',
                    pk=True,
                    autoinc=True)
         expected = '"id" integer PRIMARY KEY AUTOINCREMENT'
@@ -67,7 +67,7 @@ class TestColumn(TestCase):
 
     def test_unique_not_null(self) -> None:
         r = Column(name='id',
-                   type_='integer',
+                   type='integer',
                    unique=True,
                    not_null=True)
         expected = '"id" integer UNIQUE NOT NULL'
@@ -75,14 +75,14 @@ class TestColumn(TestCase):
 
     def test_default(self) -> None:
         r = Column(name='order',
-                   type_='integer',
+                   type='integer',
                    default=0)
         expected = '"order" integer DEFAULT 0'
         self.assertEqual(r.sql, expected)
 
     def test_comment(self) -> None:
         r = Column(name='id',
-                   type_='integer',
+                   type='integer',
                    unique=True,
                    not_null=True,
                    comment="Column comment")
@@ -94,7 +94,7 @@ class TestColumn(TestCase):
     def test_dbml_simple(self):
         c = Column(
             name='order',
-            type_='integer'
+            type='integer'
         )
         t = Table(name='Test')
         t.add_column(c)
@@ -107,7 +107,7 @@ class TestColumn(TestCase):
     def test_dbml_full(self):
         c = Column(
             name='order',
-            type_='integer',
+            type='integer',
             unique=True,
             not_null=True,
             pk=True,
@@ -129,7 +129,7 @@ class TestColumn(TestCase):
     def test_dbml_multiline_note(self):
         c = Column(
             name='order',
-            type_='integer',
+            type='integer',
             not_null=True,
             note='Note on the column\nmultiline',
             comment='Comment on the column'
@@ -148,7 +148,7 @@ multiline''']"""
     def test_dbml_default(self):
         c = Column(
             name='order',
-            type_='integer',
+            type='integer',
             default='String value'
         )
         t = Table(name='Test')
@@ -184,7 +184,7 @@ multiline''']"""
         self.assertEqual(c.dbml, expected)
 
     def test_database(self):
-        c1 = Column(name='client_id', type_='integer')
+        c1 = Column(name='client_id', type='integer')
         t1 = Table(name='products')
 
         self.assertIsNone(c1.database)
@@ -195,16 +195,16 @@ multiline''']"""
         self.assertIs(c1.database, s)
 
     def test_get_refs(self) -> None:
-        c1 = Column(name='client_id', type_='integer')
+        c1 = Column(name='client_id', type='integer')
         with self.assertRaises(TableNotFoundError):
             c1.get_refs()
         t1 = Table(name='products')
         t1.add_column(c1)
-        c2 = Column(name='id', type_='integer', autoinc=True, pk=True)
+        c2 = Column(name='id', type='integer', autoinc=True, pk=True)
         t2 = Table(name='clients')
         t2.add_column(c2)
 
-        ref = Reference(type_='>', col1=c1, col2=c2, inline=True)
+        ref = Reference(type='>', col1=c1, col2=c2, inline=True)
         s = Database()
         s.add(t1)
         s.add(t2)
@@ -213,14 +213,14 @@ multiline''']"""
         self.assertEqual(c1.get_refs(), [ref])
 
     def test_dbml_with_ref(self) -> None:
-        c1 = Column(name='client_id', type_='integer')
+        c1 = Column(name='client_id', type='integer')
         t1 = Table(name='products')
         t1.add_column(c1)
-        c2 = Column(name='id', type_='integer', autoinc=True, pk=True)
+        c2 = Column(name='id', type='integer', autoinc=True, pk=True)
         t2 = Table(name='clients')
         t2.add_column(c2)
 
-        ref = Reference(type_='>', col1=c1, col2=c2)
+        ref = Reference(type='>', col1=c1, col2=c2)
         s = Database()
         s.add(t1)
         s.add(t2)
@@ -235,14 +235,14 @@ multiline''']"""
         self.assertEqual(c2.dbml, expected)
 
     def test_dbml_with_ref_and_properties(self) -> None:
-        c1 = Column(name='client_id', type_='integer')
+        c1 = Column(name='client_id', type='integer')
         t1 = Table(name='products')
         t1.add_column(c1)
-        c2 = Column(name='id', type_='integer', autoinc=True, pk=True)
+        c2 = Column(name='id', type='integer', autoinc=True, pk=True)
         t2 = Table(name='clients')
         t2.add_column(c2)
 
-        ref = Reference(type_='<', col1=c2, col2=c1)
+        ref = Reference(type='<', col1=c2, col2=c1)
         s = Database()
         s.add(t1)
         s.add(t2)
