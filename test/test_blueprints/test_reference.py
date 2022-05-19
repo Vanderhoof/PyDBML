@@ -23,12 +23,12 @@ class TestReferenceBlueprint(TestCase):
         t1 = Table(
             name='table1'
         )
-        c1 = Column(name='col1', type_='Number')
+        c1 = Column(name='col1', type='Number')
         t1.add_column(c1)
         t2 = Table(
             name='table2'
         )
-        c2 = Column(name='col2', type_='Varchar')
+        c2 = Column(name='col2', type='Varchar')
         t2.add_column(c2)
 
         with self.assertRaises(RuntimeError):

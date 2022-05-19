@@ -82,7 +82,7 @@ class ReferenceBlueprint(Blueprint):
         col2 = [table2[col] for col in col2_list]
 
         return Reference(
-            type_=self.type,
+            type=self.type,
             inline=self.inline,
             col1=col1,
             col2=col2,
@@ -120,7 +120,7 @@ class ColumnBlueprint(Blueprint):
                     break
         return Column(
             name=self.name,
-            type_=self.type,
+            type=self.type,
             unique=self.unique,
             not_null=self.not_null,
             pk=self.pk,
@@ -149,7 +149,7 @@ class IndexBlueprint(Blueprint):
             subjects=[],
             name=self.name,
             unique=self.unique,
-            type_=self.type,
+            type=self.type,
             pk=self.pk,
             note=self.note.build() if self.note else None,
             comment=self.comment
