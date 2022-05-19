@@ -7,7 +7,7 @@ from .common import _c
 from .common import end
 from .generic import name
 
-pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 table_name = pp.Combine(name + '.' + name) | name
 
@@ -20,7 +20,7 @@ table_group = _c + (
 ) + end
 
 
-def parse_table_group(s, l, t):
+def parse_table_group(s, loc, tok):
     '''
     TableGroup tablegroup_name {
         table1
@@ -29,13 +29,13 @@ def parse_table_group(s, l, t):
     }
     '''
     init_dict = {
-        'name': t['name'],
-        'items': list(t.get('items', []))
+        'name': tok['name'],
+        'items': list(tok.get('items', []))
     }
-    if 'comment_before' in t:
-        comment = '\n'.join(c[0] for c in t['comment_before'])
+    if 'comment_before' in tok:
+        comment = '\n'.join(c[0] for c in tok['comment_before'])
         init_dict['comment'] = comment
     return TableGroupBlueprint(**init_dict)
 
 
-table_group.setParseAction(parse_table_group)
+table_group.set_parse_action(parse_table_group)

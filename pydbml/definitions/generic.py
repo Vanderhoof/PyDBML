@@ -2,7 +2,7 @@ import pyparsing as pp
 
 from pydbml.parser.blueprints import ExpressionBlueprint
 
-pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 name = pp.Word(pp.alphanums + '_') | pp.QuotedString('"')
 
@@ -17,7 +17,7 @@ expression_literal = pp.Combine(
     pp.Suppress('`')
     + pp.CharsNotIn('`')[...]
     + pp.Suppress('`')
-).setParseAction(lambda s, l, t: ExpressionBlueprint(t[0]))
+).set_parse_action(lambda s, lok, tok: ExpressionBlueprint(tok[0]))
 
 boolean_literal = (
     pp.CaselessLiteral('true')

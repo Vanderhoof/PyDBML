@@ -8,7 +8,7 @@ from pyparsing import ParserElement
 from pydbml import PyDBML
 
 
-ParserElement.setDefaultWhitespaceChars(' \t\r')
+ParserElement.set_default_whitespace_chars(' \t\r')
 
 
 TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'

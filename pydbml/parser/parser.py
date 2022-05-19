@@ -26,7 +26,7 @@ from pydbml.database import Database
 from pydbml.tools import remove_bom
 
 
-pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 
 class PyDBML:
@@ -105,7 +105,7 @@ class PyDBMLParser:
 
     def parse(self):
         self._set_syntax()
-        self._syntax.parseString(self.source, parseAll=True)
+        self._syntax.parse_string(self.source, parseAll=True)
         self.build_database()
         return self.database
 
@@ -139,8 +139,8 @@ class PyDBMLParser:
         )
         self._syntax = expr[...] + ('\n' | comment)[...] + pp.StringEnd()
 
-    def parse_blueprint(self, s, l, t):
-        blueprint = t[0]
+    def parse_blueprint(self, s, loc, tok):
+        blueprint = tok[0]
         if isinstance(blueprint, TableBlueprint):
             self.tables.append(blueprint)
             ref_bps = blueprint.get_reference_blueprints()

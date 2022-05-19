@@ -10,7 +10,7 @@ from .common import note
 from .generic import name
 from .generic import string_literal
 
-pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 project_field = pp.Group(name + _ + pp.Suppress(':') + _ - string_literal)
 
@@ -27,16 +27,16 @@ project = _c + (
 ) + (n | pp.StringEnd())
 
 
-def parse_project(s, l, t):
+def parse_project(s, loc, tok):
     '''
     Project project_name {
       database_type: 'PostgreSQL'
       Note: 'Description of the project'
     }
     '''
-    init_dict = {'name': t['name']}
+    init_dict = {'name': tok['name']}
     items = {}
-    for item in t.get('items', []):
+    for item in tok.get('items', []):
         if isinstance(item, NoteBlueprint):
             init_dict['note'] = item
         else:
@@ -44,10 +44,10 @@ def parse_project(s, l, t):
             items[k] = v
     if items:
         init_dict['items'] = items
-    if 'comment_before' in t:
-        comment = '\n'.join(c[0] for c in t['comment_before'])
+    if 'comment_before' in tok:
+        comment = '\n'.join(c[0] for c in tok['comment_before'])
         init_dict['comment'] = comment
     return ProjectBlueprint(**init_dict)
 
 
-project.setParseAction(parse_project)
+project.set_parse_action(parse_project)
