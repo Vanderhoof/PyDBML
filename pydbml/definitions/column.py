@@ -20,22 +20,28 @@ from .reference import ref_inline
 
 pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
 
-type_args = ("(" + pp.originalTextFor(expression)('args') + ")")
-type_name = (pp.Word(pp.alphanums + '_') | pp.QuotedString('"'))('name')
-column_type = (type_name + type_args[0, 1])
+type_args = ("(" + pp.originalTextFor(expression) + ")")
+
+# column type is parsed as a single string, it will be split by blueprint
+column_type = pp.Combine((name + '.' + name) | ((name) + type_args[0, 1]))
 
 
-def parse_column_type(s, l, t) -> str:
-    '''
-    int or "mytype" or varchar(255)
-    '''
-    result = t['name']
-    args = t.get('args')
-    result += '(' + args + ')' if args else ''
-    return result
+# def parse_column_type(s, l, t) -> str:
+#     '''
+#     int or "mytype" or varchar(255) or 
+#     '''
+#     result = {}
+#     if '.' in t['name']:
+#         result['schema'], result['name'] = t['name'].split('.')
+#     else:
+#         result['name'] = t['name']
+
+#     if 'args' in t:
+#         result['args'] = f'({t["args"]})'
+#     return result
 
 
-column_type.setParseAction(parse_column_type)
+# column_type.setParseAction(parse_column_type)
 
 
 default = pp.CaselessLiteral('default:').suppress() + _ - (

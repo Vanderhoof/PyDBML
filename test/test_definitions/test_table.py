@@ -135,6 +135,18 @@ class TestTable(TestCase):
         self.assertEqual(res[0].alias, 'ii')
         self.assertEqual(len(res[0].columns), 1)
 
+    def test_schema(self) -> None:
+        val = 'table ids as ii {\nid integer\n}'
+        res = table.parseString(val, parseAll=True)
+        self.assertEqual(res[0].name, 'ids')
+        self.assertEqual(res[0].schema, 'public')  # default
+        self.assertEqual(len(res[0].columns), 1)
+
+        val = 'table myschema.ids as ii {\nid integer\n}'
+        res = table.parseString(val, parseAll=True)
+        self.assertEqual(res[0].name, 'ids')
+        self.assertEqual(res[0].schema, 'myschema')
+
     def test_with_settings(self) -> None:
         val = 'table ids as ii [headercolor: #ccc, note: "headernote"] {\nid integer\n}'
         res = table.parseString(val, parseAll=True)

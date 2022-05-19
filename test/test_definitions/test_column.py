@@ -23,7 +23,12 @@ class TestColumnType(TestCase):
         self.assertEqual(res[0], val)
 
     def test_quoted(self) -> None:
-        val = 'mytype'
+        val = '"mytype"'
+        res = column_type.parseString(val, parseAll=True)
+        self.assertEqual(res[0], 'mytype')
+
+    def test_with_schema(self) -> None:
+        val = 'myschema.mytype'
         res = column_type.parseString(val, parseAll=True)
         self.assertEqual(res[0], val)
 
@@ -189,6 +194,11 @@ class TestColumn(TestCase):
         self.assertTrue(res[0].unique)
         self.assertTrue(res[0].not_null)
         self.assertTrue(res[0].note is not None)
+
+    def test_enum_type_bad(self) -> None:
+        val = "_test_ myschema.mytype(12) [unique]\n"
+        with self.assertRaises(ParseException):
+            table_column.parseString(val, parseAll=True)
 
     def test_settings_and_constraints(self) -> None:
         val = "_test_ \"mytype\" unique pk [not null]\n"

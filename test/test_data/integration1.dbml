@@ -39,6 +39,6 @@ Ref {
 }
 
 TableGroup Unanimate {
-    books
-    countries
+    "books"
+    "countries"
 }

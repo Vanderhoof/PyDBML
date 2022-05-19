@@ -63,15 +63,15 @@ class Database:
     def add_table(self, obj: Table) -> Table:
         if obj in self.tables:
             raise DatabaseValidationError(f'{obj} is already in the database.')
-        if obj.name in self.table_dict:
-            raise DatabaseValidationError(f'Table {obj.name} is already in the database.')
+        if obj.full_name in self.table_dict:
+            raise DatabaseValidationError(f'Table {obj.full_name} is already in the database.')
         if obj.alias and obj.alias in self.table_dict:
             raise DatabaseValidationError(f'Table {obj.alias} is already in the database.')
 
         self._set_database(obj)
 
         self.tables.append(obj)
-        self.table_dict[obj.name] = obj
+        self.table_dict[obj.full_name] = obj
         if obj.alias:
             self.table_dict[obj.alias] = obj
         return obj
@@ -141,7 +141,7 @@ class Database:
         except ValueError:
             raise DatabaseValidationError(f'{obj} is not in the database.')
         self._unset_database(self.tables.pop(index))
-        result = self.table_dict.pop(obj.name)
+        result = self.table_dict.pop(obj.full_name)
         if obj.alias:
             self.table_dict.pop(obj.alias)
         return result

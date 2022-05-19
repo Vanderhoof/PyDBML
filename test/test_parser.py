@@ -18,15 +18,15 @@ class TestParser(TestCase):
 
     def test_table_refs(self) -> None:
         p = PyDBML.parse_file(TEST_DATA_PATH / 'general.dbml')
-        r = p['orders'].get_refs()
+        r = p['public.orders'].get_refs()
         self.assertEqual(r[0].col2[0].name, 'order_id')
         self.assertEqual(r[0].col1[0].table.name, 'orders')
         self.assertEqual(r[0].col1[0].name, 'id')
-        r = p['products'].get_refs()
+        r = p['public.products'].get_refs()
         self.assertEqual(r[1].col1[0].name, 'merchant_id')
         self.assertEqual(r[1].col2[0].table.name, 'merchants')
         self.assertEqual(r[1].col2[0].name, 'id')
-        r = p['users'].get_refs()
+        r = p['public.users'].get_refs()
         self.assertEqual(r[0].col1[0].name, 'country_code')
         self.assertEqual(r[0].col2[0].table.name, 'countries')
         self.assertEqual(r[0].col2[0].name, 'code')
@@ -51,8 +51,8 @@ class TestParser(TestCase):
 class TestRefs(TestCase):
     def test_reference_aliases(self):
         results = PyDBML.parse_file(TEST_DATA_PATH / 'relationships_aliases.dbml')
-        posts, reviews, users = results['posts'], results['reviews'], results['users']
-        posts2, reviews2, users2 = results['posts2'], results['reviews2'], results['users2']
+        posts, reviews, users = results['public.posts'], results['public.reviews'], results['public.users']
+        posts2, reviews2, users2 = results['public.posts2'], results['public.reviews2'], results['public.users2']
 
         rs = results.refs
         self.assertEqual(rs[0].col1[0].table, users)
@@ -68,8 +68,8 @@ class TestRefs(TestCase):
     def test_composite_references(self):
         results = PyDBML.parse_file(TEST_DATA_PATH / 'relationships_composite.dbml')
         self.assertEqual(len(results.tables), 4)
-        posts, reviews = results['posts'], results['reviews']
-        posts2, reviews2 = results['posts2'], results['reviews2']
+        posts, reviews = results['public.posts'], results['public.reviews']
+        posts2, reviews2 = results['public.posts2'], results['public.reviews2']
 
         rs = results.refs
         self.assertEqual(len(rs), 2)
@@ -101,6 +101,6 @@ class TestPyDBMLParser(TestCase):
     def test_edge(self) -> None:
         p = PyDBMLParser('')
         with self.assertRaises(RuntimeError):
-            p.locate_table('test')
+            p.locate_table('myschema', 'test')
         with self.assertRaises(RuntimeError):
             p.parse_blueprint(1, 1, [1])

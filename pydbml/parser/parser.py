@@ -165,13 +165,16 @@ class PyDBMLParser:
             raise RuntimeError(f'type unknown: {blueprint}')
         blueprint.parser = self
 
-    def locate_table(self, name: str) -> 'Table':
+    def locate_table(self, schema: str, name: str) -> 'Table':
         if not self.database:
             raise RuntimeError('Database is not ready')
-        try:
-            result = self.database[name]
-        except KeyError:
-            raise TableNotFoundError(f'Table {name} not present in the database')
+        # first by alias
+        result = self.database.table_dict.get(name)
+        if result is None:
+            full_name = f'{schema}.{name}'
+            result = self.database.table_dict.get(full_name)
+        if result is None:
+            raise TableNotFoundError(f'Table {full_name} not present in the database')
         return result
 
     def build_database(self):

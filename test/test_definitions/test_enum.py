@@ -11,7 +11,7 @@ from pydbml.definitions.enum import enum_settings
 ParserElement.setDefaultWhitespaceChars(' \t\r')
 
 
-class TestTableSettings(TestCase):
+class TestEnumSettings(TestCase):
     def test_note(self) -> None:
         val = '[note: "note content"]'
         enum_settings.parseString(val, parseAll=True)
@@ -68,6 +68,14 @@ class TestEnum(TestCase):
         res = enum.parseString(val, parseAll=True)
         self.assertEqual(len(res[0].items), 4)
         self.assertEqual(res[0].name, 'members')
+
+    def test_schema(self) -> None:
+        val1 = 'enum members {janitor teacher\nstudent\nheadmaster\n}'
+        res1 = enum.parseString(val1, parseAll=True)
+        self.assertEqual(res1[0].schema, 'public')
+        val2 = 'enum myschema.members {janitor teacher\nstudent\nheadmaster\n}'
+        res2 = enum.parseString(val2, parseAll=True)
+        self.assertEqual(res2[0].schema, 'myschema')
 
     def test_comment(self) -> None:
         val = '//comment before\nenum members {janitor teacher\nstudent\nheadmaster\n}'

@@ -206,7 +206,7 @@ class TestDocs(TestCase):
     def test_note_definition(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'note_definition.dbml')
         self.assertEqual(len(results.tables), 1)
-        users = results['users']
+        users = results['public.users']
         self.assertEqual(users.note.text, 'This is a note of this table')
 
     def test_project_notes(self) -> None:
@@ -218,7 +218,7 @@ class TestDocs(TestCase):
 
     def test_column_notes(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'column_notes.dbml')
-        users = results['users']
+        users = results['public.users']
 
         self.assertEqual(users.note.text, 'Stores user data')
         self.assertEqual(users['column_name'].note.text, 'replace text here')
@@ -226,7 +226,7 @@ class TestDocs(TestCase):
 
     def test_enum_definition(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'enum_definition.dbml')
-        jobs = results['jobs']
+        jobs = results['public.jobs']
         jobs['status'].type == 'job_status'
 
         self.assertEqual(len(results.enums), 1)

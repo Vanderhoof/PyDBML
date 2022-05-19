@@ -40,6 +40,23 @@ class TestEnum(TestCase):
 );'''
         self.assertEqual(e.sql, expected)
 
+    def test_schema(self) -> None:
+        items = [
+            EnumItem('created'),
+            EnumItem('running'),
+            EnumItem('donef'),
+            EnumItem('failure'),
+        ]
+        e = Enum('job_status', items, schema="myschema")
+        expected = \
+'''CREATE TYPE "myschema"."job_status" AS ENUM (
+  'created',
+  'running',
+  'donef',
+  'failure',
+);'''
+        self.assertEqual(e.sql, expected)
+
     def test_comments(self) -> None:
         items = [
             EnumItem('created', comment='EnumItem comment'),
@@ -66,6 +83,17 @@ CREATE TYPE "job_status" AS ENUM (
         e = Enum('lang', items)
         expected = \
 '''Enum "lang" {
+    "en-US"
+    "ru-RU"
+    "en-GB"
+}'''
+        self.assertEqual(e.dbml, expected)
+
+    def test_dbml_schema(self):
+        items = [EnumItem('en-US'), EnumItem('ru-RU'), EnumItem('en-GB')]
+        e = Enum('lang', items, schema="myschema")
+        expected = \
+'''Enum "myschema"."lang" {
     "en-US"
     "ru-RU"
     "en-GB"
