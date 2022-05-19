@@ -8,49 +8,49 @@ from pydbml.definitions.enum import enum_item
 from pydbml.definitions.enum import enum_settings
 
 
-ParserElement.setDefaultWhitespaceChars(' \t\r')
+ParserElement.set_default_whitespace_chars(' \t\r')
 
 
 class TestEnumSettings(TestCase):
     def test_note(self) -> None:
         val = '[note: "note content"]'
-        enum_settings.parseString(val, parseAll=True)
+        enum_settings.parse_string(val, parseAll=True)
 
     def test_wrong(self) -> None:
         val = '[wrong]'
         with self.assertRaises(ParseSyntaxException):
-            enum_settings.parseString(val, parseAll=True)
+            enum_settings.parse_string(val, parseAll=True)
 
 
 class TestEnumItem(TestCase):
     def test_no_settings(self) -> None:
         val = 'student'
-        res = enum_item.parseString(val, parseAll=True)
+        res = enum_item.parse_string(val, parseAll=True)
         self.assertEqual(res[0].name, 'student')
 
     def test_settings(self) -> None:
         val = 'student [note: "our future, help us God"]'
-        res = enum_item.parseString(val, parseAll=True)
+        res = enum_item.parse_string(val, parseAll=True)
         self.assertEqual(res[0].name, 'student')
         self.assertEqual(res[0].note.text, 'our future, help us God')
 
     def test_comment_before(self) -> None:
         val = '//comment before\nstudent [note: "our future, help us God"]'
-        res = enum_item.parseString(val, parseAll=True)
+        res = enum_item.parse_string(val, parseAll=True)
         self.assertEqual(res[0].name, 'student')
         self.assertEqual(res[0].note.text, 'our future, help us God')
         self.assertEqual(res[0].comment, 'comment before')
 
     def test_comment_after(self) -> None:
         val = 'student [note: "our future, help us God"] //comment after'
-        res = enum_item.parseString(val, parseAll=True)
+        res = enum_item.parse_string(val, parseAll=True)
         self.assertEqual(res[0].name, 'student')
         self.assertEqual(res[0].note.text, 'our future, help us God')
         self.assertEqual(res[0].comment, 'comment after')
 
     def test_comment_both(self) -> None:
         val = '//comment before\nstudent [note: "our future, help us God"] //comment after'
-        res = enum_item.parseString(val, parseAll=True)
+        res = enum_item.parse_string(val, parseAll=True)
         self.assertEqual(res[0].name, 'student')
         self.assertEqual(res[0].note.text, 'our future, help us God')
         self.assertEqual(res[0].comment, 'comment after')
@@ -59,27 +59,27 @@ class TestEnumItem(TestCase):
 class TestEnum(TestCase):
     def test_singe_item(self) -> None:
         val = 'enum members {\nstudent\n}'
-        res = enum.parseString(val, parseAll=True)
+        res = enum.parse_string(val, parseAll=True)
         self.assertEqual(len(res[0].items), 1)
         self.assertEqual(res[0].name, 'members')
 
     def test_several_items(self) -> None:
         val = 'enum members {janitor teacher\nstudent\nheadmaster\n}'
-        res = enum.parseString(val, parseAll=True)
+        res = enum.parse_string(val, parseAll=True)
         self.assertEqual(len(res[0].items), 4)
         self.assertEqual(res[0].name, 'members')
 
     def test_schema(self) -> None:
         val1 = 'enum members {janitor teacher\nstudent\nheadmaster\n}'
-        res1 = enum.parseString(val1, parseAll=True)
+        res1 = enum.parse_string(val1, parseAll=True)
         self.assertEqual(res1[0].schema, 'public')
         val2 = 'enum myschema.members {janitor teacher\nstudent\nheadmaster\n}'
-        res2 = enum.parseString(val2, parseAll=True)
+        res2 = enum.parse_string(val2, parseAll=True)
         self.assertEqual(res2[0].schema, 'myschema')
 
     def test_comment(self) -> None:
         val = '//comment before\nenum members {janitor teacher\nstudent\nheadmaster\n}'
-        res = enum.parseString(val, parseAll=True)
+        res = enum.parse_string(val, parseAll=True)
         self.assertEqual(len(res[0].items), 4)
         self.assertEqual(res[0].name, 'members')
         self.assertEqual(res[0].comment, 'comment before')
@@ -87,4 +87,4 @@ class TestEnum(TestCase):
     def test_oneline(self) -> None:
         val = 'enum members {student}'
         with self.assertRaises(ParseSyntaxException):
-            enum.parseString(val, parseAll=True)
+            enum.parse_string(val, parseAll=True)

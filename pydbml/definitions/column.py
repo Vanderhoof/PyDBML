@@ -18,54 +18,35 @@ from .generic import string_literal
 from .reference import ref_inline
 
 
-pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
-type_args = ("(" + pp.originalTextFor(expression) + ")")
+type_args = ("(" + pp.original_text_for(expression) + ")")
 
 # column type is parsed as a single string, it will be split by blueprint
 column_type = pp.Combine((name + '.' + name) | ((name) + type_args[0, 1]))
 
-
-# def parse_column_type(s, l, t) -> str:
-#     '''
-#     int or "mytype" or varchar(255) or 
-#     '''
-#     result = {}
-#     if '.' in t['name']:
-#         result['schema'], result['name'] = t['name'].split('.')
-#     else:
-#         result['name'] = t['name']
-
-#     if 'args' in t:
-#         result['args'] = f'({t["args"]})'
-#     return result
-
-
-# column_type.setParseAction(parse_column_type)
-
-
 default = pp.CaselessLiteral('default:').suppress() + _ - (
     string_literal
     | expression_literal
-    | boolean_literal.setParseAction(
-        lambda s, l, t: {
+    | boolean_literal.set_parse_action(
+        lambda s, loc, tok: {
             'true': True,
             'false': False,
             'NULL': None
-        }[t[0]]
+        }[tok[0]]
     )
-    | number_literal.setParseAction(
-        lambda s, l, t: float(''.join(t[0])) if '.' in t[0] else int(t[0])
+    | number_literal.set_parse_action(
+        lambda s, loc, tok: float(''.join(tok[0])) if '.' in tok[0] else int(tok[0])
     )
 )
 
 
 column_setting = _ + (
-    pp.CaselessLiteral("not null").setParseAction(
-        lambda s, l, t: True
+    pp.CaselessLiteral("not null").set_parse_action(
+        lambda s, loc, tok: True
     )('notnull')
-    | pp.CaselessLiteral("null").setParseAction(
-        lambda s, l, t: False
+    | pp.CaselessLiteral("null").set_parse_action(
+        lambda s, loc, tok: False
     )('notnull')
     | pp.CaselessLiteral("primary key")('pk')
     | pk('pk')
@@ -78,31 +59,31 @@ column_setting = _ + (
 column_settings = '[' - column_setting + ("," + column_setting)[...] + ']' + c
 
 
-def parse_column_settings(s, l, t):
+def parse_column_settings(s, loc, tok):
     '''
     [ NOT NULL, increment, default: `now()`]
     '''
     result = {}
-    if t.get('notnull'):
+    if tok.get('notnull'):
         result['not_null'] = True
-    if 'pk' in t:
+    if 'pk' in tok:
         result['pk'] = True
-    if 'unique' in t:
+    if 'unique' in tok:
         result['unique'] = True
-    if 'increment' in t:
+    if 'increment' in tok:
         result['autoinc'] = True
-    if 'note' in t:
-        result['note'] = t['note']
-    if 'default' in t:
-        result['default'] = t['default'][0]
-    if 'ref' in t:
-        result['ref_blueprints'] = list(t['ref'])
-    if 'comment' in t:
-        result['comment'] = t['comment'][0]
+    if 'note' in tok:
+        result['note'] = tok['note']
+    if 'default' in tok:
+        result['default'] = tok['default'][0]
+    if 'ref' in tok:
+        result['ref_blueprints'] = list(tok['ref'])
+    if 'comment' in tok:
+        result['comment'] = tok['comment'][0]
     return result
 
 
-column_settings.setParseAction(parse_column_settings)
+column_settings.set_parse_action(parse_column_settings)
 
 
 constraint = pp.CaselessLiteral("unique") | pp.CaselessLiteral("pk")
@@ -115,32 +96,32 @@ table_column = _c + (
 ) + n
 
 
-def parse_column(s, l, t):
+def parse_column(s, loc, tok):
     '''
     address varchar(255) [unique, not null, note: 'to include unit number']
     '''
     init_dict = {
-        'name': t['name'],
-        'type': t['type'],
+        'name': tok['name'],
+        'type': tok['type'],
     }
     # deprecated
-    for constraint in t.get('constraints', []):
+    for constraint in tok.get('constraints', []):
         if constraint == 'pk':
             init_dict['pk'] = True
         elif constraint == 'unique':
             init_dict['unique'] = True
 
-    if 'settings' in t:
-        init_dict.update(t['settings'])
+    if 'settings' in tok:
+        init_dict.update(tok['settings'])
 
     # comments after column definition have priority
-    if 'comment' in t:
-        init_dict['comment'] = t['comment'][0]
-    if 'comment' not in init_dict and 'comment_before' in t:
-        comment = '\n'.join(c[0] for c in t['comment_before'])
+    if 'comment' in tok:
+        init_dict['comment'] = tok['comment'][0]
+    if 'comment' not in init_dict and 'comment_before' in tok:
+        comment = '\n'.join(c[0] for c in tok['comment_before'])
         init_dict['comment'] = comment
 
     return ColumnBlueprint(**init_dict)
 
 
-table_column.setParseAction(parse_column)
+table_column.set_parse_action(parse_column)

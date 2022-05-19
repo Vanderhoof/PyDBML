@@ -8,7 +8,7 @@ from .common import c
 from .common import n
 from .generic import name
 
-pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 relation = pp.oneOf("> - <")
 
@@ -23,24 +23,24 @@ col_name = (
 ref_inline = pp.Literal("ref:") - relation('type') - col_name
 
 
-def parse_inline_relation(s, l, t):
+def parse_inline_relation(s, loc, tok):
     '''
     ref: < table.column
     or
     ref: < schema1.table.column
     '''
     result = {
-        'type': t['type'],
+        'type': tok['type'],
         'inline': True,
-        'table2': t['table'],
-        'col2': t['field']
+        'table2': tok['table'],
+        'col2': tok['field']
     }
-    if 'schema' in t:
-        result['schema2'] = t['schema']
+    if 'schema' in tok:
+        result['schema2'] = tok['schema']
     return ReferenceBlueprint(**result)
 
 
-ref_inline.setParseAction(parse_inline_relation)
+ref_inline.set_parse_action(parse_inline_relation)
 
 on_option = (
     pp.CaselessLiteral('no action')
@@ -65,21 +65,21 @@ ref_settings = (
 )
 
 
-def parse_ref_settings(s, l, t):
+def parse_ref_settings(s, loc, tok):
     '''
     [delete: cascade]
     '''
     result = {}
-    if 'update' in t:
-        result['on_update'] = t['update'][0]
-    if 'delete' in t:
-        result['on_delete'] = t['delete'][0]
-    if 'comment' in t:
-        result['comment'] = t['comment'][0]
+    if 'update' in tok:
+        result['on_update'] = tok['update'][0]
+    if 'delete' in tok:
+        result['on_delete'] = tok['delete'][0]
+    if 'comment' in tok:
+        result['comment'] = tok['comment'][0]
     return result
 
 
-ref_settings.setParseAction(parse_ref_settings)
+ref_settings.set_parse_action(parse_ref_settings)
 
 composite_name = (
     '(' + pp.White()[...]
@@ -105,7 +105,7 @@ ref_cols = (
 )
 
 
-def parse_ref_cols(s, l, t):
+def parse_ref_cols(s, loc, tok):
     '''
     table1.col1
     or
@@ -114,15 +114,15 @@ def parse_ref_cols(s, l, t):
     schema1.table1.(col1, col2)
     '''
     result = {
-        'table': t['table'],
-        'field': t['field'],
+        'table': tok['table'],
+        'field': tok['field'],
     }
-    if 'schema' in t:
-        result['schema'] = t['schema']
+    if 'schema' in tok:
+        result['schema'] = tok['schema']
     return result
 
 
-ref_cols.setParseAction(parse_ref_cols)
+ref_cols.set_parse_action(parse_ref_cols)
 
 ref_body = (
     ref_cols('col1')
@@ -152,7 +152,7 @@ ref_long = _c + (
 )
 
 
-def parse_ref(s, l, t):
+def parse_ref(s, loc, tok):
     '''
     ref name: table1.col1 > table2.col2
     or
@@ -161,35 +161,35 @@ def parse_ref(s, l, t):
     }
     '''
     init_dict = {
-        'type': t['type'],
+        'type': tok['type'],
         'inline': False,
-        'table1': t['col1']['table'],
-        'col1': t['col1']['field'],
-        'table2': t['col2']['table'],
-        'col2': t['col2']['field'],
+        'table1': tok['col1']['table'],
+        'col1': tok['col1']['field'],
+        'table2': tok['col2']['table'],
+        'col2': tok['col2']['field'],
     }
 
-    if 'schema' in t['col1']:
-        init_dict['schema1'] = t['col1']['schema']
-    if 'schema' in t['col2']:
-        init_dict['schema2'] = t['col2']['schema']
-    if 'name' in t:
-        init_dict['name'] = t['name']
-    if 'settings' in t:
-        init_dict.update(t['settings'])
+    if 'schema' in tok['col1']:
+        init_dict['schema1'] = tok['col1']['schema']
+    if 'schema' in tok['col2']:
+        init_dict['schema2'] = tok['col2']['schema']
+    if 'name' in tok:
+        init_dict['name'] = tok['name']
+    if 'settings' in tok:
+        init_dict.update(tok['settings'])
 
     # comments after settings have priority
-    if 'comment' in t:
-        init_dict['comment'] = t['comment'][0]
-    if 'comment' not in init_dict and 'comment_before' in t:
-        comment = '\n'.join(c[0] for c in t['comment_before'])
+    if 'comment' in tok:
+        init_dict['comment'] = tok['comment'][0]
+    if 'comment' not in init_dict and 'comment_before' in tok:
+        comment = '\n'.join(c[0] for c in tok['comment_before'])
         init_dict['comment'] = comment
 
     ref = ReferenceBlueprint(**init_dict)
     return ref
 
 
-ref_short.setParseAction(parse_ref)
-ref_long.setParseAction(parse_ref)
+ref_short.set_parse_action(parse_ref)
+ref_long.set_parse_action(parse_ref)
 
 ref = ref_short | ref_long + (n | pp.StringEnd())

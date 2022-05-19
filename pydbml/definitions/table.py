@@ -11,7 +11,7 @@ from .common import note_object
 from .generic import name
 from .index import indexes
 
-pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 alias = pp.WordStart() + pp.Literal('as').suppress() - pp.WordEnd() - name
 
@@ -26,19 +26,19 @@ table_setting = _ + (note('note') | header_color) + _
 table_settings = '[' + table_setting + (',' + table_setting)[...] + ']'
 
 
-def parse_table_settings(s, l, t):
+def parse_table_settings(s, loc, tok):
     '''
     [headercolor: #cccccc, note: 'note']
     '''
     result = {}
-    if 'note' in t:
-        result['note'] = t['note']
-    if 'header_color' in t:
-        result['header_color'] = t['header_color']
+    if 'note' in tok:
+        result['note'] = tok['note']
+    if 'header_color' in tok:
+        result['header_color'] = tok['header_color']
     return result
 
 
-table_settings.setParseAction(parse_table_settings)
+table_settings.set_parse_action(parse_table_settings)
 
 
 note_element = note | note_object
@@ -58,7 +58,7 @@ table = _c + (
 ) + end
 
 
-def parse_table(s, l, t):
+def parse_table(s, loc, tok):
     '''
     Table bookings as bb [headercolor: #cccccc] {
       id integer
@@ -72,27 +72,27 @@ def parse_table(s, l, t):
     }
     '''
     init_dict = {
-        'name': t['name'],
+        'name': tok['name'],
     }
-    if 'schema' in t:
-        init_dict['schema'] = t['schema']
-    if 'settings' in t:
-        init_dict.update(t['settings'])
-    if 'alias' in t:
-        init_dict['alias'] = t['alias'][0]
-    if 'note' in t:
+    if 'schema' in tok:
+        init_dict['schema'] = tok['schema']
+    if 'settings' in tok:
+        init_dict.update(tok['settings'])
+    if 'alias' in tok:
+        init_dict['alias'] = tok['alias'][0]
+    if 'note' in tok:
         # will override one from settings
-        init_dict['note'] = t['note'][0]
-    if 'indexes' in t:
-        init_dict['indexes'] = t['indexes']
-    if 'columns' in t:
-        init_dict['columns'] = t['columns']
-    if'comment_before' in t:
-        comment = '\n'.join(c[0] for c in t['comment_before'])
+        init_dict['note'] = tok['note'][0]
+    if 'indexes' in tok:
+        init_dict['indexes'] = tok['indexes']
+    if 'columns' in tok:
+        init_dict['columns'] = tok['columns']
+    if'comment_before' in tok:
+        comment = '\n'.join(c[0] for c in tok['comment_before'])
         init_dict['comment'] = comment
     result = TableBlueprint(**init_dict)
 
     return result
 
 
-table.setParseAction(parse_table)
+table.set_parse_action(parse_table)
