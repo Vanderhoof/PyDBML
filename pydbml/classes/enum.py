@@ -1,4 +1,5 @@
 from typing import Iterable
+from typing import List
 from typing import Optional
 from typing import Union
 
@@ -64,7 +65,7 @@ class Enum(SQLOjbect):
         self.name = name
         self.schema = schema
         self.comment = comment
-        self.items = []
+        self.items: List[EnumItem] = []
         for item in items:
             self.add_item(item)
 
