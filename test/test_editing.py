@@ -86,5 +86,5 @@ class TestEnum(EditingTestCase):
         self.assertIn('Enum "changed product status"', enum.dbml)
 
         col = products['status']
-        self.assertEqual(col.sql, '"status" changed product status')
-        self.assertEqual(col.dbml, '"status" changed product status')
+        self.assertEqual(col.sql, '"status" "changed product status"')
+        self.assertEqual(col.dbml, '"status" "changed product status"')
