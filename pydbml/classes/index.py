@@ -1,12 +1,13 @@
-from typing import Optional
-from typing import Union
 from typing import List
+from typing import Literal
+from typing import Optional
 from typing import TYPE_CHECKING
+from typing import Union
 
 from .base import SQLOjbect
-from .note import Note
 from .column import Column
 from .expression import Expression
+from .note import Note
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
 from pydbml.tools import note_option_to_dbml
@@ -23,11 +24,10 @@ class Index(SQLOjbect):
                  subjects: List[Union[str, 'Column', 'Expression']],
                  name: Optional[str] = None,
                  unique: bool = False,
-                 type: Optional[str] = None,
+                 type: Literal['hash', 'btree'] = None,
                  pk: bool = False,
                  note: Optional[Union['Note', str]] = None,
                  comment: Optional[str] = None):
-        self.database = None
         self.subjects = subjects
         self.table: Optional['Table'] = None
 

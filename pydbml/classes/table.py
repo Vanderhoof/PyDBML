@@ -26,7 +26,7 @@ if TYPE_CHECKING:  # pragma: no cover
 class Table(SQLOjbect):
     '''Class representing table.'''
 
-    required_attributes = ('name',)
+    required_attributes = ('name', 'schema')
 
     def __init__(self,
                  name: str,
