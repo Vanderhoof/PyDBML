@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable
 from typing import Optional
 from typing import Union
 
@@ -57,14 +57,22 @@ class Enum(SQLOjbect):
 
     def __init__(self,
                  name: str,
-                 items: List['EnumItem'],
+                 items: Iterable[Union['EnumItem', str]],
                  schema: str = 'public',
                  comment: Optional[str] = None):
         self.database = None
         self.name = name
         self.schema = schema
-        self.items = items
         self.comment = comment
+        self.items = []
+        for item in items:
+            self.add_item(item)
+
+    def add_item(self, item: Union['EnumItem', str]) -> None:
+        if isinstance(item, EnumItem):
+            self.items.append(item)
+        elif isinstance(item, str):
+            self.items.append(EnumItem(item))
 
     def __getitem__(self, key: int) -> EnumItem:
         return self.items[key]

@@ -5,6 +5,7 @@ from typing import Union
 
 from .base import SQLOjbect
 from .expression import Expression
+from .enum import Enum
 from .note import Note
 from pydbml.exceptions import TableNotFoundError
 from pydbml.tools import comment_to_dbml
@@ -23,7 +24,7 @@ class Column(SQLOjbect):
 
     def __init__(self,
                  name: str,
-                 type: str,
+                 type: Union[str, Enum],
                  unique: bool = False,
                  not_null: bool = False,
                  pk: bool = False,
@@ -65,7 +66,12 @@ class Column(SQLOjbect):
         '''
 
         self.check_attributes_for_sql()
-        components = [f'"{self.name}"', str(self.type)]
+        components = [f'"{self.name}"']
+        if isinstance(self.type, Enum):
+            components.append(self.type._get_full_name_for_sql())
+        else:
+            components.append(str(self.type))
+
         if self.pk:
             components.append('PRIMARY KEY')
         if self.autoinc:
@@ -97,7 +103,11 @@ class Column(SQLOjbect):
                 return val
 
         result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'"{self.name}" {self.type}'
+        result += f'"{self.name}" '
+        if isinstance(self.type, Enum):
+            result += self.type._get_full_name_for_sql()
+        else:
+            result += self.type
 
         options = [ref.dbml for ref in self.get_refs() if ref.inline]
         if self.pk:

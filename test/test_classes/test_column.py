@@ -5,6 +5,7 @@ from pydbml.classes import Expression
 from pydbml.classes import Note
 from pydbml.classes import Reference
 from pydbml.classes import Table
+from pydbml.classes import Enum
 from pydbml.database import Database
 from pydbml.exceptions import TableNotFoundError
 
@@ -57,6 +58,21 @@ class TestColumn(TestCase):
         expected = '"id" integer'
         self.assertEqual(r.sql, expected)
 
+    def test_sql_enum_type(self) -> None:
+        et = Enum('product status', ('production', 'development'))
+        db = Database()
+        db.add_enum(et)
+        r = Column(name='id',
+                   type=et,
+                   pk=True,
+                   autoinc=True)
+        expected = '"id" "product status" PRIMARY KEY AUTOINCREMENT'
+        self.assertEqual(r.sql, expected)
+
+        et.schema = 'myschema'
+        expected = '"id" "myschema"."product status" PRIMARY KEY AUTOINCREMENT'
+        self.assertEqual(r.sql, expected)
+
     def test_pk_autoinc(self) -> None:
         r = Column(name='id',
                    type='integer',
@@ -103,6 +119,24 @@ class TestColumn(TestCase):
         expected = '"order" integer'
 
         self.assertEqual(c.dbml, expected)
+
+    def test_dbml_enum_type(self) -> None:
+        et = Enum('product status', ('production', 'development'))
+        db = Database()
+        db.add_enum(et)
+        r = Column(name='id',
+                   type=et,
+                   pk=True,
+                   autoinc=True)
+        t = Table('products')
+        t.add_column(r)
+        db.add_table(t)
+        expected = '"id" "product status" [pk, increment]'
+        self.assertEqual(r.dbml, expected)
+
+        et.schema = 'myschema'
+        expected = '"id" "myschema"."product status" [pk, increment]'
+        self.assertEqual(r.dbml, expected)
 
     def test_dbml_full(self):
         c = Column(
