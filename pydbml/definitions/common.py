@@ -1,12 +1,14 @@
 import pyparsing as pp
 
-from pydbml.classes import Note
-
 from .generic import string_literal
+from pydbml.parser.blueprints import NoteBlueprint
 
-pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
-comment = pp.Suppress("//") + pp.SkipTo(pp.LineEnd())
+comment = (
+    pp.Suppress("//") + pp.SkipTo(pp.LineEnd())
+    | pp.Suppress('/*') + ... + pp.Suppress('*/')
+)
 
 # optional comment or newline
 _ = ('\n' | comment)[...].suppress()
@@ -23,10 +25,10 @@ end = n | pp.StringEnd()
 # n = pp.Suppress('\n')[1, ...]
 
 note = pp.CaselessLiteral("note:") + _ - string_literal('text')
-note.setParseAction(lambda s, l, t: Note(t['text']))
+note.set_parse_action(lambda s, loc, tok: NoteBlueprint(tok['text']))
 
 note_object = pp.CaselessLiteral('note') + _ - '{' + _ - string_literal('text') + _ - '}'
-note_object.setParseAction(lambda s, l, t: Note(t['text']))
+note_object.set_parse_action(lambda s, loc, tok: NoteBlueprint(tok['text']))
 
 pk = pp.CaselessLiteral("pk")
 unique = pp.CaselessLiteral("unique")

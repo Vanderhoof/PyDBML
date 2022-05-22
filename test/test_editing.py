@@ -3,19 +3,12 @@ import os
 from pathlib import Path
 from unittest import TestCase
 
-from pyparsing import ParseException
-from pyparsing import ParseSyntaxException
 from pyparsing import ParserElement
 
 from pydbml import PyDBML
-from pydbml.definitions.table import alias
-from pydbml.definitions.table import header_color
-from pydbml.definitions.table import table
-from pydbml.definitions.table import table_body
-from pydbml.definitions.table import table_settings
 
 
-ParserElement.setDefaultWhitespaceChars(' \t\r')
+ParserElement.set_default_whitespace_chars(' \t\r')
 
 
 TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'
@@ -28,7 +21,7 @@ class EditingTestCase(TestCase):
 
 class TestEditTable(EditingTestCase):
     def test_name(self) -> None:
-        products = self.dbml['products']
+        products = self.dbml['public.products']
         products.name = 'changed_products'
         self.assertIn('CREATE TABLE "changed_products"', products.sql)
         self.assertIn('CREATE INDEX "product_status" ON "changed_products"', products.sql)
@@ -42,7 +35,7 @@ class TestEditTable(EditingTestCase):
         self.assertIn('ON "changed_products"', index.sql)
 
     def test_alias(self) -> None:
-        products = self.dbml['products']
+        products = self.dbml['public.products']
         products.alias = 'new_alias'
 
         self.assertIn('as "new_alias"', products.dbml)
@@ -50,7 +43,7 @@ class TestEditTable(EditingTestCase):
 
 class TestColumn(EditingTestCase):
     def test_name(self) -> None:
-        products = self.dbml['products']
+        products = self.dbml['public.products']
         col = products['name']
         col.name = 'new_name'
         self.assertEqual(col.sql, '"new_name" varchar')
@@ -61,7 +54,7 @@ class TestColumn(EditingTestCase):
         self.assertEqual(col, products[col.name])
 
     def test_name_index(self) -> None:
-        products = self.dbml['products']
+        products = self.dbml['public.products']
         col = products['status']
         col.name = 'changed_status'
         self.assertIn('"changed_status"', products.indexes[0].sql)
@@ -76,21 +69,22 @@ class TestColumn(EditingTestCase):
         )
 
     def test_name_ref(self) -> None:
-        products = self.dbml['products']
+        products = self.dbml['public.products']
         col = products['merchant_id']
         col.name = 'changed_merchant_id'
-        table_ref = products.refs[0]
+        merchants = self.dbml['public.merchants']
+        table_ref = merchants.get_refs()[0]
         self.assertIn('FOREIGN KEY ("changed_merchant_id")', table_ref.sql)
 
 
 class TestEnum(EditingTestCase):
     def test_enum_name(self):
-        products = self.dbml['products']
+        products = self.dbml['public.products']
         enum = self.dbml.enums[0]
         enum.name = 'changed product status'
         self.assertIn('CREATE TYPE "changed product status"', enum.sql)
         self.assertIn('Enum "changed product status"', enum.dbml)
 
         col = products['status']
-        self.assertEqual(col.sql, '"status" changed product status')
-        self.assertEqual(col.dbml, '"status" changed product status')
+        self.assertEqual(col.sql, '"status" "changed product status"')
+        self.assertEqual(col.dbml, '"status" "changed product status"')

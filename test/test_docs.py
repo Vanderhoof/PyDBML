@@ -9,11 +9,11 @@ from pathlib import Path
 from unittest import TestCase
 
 from pydbml import PyDBML
-from pydbml.exceptions import ColumnNotFoundError
-from pydbml.exceptions import TableNotFoundError
+from pydbml.classes import Expression
 
 
 TEST_DOCS_PATH = Path(os.path.abspath(__file__)).parent / 'test_data/docs'
+TestCase.maxDiff = None
 
 
 class TestDocs(TestCase):
@@ -25,7 +25,7 @@ class TestDocs(TestCase):
 
         self.assertEqual(len(results.refs), 1)
         ref = results.refs[0]
-        self.assertEqual((posts, users), (ref.table1, ref.table2))
+        self.assertEqual((posts, users), (ref.col1[0].table, ref.col2[0].table))
 
     def test_project(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'project.dbml')
@@ -52,7 +52,7 @@ class TestDocs(TestCase):
 
         self.assertEqual(len(results.refs), 1)
         ref = results.refs[0]
-        self.assertEqual((u, posts), (ref.table1, ref.table2))
+        self.assertEqual((u, posts), (ref.col1[0].table, ref.col2[0].table))
 
     def test_table_notes(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'table_notes.dbml')
@@ -94,7 +94,8 @@ class TestDocs(TestCase):
         self.assertEqual([c.name for c in table.columns], ['id', 'username', 'full_name', 'gender', 'created_at', 'rating'])
         *_, gender, created_at, rating = table.columns
         self.assertEqual(gender.default, 'm')
-        self.assertEqual(created_at.default, '(now())')
+        self.assertIsInstance(created_at.default, Expression)
+        self.assertEqual(created_at.default.text, 'now()')
         self.assertEqual(rating.default, 10)
 
     def test_index_definition(self) -> None:
@@ -123,11 +124,17 @@ class TestDocs(TestCase):
         self.assertEqual(ix[4].subjects, [table['booking_date']])
         self.assertEqual(ix[4].type, 'hash')
 
-        self.assertEqual(ix[5].subjects, ['(id*2)'])
+        self.assertEqual(len(ix[5].subjects), 1)
+        self.assertIsInstance(ix[5].subjects[0], Expression)
+        self.assertEqual(ix[5].subjects[0].text, 'id*2')
 
-        self.assertEqual(ix[6].subjects, ['(id*3)', '(getdate())'])
+        self.assertEqual(len(ix[6].subjects), 2)
+        self.assertIsInstance(ix[6].subjects[0], Expression)
+        self.assertIsInstance(ix[6].subjects[1], Expression)
+        self.assertEqual(ix[6].subjects[0].text, 'id*3')
+        self.assertEqual(ix[6].subjects[1].text, 'getdate()')
 
-        self.assertEqual(ix[7].subjects, ['(id*3)', table['id']])
+        self.assertEqual(ix[7].subjects, [Expression('id*3'), table['id']])
 
     def test_relationships(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'relationships_1.dbml')
@@ -135,12 +142,12 @@ class TestDocs(TestCase):
 
         rf = results.refs
 
-        self.assertEqual(rf[0].table1, posts)
-        self.assertEqual(rf[0].table2, users)
+        self.assertEqual(rf[0].col1[0].table, posts)
+        self.assertEqual(rf[0].col2[0].table, users)
         self.assertEqual(rf[0].type, '>')
 
-        self.assertEqual(rf[1].table1, reviews)
-        self.assertEqual(rf[1].table2, users)
+        self.assertEqual(rf[1].col1[0].table, reviews)
+        self.assertEqual(rf[1].col2[0].table, users)
         self.assertEqual(rf[1].type, '>')
 
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'relationships_2.dbml')
@@ -148,12 +155,12 @@ class TestDocs(TestCase):
 
         rf = results.refs
 
-        self.assertEqual(rf[0].table1, users)
-        self.assertEqual(rf[0].table2, posts)
+        self.assertEqual(rf[0].col1[0].table, users)
+        self.assertEqual(rf[0].col2[0].table, posts)
         self.assertEqual(rf[0].type, '<')
 
-        self.assertEqual(rf[1].table1, users)
-        self.assertEqual(rf[1].table2, reviews)
+        self.assertEqual(rf[1].col1[0].table, users)
+        self.assertEqual(rf[1].col2[0].table, reviews)
         self.assertEqual(rf[1].type, '<')
 
     def test_relationships_composite(self) -> None:
@@ -164,8 +171,8 @@ class TestDocs(TestCase):
 
         self.assertEqual(len(rf), 1)
 
-        self.assertEqual(rf[0].table1, merchant_periods)
-        self.assertEqual(rf[0].table2, merchants)
+        self.assertEqual(rf[0].col1[0].table, merchant_periods)
+        self.assertEqual(rf[0].col2[0].table, merchants)
         self.assertEqual(rf[0].type, '>')
         self.assertEqual(
             rf[0].col1,
@@ -190,8 +197,8 @@ class TestDocs(TestCase):
 
         self.assertEqual(len(rf), 1)
 
-        self.assertEqual(rf[0].table1, merchant_periods)
-        self.assertEqual(rf[0].table2, merchants)
+        self.assertEqual(rf[0].col1[0].table, merchant_periods)
+        self.assertEqual(rf[0].col2[0].table, merchants)
         self.assertEqual(rf[0].type, '>')
         self.assertEqual(rf[0].on_delete, 'cascade')
         self.assertEqual(rf[0].on_update, 'no action')
@@ -199,7 +206,7 @@ class TestDocs(TestCase):
     def test_note_definition(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'note_definition.dbml')
         self.assertEqual(len(results.tables), 1)
-        users = results['users']
+        users = results['public.users']
         self.assertEqual(users.note.text, 'This is a note of this table')
 
     def test_project_notes(self) -> None:
@@ -211,7 +218,7 @@ class TestDocs(TestCase):
 
     def test_column_notes(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'column_notes.dbml')
-        users = results['users']
+        users = results['public.users']
 
         self.assertEqual(users.note.text, 'Stores user data')
         self.assertEqual(users['column_name'].note.text, 'replace text here')
@@ -219,7 +226,7 @@ class TestDocs(TestCase):
 
     def test_enum_definition(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'enum_definition.dbml')
-        jobs = results['jobs']
+        jobs = results['public.jobs']
         jobs['status'].type == 'job_status'
 
         self.assertEqual(len(results.enums), 1)

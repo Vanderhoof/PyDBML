@@ -1,9 +1,6 @@
-from pydbml.parser import PyDBML, PyDBMLParseResults
-import unittest
-import doctest
 from . import classes
-
-
-def load_tests(loader, tests, ignore):
-    tests.addTests(doctest.DocTestSuite(classes))
-    return tests
+from .parser import PyDBML
+from .database import Database
+from pydbml.constants import MANY_TO_ONE
+from pydbml.constants import ONE_TO_MANY
+from pydbml.constants import ONE_TO_ONE

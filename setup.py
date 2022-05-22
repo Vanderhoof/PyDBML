@@ -13,7 +13,7 @@ except FileNotFoundError:
 
 setup(
     name='pydbml',
-    python_requires='>=3.5',
+    python_requires='>=3.8',
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
