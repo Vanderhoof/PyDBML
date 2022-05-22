@@ -2,6 +2,7 @@ from typing import Collection
 from typing import Literal
 from typing import Optional
 from typing import Union
+from typing import TYPE_CHECKING
 
 from .base import SQLOjbect
 from .column import Column
@@ -11,6 +12,9 @@ from pydbml.exceptions import DBMLError
 from pydbml.exceptions import TableNotFoundError
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
+
+if TYPE_CHECKING:  # pragma: no cover
+    from .table import Table
 
 
 class Reference(SQLOjbect):
@@ -39,6 +43,16 @@ class Reference(SQLOjbect):
         self.on_update = on_update
         self.on_delete = on_delete
         self.inline = inline
+
+    @property
+    def table1(self) -> Optional['Table']:
+        self._validate()
+        return self.col1[0].table if self.col1 else None
+
+    @property
+    def table2(self) -> Optional['Table']:
+        self._validate()
+        return self.col2[0].table if self.col2 else None
 
     def __repr__(self):
         '''
@@ -76,13 +90,15 @@ class Reference(SQLOjbect):
         table1 = self.col1[0].table
         if any(c.table != table1 for c in self.col1):
             raise DBMLError('Columns in col1 are from different tables')
-        if table1 is None:
-            raise TableNotFoundError('Table on col1 is not set')
 
         table2 = self.col2[0].table
         if any(c.table != table2 for c in self.col2):
             raise DBMLError('Columns in col2 are from different tables')
-        if table2 is None:
+
+    def _validate_for_sql(self):
+        if self.table1 is None:
+            raise TableNotFoundError('Table on col1 is not set')
+        if self.table2 is None:
             raise TableNotFoundError('Table on col2 is not set')
 
     @property
@@ -94,17 +110,17 @@ class Reference(SQLOjbect):
 
         '''
         self.check_attributes_for_sql()
-        self._validate()
+        self._validate_for_sql()
         c = f'CONSTRAINT "{self.name}" ' if self.name else ''
 
         if self.inline:
             if self.type in (MANY_TO_ONE, ONE_TO_ONE):
                 source_col = self.col1
-                ref_table = self.col2[0].table
+                ref_table = self.table2
                 ref_col = self.col2
             else:
                 source_col = self.col2
-                ref_table = self.col1[0].table
+                ref_table = self.table1
                 ref_col = self.col1
 
             cols = '", "'.join(c.name for c in source_col)
@@ -121,14 +137,14 @@ class Reference(SQLOjbect):
             return result
         else:
             if self.type in (MANY_TO_ONE, ONE_TO_ONE):
-                t1 = self.col1[0].table
+                t1 = self.table1
                 c1 = ', '.join(f'"{c.name}"' for c in self.col1)
-                t2 = self.col2[0].table
+                t2 = self.table2
                 c2 = ', '.join(f'"{c.name}"' for c in self.col2)
             else:
-                t1 = self.col2[0].table
+                t1 = self.table2
                 c1 = ', '.join(f'"{c.name}"' for c in self.col2)
-                t2 = self.col1[0].table
+                t2 = self.table1
                 c2 = ', '.join(f'"{c.name}"' for c in self.col1)
 
             result = comment_to_sql(self.comment) if self.comment else ''
@@ -144,7 +160,7 @@ class Reference(SQLOjbect):
 
     @property
     def dbml(self):
-        self._validate()
+        self._validate_for_sql()
         if self.inline:
             # settings are ignored for inline ref
             if len(self.col2) > 1:
@@ -178,9 +194,9 @@ class Reference(SQLOjbect):
             options_str = f' [{", ".join(options)}]' if options else ''
             result += (
                 ' {\n    '
-                f'{self.col1[0].table._get_full_name_for_sql()}.{col1} '
+                f'{self.table1._get_full_name_for_sql()}.{col1} '
                 f'{self.type} '
-                f'{self.col2[0].table._get_full_name_for_sql()}.{col2}'
+                f'{self.table2._get_full_name_for_sql()}.{col2}'
                 f'{options_str}'
                 '\n}'
             )

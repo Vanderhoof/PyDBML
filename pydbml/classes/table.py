@@ -104,7 +104,7 @@ class Table(SQLOjbect):
     def get_refs(self) -> List[Reference]:
         if not self.database:
             raise UnknownDatabaseError('Database for the table is not set')
-        return [ref for ref in self.database.refs if ref.col1[0].table == self]
+        return [ref for ref in self.database.refs if ref.table1 == self]
 
     def _get_references_for_sql(self) -> List[Reference]:
         '''
@@ -116,9 +116,9 @@ class Table(SQLOjbect):
         for ref in self.database.refs:
             if ref.inline:
                 if (ref.type in (MANY_TO_ONE, ONE_TO_ONE)) and\
-                        (ref.col1[0].table == self):
+                        (ref.table1 == self):
                     result.append(ref)
-                elif (ref.type == ONE_TO_MANY) and (ref.col2[0].table == self):
+                elif (ref.type == ONE_TO_MANY) and (ref.table2 == self):
                     result.append(ref)
         return result
 
