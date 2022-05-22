@@ -1,7 +1,7 @@
-from .base import SQLOjbect
+from .base import SQLObject
 
 
-class Expression(SQLOjbect):
+class Expression(SQLObject):
     def __init__(self, text: str):
         self.text = text
 

@@ -3,7 +3,7 @@ from typing import List
 from typing import Optional
 from typing import Union
 
-from .base import SQLOjbect
+from .base import SQLObject
 from .note import Note
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
@@ -53,7 +53,7 @@ class EnumItem:
         return result
 
 
-class Enum(SQLOjbect):
+class Enum(SQLObject):
     required_attributes = ('name', 'schema', 'items')
 
     def __init__(self,

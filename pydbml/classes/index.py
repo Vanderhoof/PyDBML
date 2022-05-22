@@ -4,7 +4,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Union
 
-from .base import SQLOjbect
+from .base import SQLObject
 from .column import Column
 from .expression import Expression
 from .note import Note
@@ -16,7 +16,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from .table import Table
 
 
-class Index(SQLOjbect):
+class Index(SQLObject):
     '''Class representing index.'''
     required_attributes = ('subjects', 'table')
 

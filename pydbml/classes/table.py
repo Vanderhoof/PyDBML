@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from typing import Union
 from typing import Iterable
 
-from .base import SQLOjbect
+from .base import SQLObject
 from .column import Column
 from .index import Index
 from .note import Note
@@ -24,7 +24,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from pydbml.database import Database
 
 
-class Table(SQLOjbect):
+class Table(SQLObject):
     '''Class representing table.'''
 
     required_attributes = ('name', 'schema')

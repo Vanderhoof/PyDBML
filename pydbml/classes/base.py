@@ -4,7 +4,7 @@ from typing import Tuple
 from pydbml.exceptions import AttributeMissingError
 
 
-class SQLOjbect:
+class SQLObject:
     '''
     Base class for all SQL objects.
     '''

@@ -4,7 +4,7 @@ from typing import Optional
 from typing import Union
 from typing import TYPE_CHECKING
 
-from .base import SQLOjbect
+from .base import SQLObject
 from .column import Column
 from pydbml.constants import MANY_TO_ONE
 from pydbml.constants import ONE_TO_ONE
@@ -17,7 +17,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from .table import Table
 
 
-class Reference(SQLOjbect):
+class Reference(SQLObject):
     '''
     Class, representing a foreign key constraint.
     It is a separate object, which is not connected to Table or Column objects

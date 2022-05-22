@@ -3,7 +3,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Union
 
-from .base import SQLOjbect
+from .base import SQLObject
 from .expression import Expression
 from .enum import Enum
 from .note import Note
@@ -17,7 +17,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from .reference import Reference
 
 
-class Column(SQLOjbect):
+class Column(SQLObject):
     '''Class representing table column.'''
 
     required_attributes = ('name', 'type')
