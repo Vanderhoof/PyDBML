@@ -136,7 +136,7 @@ class IndexBlueprint(Blueprint):
     subject_names: List[Union[str, ExpressionBlueprint]]
     name: Optional[str] = None
     unique: bool = False
-    type: Optional[str] = None
+    type: Optional[Literal['hash', 'btree']] = None
     pk: bool = False
     note: Optional[NoteBlueprint] = None
     comment: Optional[str] = None

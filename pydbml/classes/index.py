@@ -24,7 +24,7 @@ class Index(SQLObject):
                  subjects: List[Union[str, 'Column', 'Expression']],
                  name: Optional[str] = None,
                  unique: bool = False,
-                 type: Literal['hash', 'btree'] = None,
+                 type: Optional[Literal['hash', 'btree']] = None,
                  pk: bool = False,
                  note: Optional[Union['Note', str]] = None,
                  comment: Optional[str] = None):
