@@ -22,7 +22,7 @@ Now let's create a table and add it to the database.
 
 ```
 
-To add columns to the table you have to use the `add_column` method of the Table object.
+To add columns to the table, you have to use the `add_column` method of the Table object.
 
 ```python
 >>> from pydbml.classes import Column
@@ -44,7 +44,7 @@ Index is also a part of a table, so you have to add it similarly, using `add_ind
 
 ```
 
-The table's third column, `manufacturer_id`. looks like it should be a foreign key. Let's create another table, called `manufacturers`, so that we could create a relation.
+The table's third column, `manufacturer_id` looks like it should be a foreign key. Let's create another table, called `manufacturers`, so that we could create a relation.
 
 ```python
 >>> table2 = Table(
@@ -98,7 +98,7 @@ Ref {
 
 ```
 
-We can generate SQL for the schema in a similar way, by calling the `sql` property:
+We can generate SQL for the schema similarly, by calling the `sql` property:
 
 ```python
 >>> print(db.sql)

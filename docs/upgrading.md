@@ -6,7 +6,7 @@ In May 2022 I've rewritten PyDBML from scratch and released version 1.0.0. Now y
 
 ## Getting Tables From Parse Results by Name
 
-Previously the parser returned the `PyDBMLParseResults` object, now it returnes a `Database` object. While they mostly can be operated similarly, now you can't get a table just by name.
+Previously the parser returned the `PyDBMLParseResults` object, now it returns a `Database` object. While they mostly can be operated similarly, now you can't get a table just by name.
 
 Since v2.4 DBML supports multiple schemas for tables and enums. PyDBML 1.0.0 also supports multiple schemas, but this means that there may be tables with the same name in different schemas. So now you can't get a table from the parse results just by name, you have to specify the schema too:
 
@@ -135,7 +135,7 @@ CREATE TABLE "products" (
 
 ```
 
-If the reference is not inline, it won't appear in the Table SQL definition, otherwise it will le rendered separately as an `ALTER TABLE` clause:
+If the reference is not inline, it won't appear in the Table SQL definition, otherwise it will be rendered separately as an `ALTER TABLE` clause:
 
 ```python
 >>> ref.inline = False
@@ -150,7 +150,7 @@ ALTER TABLE "products" ADD FOREIGN KEY ("name") REFERENCES "names" ("name_val");
 
 ## `type_` -> `type`
 
-Previously you would initialize a `Column`, `Index` and `Reference` type with `type_` parameter. Now this parameter is renamed to simply `type`.
+Previously you would initialize a `Column`, `Index` and `Reference` type with `type_` parameter. Now, this parameter is renamed to simply `type`.
 
 ```python
 >>> from pydbml.classes import Index, Column
@@ -172,7 +172,7 @@ Previously you would initialize a `Column`, `Index` and `Reference` type with `t
 
 ## New Expression Class
 
-SQL expressions are allowed in column's `default` value definition and in index's subject definition. Previously you defined expressions as parentesised strings: `"(upper(name))"`. Now you have to use the `Expression` class. This will make sure the expression will be rendered properly in SQL and DBML.
+SQL expressions are allowed in column's `default` value definition and in index's subject definition. Previously, you defined expressions as parenthesized strings: `"(upper(name))"`. Now you have to use the `Expression` class. This will make sure the expression will be rendered properly in SQL and DBML.
 
 ```python
 >>> from pydbml.classes import Expression

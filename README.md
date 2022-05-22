@@ -6,10 +6,13 @@
 
 PyDBML is a Python parser and builder for [DBML](https://www.dbml.org) syntax. 
 
+> The project was rewritten in May 2022, the new version 1.0.0 is not compatible with the previous ones. See details in [Upgrading to PyDBML 1.0.0](docs/upgrading.md).
+
 **Docs:**
 
 * [Class Reference](docs/classes.md)
 * [Creating DBML schema](docs/creating_schema.md)
+* [Upgrading to PyDBML 1.0.0](docs/upgrading.md)
 
 ## Installation
 
@@ -49,7 +52,7 @@ or with entire source string
 
 ```
 
-Parser returns a Database object that is a container for the parsed DBML entities.
+The parser returns a Database object that is a container for the parsed DBML entities.
 
 You can access tables inside the `tables` attribute:
 
