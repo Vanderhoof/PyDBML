@@ -1,7 +1,7 @@
 from setuptools import setup
 
 
-SHORT_DESCRIPTION = 'DBML syntax parser for Python'
+SHORT_DESCRIPTION = 'Python parser and builder for DBML'
 
 try:
     with open('README.md', encoding='utf8') as readme:
@@ -17,7 +17,7 @@ setup(
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
-    version='0.4.2',
+    version='1.0.0',
     author='Daniil Minukhin',
     author_email='ddddsa@gmail.com',
     url='https://github.com/Vanderhoof/PyDBML',
