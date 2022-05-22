@@ -54,7 +54,7 @@ class EnumItem:
 
 
 class Enum(SQLOjbect):
-    required_attributes = ('name', 'items')
+    required_attributes = ('name', 'schema', 'items')
 
     def __init__(self,
                  name: str,

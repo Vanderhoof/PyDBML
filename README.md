@@ -9,6 +9,7 @@ PyDBML is a Python parser and builder for [DBML](https://www.dbml.org) syntax.
 **Docs:**
 
 * [Class Reference](docs/classes.md)
+* [Creating DBML schema](docs/creating_schema.md)
 
 ## Installation
 

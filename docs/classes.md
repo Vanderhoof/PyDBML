@@ -165,23 +165,15 @@ Indexes are stored in the `indexes` attribute of a `Table` object.
 
 ### Attributes
 
-database
-type
-col1
-col2
-name
-comment
-on_update
-on_delete
-inline
-
 * **database** (`Database`) — link to the reference's database object, if it was set.
 * **type** (str) — reference type, in DBML syntax:
   * `<` — one to many;
   * `>` — many to one;
   * `-` — one to one.
 * **col1** (list os `Column`) — list of Column objects of the left side of the reference. Changed in **0.4.0**, previously was plain `Column`.
+* **table1** (`Table` or `None`) — link to the left `Table` object of the reference or `None` of it was not set.
 * **col2** (list of `Column`) — list of Column objects of the right side of the reference. Changed in **0.4.0**, previously was plain `Column`.
+* **table2** (`Table` or `None`) — link to the right `Table` object of the reference or `None` of it was not set.
 * **name** (str) — reference name, if defined.
 * **on_update** (str) — reference's on update setting, if defined.
 * **on_delete** (str) — reference's on delete setting, if defined.

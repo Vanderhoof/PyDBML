@@ -20,6 +20,17 @@ class TestReference(TestCase):
         expected = 'ALTER TABLE "products" ADD FOREIGN KEY ("name") REFERENCES "names" ("name_val");'
         self.assertEqual(ref.sql, expected)
 
+    def test_table1(self):
+        t = Table('products')
+        c1 = Column('name', 'varchar2')
+        t2 = Table('names')
+        c2 = Column('name_val', 'varchar2')
+        t2.add_column(c2)
+        ref = Reference('>', c1, c2)
+        self.assertIsNone(ref.table1)
+        t.add_column(c1)
+        self.assertIs(ref.table1, t)
+
     def test_sql_schema_single(self):
         t = Table('products', schema='myschema1')
         c1 = Column('name', 'varchar2')
@@ -392,11 +403,11 @@ CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("n
             c2
         )
         with self.assertRaises(TableNotFoundError):
-            ref1._validate()
+            ref1._validate_for_sql()
         table = Table('name')
         table.add_column(c1)
         with self.assertRaises(TableNotFoundError):
-            ref1._validate()
+            ref1._validate_for_sql()
         table.delete_column(c1)
 
         ref2 = Reference(
@@ -405,9 +416,9 @@ CONSTRAINT "country_name" FOREIGN KEY ("name", "country") REFERENCES "names" ("n
             [c3, c4]
         )
         with self.assertRaises(TableNotFoundError):
-            ref2._validate()
+            ref2._validate_for_sql()
         table = Table('name')
         table.add_column(c1)
         table.add_column(c2)
         with self.assertRaises(TableNotFoundError):
-            ref2._validate()
+            ref2._validate_for_sql()
