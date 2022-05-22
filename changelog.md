@@ -1,3 +1,11 @@
+# 1.0.0
+
+- New project architecture, full support for creating and editing DBML. See details in [Upgrading to PyDBML 1.0.0](docs/upgrading.md)
+- New Expression class
+- Support DBML 2.4.1 syntax:
+    - Multiline comments
+    - Multiple schemas
+
 # 0.4.2
 
 - Fix: after editing column name index dbml was not updated.

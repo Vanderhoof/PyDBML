@@ -1,0 +1,44 @@
+Project "my project" {
+    author: 'me'
+    reason: 'testing'
+}
+
+Enum "level" {
+    "junior"
+    "middle"
+    "senior"
+}
+
+Table "Employees" as "emp" {
+    "id" integer [pk, increment]
+    "name" varchar [note: 'Full employee name']
+    "age" number
+    "level" level
+    "favorite_book_id" integer
+}
+
+Table "books" {
+    "id" integer [pk, increment]
+    "title" varchar
+    "author" varchar
+    "country_id" integer
+}
+
+Table "countries" {
+    "id" integer [ref: < "books"."country_id", pk, increment]
+    "name" varchar2 [unique]
+
+    indexes {
+        name [unique]
+        `UPPER(name)`
+    }
+}
+
+Ref {
+    "Employees"."favorite_book_id" > "books"."id"
+}
+
+TableGroup Unanimate {
+    "books"
+    "countries"
+}

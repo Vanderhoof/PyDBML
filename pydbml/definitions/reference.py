@@ -1,29 +1,45 @@
 import pyparsing as pp
 
-from pydbml.classes import ReferenceBlueprint
-
 from .common import _
 from .common import _c
 from .common import c
 from .common import n
 from .generic import name
+from pydbml.parser.blueprints import ReferenceBlueprint
 
-pp.ParserElement.setDefaultWhitespaceChars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 relation = pp.oneOf("> - <")
-ref_inline = pp.Literal("ref:") - relation('type') - name('table') - '.' - name('field')
+
+col_name = (
+    (
+        name('schema') + '.' + name('table') + '.' - name('field')
+    ) | (
+        name('table') + '.' + name('field')
+    )
+)
+
+ref_inline = pp.Literal("ref:") - relation('type') - col_name
 
 
-def parse_inline_relation(s, l, t):
+def parse_inline_relation(s, loc, tok):
     '''
     ref: < table.column
+    or
+    ref: < schema1.table.column
     '''
-    return ReferenceBlueprint(type_=t['type'],
-                              table2=t['table'],
-                              col2=t['field'])
+    result = {
+        'type': tok['type'],
+        'inline': True,
+        'table2': tok['table'],
+        'col2': tok['field']
+    }
+    if 'schema' in tok:
+        result['schema2'] = tok['schema']
+    return ReferenceBlueprint(**result)
 
 
-ref_inline.setParseAction(parse_inline_relation)
+ref_inline.set_parse_action(parse_inline_relation)
 
 on_option = (
     pp.CaselessLiteral('no action')
@@ -48,21 +64,21 @@ ref_settings = (
 )
 
 
-def parse_ref_settings(s, l, t):
+def parse_ref_settings(s, loc, tok):
     '''
     [delete: cascade]
     '''
     result = {}
-    if 'update' in t:
-        result['on_update'] = t['update'][0]
-    if 'delete' in t:
-        result['on_delete'] = t['delete'][0]
-    if 'comment' in t:
-        result['comment'] = t['comment'][0]
+    if 'update' in tok:
+        result['on_update'] = tok['update'][0]
+    if 'delete' in tok:
+        result['on_delete'] = tok['delete'][0]
+    if 'comment' in tok:
+        result['comment'] = tok['comment'][0]
     return result
 
 
-ref_settings.setParseAction(parse_ref_settings)
+ref_settings.set_parse_action(parse_ref_settings)
 
 composite_name = (
     '(' + pp.White()[...]
@@ -76,16 +92,53 @@ composite_name = (
 )
 name_or_composite = name | pp.Combine(composite_name)
 
+ref_cols = (
+    (
+        name('schema')
+        + pp.Suppress('.') + name('table')
+        + pp.Suppress('.') + name_or_composite('field')
+    ) | (
+        name('table')
+        + pp.Suppress('.') + name_or_composite('field')
+    )
+)
+
+
+def parse_ref_cols(s, loc, tok):
+    '''
+    table1.col1
+    or
+    schema1.table1.col1
+    or
+    schema1.table1.(col1, col2)
+    '''
+    result = {
+        'table': tok['table'],
+        'field': tok['field'],
+    }
+    if 'schema' in tok:
+        result['schema'] = tok['schema']
+    return result
+
+
+ref_cols.set_parse_action(parse_ref_cols)
+
 ref_body = (
-    name('table1')
-    - '.'
-    - name_or_composite('field1')
+    ref_cols('col1')
     - relation('type')
-    - name('table2')
-    - '.'
-    - name_or_composite('field2') + c
+    - ref_cols('col2') + c
     + ref_settings('settings')[0, 1]
 )
+# ref_body = (
+#     table_name('table1')
+#     - '.'
+#     - name_or_composite('field1')
+#     - relation('type')
+#     - table_name('table2')
+#     - '.'
+#     - name_or_composite('field2') + c
+#     + ref_settings('settings')[0, 1]
+# )
 
 
 ref_short = _c + pp.CaselessLiteral('ref') + name('name')[0, 1] + ':' - ref_body
@@ -98,7 +151,7 @@ ref_long = _c + (
 )
 
 
-def parse_ref(s, l, t):
+def parse_ref(s, loc, tok):
     '''
     ref name: table1.col1 > table2.col2
     or
@@ -107,29 +160,35 @@ def parse_ref(s, l, t):
     }
     '''
     init_dict = {
-        'type_': t['type'],
-        'table1': t['table1'],
-        'col1': t['field1'],
-        'table2': t['table2'],
-        'col2': t['field2']
+        'type': tok['type'],
+        'inline': False,
+        'table1': tok['col1']['table'],
+        'col1': tok['col1']['field'],
+        'table2': tok['col2']['table'],
+        'col2': tok['col2']['field'],
     }
-    if 'name' in t:
-        init_dict['name'] = t['name']
-    if 'settings' in t:
-        init_dict.update(t['settings'])
+
+    if 'schema' in tok['col1']:
+        init_dict['schema1'] = tok['col1']['schema']
+    if 'schema' in tok['col2']:
+        init_dict['schema2'] = tok['col2']['schema']
+    if 'name' in tok:
+        init_dict['name'] = tok['name']
+    if 'settings' in tok:
+        init_dict.update(tok['settings'])
 
     # comments after settings have priority
-    if 'comment' in t:
-        init_dict['comment'] = t['comment'][0]
-    if 'comment' not in init_dict and 'comment_before' in t:
-        comment = '\n'.join(c[0] for c in t['comment_before'])
+    if 'comment' in tok:
+        init_dict['comment'] = tok['comment'][0]
+    if 'comment' not in init_dict and 'comment_before' in tok:
+        comment = '\n'.join(c[0] for c in tok['comment_before'])
         init_dict['comment'] = comment
 
     ref = ReferenceBlueprint(**init_dict)
     return ref
 
 
-ref_short.setParseAction(parse_ref)
-ref_long.setParseAction(parse_ref)
+ref_short.set_parse_action(parse_ref)
+ref_long.set_parse_action(parse_ref)
 
 ref = ref_short | ref_long + (n | pp.StringEnd())

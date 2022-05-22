@@ -8,3 +8,4 @@ build
 dist
 pydbml.egg-info
 .mypy_cache
+.coverage
