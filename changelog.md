@@ -1,12 +1,10 @@
 # 1.0.0
 
-- refs don't have tables, only columns
-- tables don't have refs
-- col1 col2 in ref are as they were in dbml
-- Expression class
-- add multiline comment
-- support multiple schemas
-- type_ -> type
+- New project architecture, full support for creating and editing DBML. See details in [Upgrading to PyDBML 1.0.0](docs/upgrading.md)
+- New Expression class
+- Support DBML 2.4.1 syntax:
+    - Multiline comments
+    - Multiple schemas
 
 # 0.4.2
 
