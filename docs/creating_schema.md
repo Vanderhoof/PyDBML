@@ -18,6 +18,7 @@ Now let's create a table and add it to the database.
 >>> from pydbml.classes import Table
 >>> table1 = Table(name='products')
 >>> db.add(table1)
+<Table 'public' 'products'>
 
 ```
 
@@ -47,7 +48,7 @@ The table's third column, `manufacturer_id`. looks like it should be a foreign k
 
 ```python
 >>> table2 = Table(
-...     'products',
+...     'manufacturers',
 ...     columns=[
 ...         Column('id', type='Integer', pk=True, autoinc=True),
 ...         Column('manufacturer_name', type='Varchar'),
@@ -55,16 +56,17 @@ The table's third column, `manufacturer_id`. looks like it should be a foreign k
 ...     ]
 ... )
 >>> db.add(table2)
-<Table 'public' 'products'>
+<Table 'public' 'manufacturers'>
 
 ```
 
 Now to the relation:
 
 ```python
-from pydbml.classes import Reference
+>>> from pydbml.classes import Reference
 >>> ref = Reference('>', table1['manufacturer_id'], table2['id'])
 >>> db.add(ref)
+<Reference '>', ['manufacturer_id'], ['id']>
 
 ```
 
@@ -74,5 +76,46 @@ Now let's generate DBML code for our schema. This is done by just calling the `d
 
 ```python
 >>> print(db.dbml)
->>> #breakpoint()
+Table "products" {
+    "id" Integer [pk, increment]
+    "product_name" Varchar [unique]
+    "manufacturer_id" Integer
+<BLANKLINE>
+    indexes {
+        product_name [unique]
+    }
+}
+<BLANKLINE>
+Table "manufacturers" {
+    "id" Integer [pk, increment]
+    "manufacturer_name" Varchar
+    "manufacturer_country" Varchar
+}
+<BLANKLINE>
+Ref {
+    "products"."manufacturer_id" > "manufacturers"."id"
+}
+
+```
+
+We can generate SQL for the schema in a similar way, by calling the `sql` property:
+
+```python
+>>> print(db.sql)
+CREATE TABLE "products" (
+  "id" Integer PRIMARY KEY AUTOINCREMENT,
+  "product_name" Varchar UNIQUE,
+  "manufacturer_id" Integer
+);
+<BLANKLINE>
+CREATE UNIQUE INDEX ON "products" ("product_name");
+<BLANKLINE>
+CREATE TABLE "manufacturers" (
+  "id" Integer PRIMARY KEY AUTOINCREMENT,
+  "manufacturer_name" Varchar,
+  "manufacturer_country" Varchar
+);
+<BLANKLINE>
+ALTER TABLE "products" ADD FOREIGN KEY ("manufacturer_id") REFERENCES "manufacturers" ("id");
+
 ```

@@ -45,6 +45,30 @@ class TestTable(TestCase):
         with self.assertRaises(ColumnNotFoundError):
             t['wrong']
 
+    def test_init_with_columns(self) -> None:
+        t = Table(
+            'products',
+            columns=(
+                Column('col1', 'integer'),
+                Column('col2', 'integer'),
+                Column('col3', 'integer'),
+            )
+        )
+        self.assertIs(t['col1'].table, t)
+        self.assertIs(t['col2'].table, t)
+        self.assertIs(t['col3'].table, t)
+
+    def test_init_with_indexes(self) -> None:
+        c1 = Column('col1', 'integer')
+        c2 = Column('col2', 'integer')
+        c3 = Column('col3', 'integer')
+        t = Table(
+            'products',
+            columns=[c1, c2, c3],
+            indexes=[Index(subjects=[c1])]
+        )
+        self.assertIs(t.indexes[0].table, t)
+
     def test_get(self) -> None:
         t = Table('products')
         c1 = Column('col1', 'integer')
@@ -227,6 +251,8 @@ CREATE TABLE "products" (
         self.assertEqual(c1.table, t)
         self.assertEqual(c2.table, t)
         self.assertEqual(t.columns, [c1, c2])
+        with self.assertRaises(TypeError):
+            t.add_column('wrong type')
 
     def test_delete_column(self) -> None:
         t = Table('products')
@@ -256,6 +282,8 @@ CREATE TABLE "products" (
         self.assertEqual(i1.table, t)
         self.assertEqual(i2.table, t)
         self.assertEqual(t.indexes, [i1, i2])
+        with self.assertRaises(TypeError):
+            t.add_index('wrong_type')
 
     def test_delete_index(self) -> None:
         t = Table('products')

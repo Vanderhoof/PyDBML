@@ -1,13 +1,63 @@
 # Class Reference
 
-Import pydbml classes from the `pydbml.classes` package.
+PyDBML classes represent database entities. They live in the `pydbml.classes` package.
 
 ```python
 >>> from pydbml.classes import Table, Column, Reference
 
 ```
 
-Each class represents a database entity.
+The `Database` class represents a PyDBML database. You can import it from the `pydbml` package.
+
+```python
+>>> from pydbml import Database
+
+```
+
+## Database
+
+`Database` is the main class, representing a PyDBML database. When PyDBML parses a .dbml file, it returns a `Database` object. This object holds all objects of the database and makes sure they are properly connected. You can access the `Database` object by calling the `database` property of each class (except child classes like `Column` or `Index`).
+
+When you are creating PyDBML schema from scratch, you have to add each created object to the database by calling `Database.add`.
+
+`Database` object may act as a list or a dictionary of tables:
+
+```python
+>>> from pydbml import PyDBML
+>>> db = PyDBML.parse_file('test_schema.dbml')
+>>> table = db.tables[0]
+>>> db['public.orders']
+<Table 'public' 'orders'>
+>>> db[0]
+<Table 'public' 'orders'>
+
+```
+
+### Attributes
+
+* **tables** (list of `Table`) — list of all `Table` objects, defined in this database.
+* **table_dict** (dict of `Table`) — dictionary holding database `Table` objects. The key is full table name (with schema: `public.mytable`) or a table alias (`myalias`).
+* **refs** (list of `Reference`) — list of all `Reference` objects, defined in this database.
+* **enums** (list of `Enum`) — list of all `Enum` objects, defined in this database.
+* **table_groups** (list of `TableGroup`) — list of all `TableGroup` objects, defined in this database.
+* **project** (`Project`) — database `Project`.
+* **sql** () — SQL definition for this database.
+* **dbml** () — DBML definition for this table.
+
+### Methods
+
+* **add** (PyDBML object) — add a PyDBML object to the database.
+* **add_table** (`Table`) — add a `Table` object to the database.
+* **add_reference** (`Reference`) — add a `Reference` object to the database.
+* **add_enum** (`Enum`) — add a `Enum` object to the database.
+* **add_table_group** (`TableGroup`) — add a `TableGroup` object to the database.
+* **add_project** (`Project`) — add a `Project` object to the database.
+* **delete** (PyDBML object) — delete a PyDBML object from the database.
+* **delete_table**  (`Table`) — delete a `Table` object from the database. 
+* **delete_reference**  (`Reference`) — delete a `Reference` object from the database. 
+* **delete_enum**  (`Enum`) — delete a `Enum` object from the database. 
+* **delete_table_group**  (`TableGroup`) — delete a `TableGroup` object from the database. 
+* **delete_project**  (`Project`) — delete a `Project` object from the database. 
 
 ## Table
 
