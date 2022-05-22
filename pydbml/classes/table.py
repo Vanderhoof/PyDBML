@@ -2,6 +2,7 @@ from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Union
+from typing import Iterable
 
 from .base import SQLOjbect
 from .column import Column
@@ -32,6 +33,8 @@ class Table(SQLOjbect):
                  name: str,
                  schema: str = 'public',
                  alias: Optional[str] = None,
+                 columns: Optional[Iterable[Column]] = None,
+                 indexes: Optional[Iterable[Index]] = None,
                  note: Optional[Union['Note', str]] = None,
                  header_color: Optional[str] = None,
                  comment: Optional[str] = None):
@@ -39,7 +42,11 @@ class Table(SQLOjbect):
         self.name = name
         self.schema = schema
         self.columns: List[Column] = []
+        for column in columns or []:
+            self.add_column(column)
         self.indexes: List[Index] = []
+        for index in indexes or []:
+            self.add_index(index)
         self.alias = alias if alias else None
         self.note = Note(note)
         self.header_color = header_color
@@ -54,6 +61,8 @@ class Table(SQLOjbect):
         Adds column to self.columns attribute and sets in this column the
         `table` attribute.
         '''
+        if not isinstance(c, Column):
+            raise TypeError('Columns must be of type Column')
         c.table = self
         self.columns.append(c)
 
@@ -73,6 +82,8 @@ class Table(SQLOjbect):
         Adds index to self.indexes attribute and sets in this index the
         `table` attribute.
         '''
+        if not isinstance(i, Index):
+            raise TypeError('Indexes must be of type Index')
         for subject in i.subjects:
             if isinstance(subject, Column) and subject.table != self:
                 raise ColumnNotFoundError(f'Column {subject} not in the table')
