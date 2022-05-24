@@ -26,9 +26,9 @@ KeyError: 'orders'
 
 Previously the `Table` object had a `refs` attribute which holded a list of `TableReference` objects. `TableReference` represented a table relation and duplicated the `Reference` object of `PyDBMLParseResults` container.
 
-**In 1.0.0 the `TableReference` class is removed, and there's not `Table.refs` attribute.**
+**In 1.0.0 the `TableReference` class is removed, and there's no `Table.refs` attribute.**
 
-Now all relations are represented by a single `Reference` object. You can still access `Table` references by calling the `get_refs` method.
+Now each relation is represented by a single `Reference` object. You can still access `Table` references by calling the `get_refs` method.
 
 `Table.get_refs` will return a list of References for this table, but only if this table is on the left side of DBML relation.
 
