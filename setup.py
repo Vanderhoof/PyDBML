@@ -21,7 +21,7 @@ setup(
     author='Daniil Minukhin',
     author_email='ddddsa@gmail.com',
     url='https://github.com/Vanderhoof/PyDBML',
-    packages=['pydbml', 'pydbml.definitions'],
+    packages=['pydbml', 'pydbml.classes', 'pydbml.definitions', 'pydbml.parser'],
     license='MIT',
     platforms='any',
     install_requires=[
