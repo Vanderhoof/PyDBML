@@ -1,3 +1,7 @@
+# 1.0.1
+
+- Fixed setup.py, thanks to @vosskj03.
+
 # 1.0.0
 
 - New project architecture, full support for creating and editing DBML. See details in [Upgrading to PyDBML 1.0.0](docs/upgrading.md)
