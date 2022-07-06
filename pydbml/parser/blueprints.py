@@ -205,6 +205,7 @@ class TableBlueprint(Blueprint):
         result = []
         for col in self.columns:
             for ref_bp in col.ref_blueprints or []:
+                ref_bp.schema1 = self.schema
                 ref_bp.table1 = self.name
                 ref_bp.col1 = col.name
                 result.append(ref_bp)
