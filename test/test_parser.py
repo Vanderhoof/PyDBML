@@ -68,6 +68,7 @@ Table core.fk_tbl {
         self.assertEqual(ref.schema1, fk_tble.schema)
         self.assertEqual(ref.schema2, pk_tbl.schema)
 
+
 class TestRefs(TestCase):
     def test_reference_aliases(self):
         results = PyDBML.parse_file(TEST_DATA_PATH / 'relationships_aliases.dbml')
@@ -124,3 +125,124 @@ class TestPyDBMLParser(TestCase):
             p.locate_table('myschema', 'test')
         with self.assertRaises(RuntimeError):
             p.parse_blueprint(1, 1, [1])
+
+
+class TestReformatNotes(TestCase):
+    def test_reformat_by_default(self):
+        p = PyDBML(TEST_DATA_PATH / 'notes.dbml')
+
+        for table in p.tables:
+            if table.note:
+                self.assertTrue(table.note.reformat)
+            for col in table.columns:
+                if col.note:
+                    self.assertTrue(col.note.reformat)
+            for index in table.indexes:
+                if index.note:
+                    self.assertTrue(index.note.reformat)
+        for enum in p.enums:
+            for item in enum.items:
+                if item.note:
+                    self.assertTrue(item.note.reformat)
+        self.assertTrue(p.project.note.reformat)
+
+    def test_reformat_off(self):
+        p = PyDBML(TEST_DATA_PATH / 'notes.dbml', reformat_notes=False)
+
+        for table in p.tables:
+            if table.note:
+                self.assertFalse(table.note.reformat)
+            for col in table.columns:
+                if col.note:
+                    self.assertFalse(col.note.reformat)
+            for index in table.indexes:
+                if index.note:
+                    self.assertFalse(index.note.reformat)
+        for enum in p.enums:
+            for item in enum.items:
+                if item.note:
+                    self.assertFalse(item.note.reformat)
+        self.assertFalse(p.project.note.reformat)
+
+    def test_note_is_idempotent(self):
+        dbml_source = """
+Table test {
+    id integer
+    Note {
+        '''
+        Indented note which is actually a Markdown formated string:
+        
+        - List item 1
+        - Another list item
+        
+        ```python
+        def test():
+              print('Hello world!')
+              return 1
+        ```
+        '''
+    }
+}
+"""
+        source_text = \
+"""Indented note which is actually a Markdown formated string:
+
+- List item 1
+- Another list item
+
+```python
+def test():
+      print('Hello world!')
+      return 1
+```"""
+        p = PyDBML(dbml_source)
+        note = p.tables[0].note
+        self.assertEqual(source_text, note.text)
+
+        p_mod = p
+        for _ in range(10):
+            p_mod = PyDBML(p_mod.dbml)
+            note2 = p_mod.tables[0].note
+            self.assertEqual(source_text, note2.text)
+
+
+    def test_unformatted_note_is_idempotent(self):
+        dbml_source = """
+Table test {
+    id integer
+    Note {
+        '''
+        Indented note which is actually a Markdown formated string:
+        
+        - List item 1
+        - Another list item
+        
+        ```python
+        def test():
+              print('Hello world!')
+              return 1
+        ```
+        '''
+    }
+}
+"""
+        source_text = \
+"""Indented note which is actually a Markdown formated string:
+
+- List item 1
+- Another list item
+
+```python
+def test():
+      print('Hello world!')
+      return 1
+```"""
+        p = PyDBML(dbml_source, reformat_notes=False)
+        note = p.tables[0].note
+        self.assertEqual(source_text, note.text)
+
+        p_mod = p
+        for _ in range(10):
+            p_mod = PyDBML(p_mod.dbml, reformat_notes=False)
+            note2 = p_mod.tables[0].note
+            self.assertEqual(source_text, note2.text)

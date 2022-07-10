@@ -214,7 +214,7 @@ class TestDocs(TestCase):
         project = results.project
 
         self.assertEqual(project.name, 'DBML')
-        self.assertTrue(project.note.text.startswith('\n    # DBML - Database Markup Language\n    DBML'))
+        self.assertTrue(project.note.text.startswith('# DBML - Database Markup Language\nDBML'))
 
     def test_column_notes(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'column_notes.dbml')

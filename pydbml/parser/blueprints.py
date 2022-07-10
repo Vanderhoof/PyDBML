@@ -30,7 +30,11 @@ class NoteBlueprint(Blueprint):
     text: str
 
     def build(self) -> 'Note':
-        return Note(self.text)
+        if self.parser:
+            reformat = self.parser.options['reformat_notes']
+            return Note(self.text, reformat=reformat)
+        else:
+            return Note(self.text)
 
 
 @dataclass
