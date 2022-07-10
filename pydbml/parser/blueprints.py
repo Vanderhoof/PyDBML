@@ -19,6 +19,8 @@ from pydbml.classes import Table
 from pydbml.classes import TableGroup
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
+from pydbml.tools import remove_indentation
+from pydbml.tools import strip_empty_lines
 
 
 class Blueprint:
@@ -30,11 +32,13 @@ class NoteBlueprint(Blueprint):
     text: str
 
     def build(self) -> 'Note':
+        text = strip_empty_lines(self.text)
+        text = remove_indentation(text)
         if self.parser:
             reformat = self.parser.options['reformat_notes']
-            return Note(self.text, reformat=reformat)
+            return Note(text, reformat=reformat)
         else:
-            return Note(self.text)
+            return Note(text)
 
 
 @dataclass

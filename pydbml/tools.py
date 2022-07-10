@@ -35,13 +35,29 @@ def remove_bom(source: str) -> str:
         source = source[1:]
     return source
 
-def remove_indentation(source: str) -> str:
-    pattern = re.compile(r'(?<=\n)\s*')
-    spaces = pattern.findall(f'\n{source}')
-    if not spaces:
-        return source
-    indent = min(map(len, spaces))
+
+def strip_empty_lines(source: str) -> str:
+    """Remove empty lines or lines with just spaces from beginning and end."""
+    first_line = 0
     lines = source.split('\n')
+    last_line = len(lines) - 1
+    while not lines[first_line] or lines[first_line].isspace():
+        first_line += 1
+    while not lines[last_line] or lines[last_line].isspace():
+        last_line -= 1
+    return '\n'.join(lines[first_line: last_line + 1])
+
+
+def remove_indentation(source: str) -> str:
+    pattern = re.compile(r'^\s*')
+
+    lines = source.split('\n')
+    spaces = []
+    for line in lines:
+        if line and not line.isspace():
+            spaces.append(len(pattern.search(line).group()))
+
+    indent = min(spaces)
     lines = [l[indent:] for l in lines]
     return '\n'.join(lines)
 
@@ -53,10 +69,10 @@ def reformat_note_text(source: str, spaces=4) -> str:
     if '\n' not in source and len(source) <= 90:
         return f"'{source}'"
 
-    # text = source.strip('\n')
     lines = []
     line = ''
-    for word in source.split(' '):
+    text = remove_indentation(source.strip('\n'))
+    for word in text.split(' '):
         if len(line) > 80:
             lines.append(line)
             line = ''
@@ -73,5 +89,5 @@ def reformat_note_text(source: str, spaces=4) -> str:
         lines.append(line)
     result = '\n'.join(lines).rstrip()
     result = f"'''\n{result}\n'''"
-    # result = indent((result))
+
     return f'{result}'

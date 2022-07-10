@@ -170,7 +170,7 @@ Table test {
     id integer
     Note {
         '''
-        Indented note which is actually a Markdown formated string:
+        Indented note which is actually a Markdown formatted string:
         
         - List item 1
         - Another list item
@@ -185,7 +185,7 @@ Table test {
 }
 """
         source_text = \
-"""Indented note which is actually a Markdown formated string:
+"""Indented note which is actually a Markdown formatted string:
 
 - List item 1
 - Another list item
@@ -212,7 +212,7 @@ Table test {
     id integer
     Note {
         '''
-        Indented note which is actually a Markdown formated string:
+        Indented note which is actually a Markdown formatted string:
         
         - List item 1
         - Another list item
@@ -227,7 +227,7 @@ Table test {
 }
 """
         source_text = \
-"""Indented note which is actually a Markdown formated string:
+"""Indented note which is actually a Markdown formatted string:
 
 - List item 1
 - Another list item
