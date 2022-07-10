@@ -9,12 +9,11 @@ from pydbml.tools import indent
 class Note(SQLObject):
     def __init__(self, text: Any, reformat: bool = True):
         if isinstance(text, Note):
-            raw_text = text.text
+            self.text = text.text
             self.reformat = text.reformat
         else:
-            raw_text = str(text) if text else ''
+            self.text = str(text) if text else ''
             self.reformat = reformat
-        self.text = remove_indentation(raw_text.strip('\n'))
 
     def __str__(self):
         '''
