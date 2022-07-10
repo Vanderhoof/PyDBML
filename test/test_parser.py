@@ -47,6 +47,26 @@ class TestParser(TestCase):
         self.assertEqual(r[4].col2[0].table.name, 'merchants')
         self.assertEqual(r[4].col2[0].name, 'id')
 
+    def test_inline_refs_schema(self) -> None:
+        # Thanks @jens-koster for this example
+        source = '''
+Table core.pk_tbl {
+    pk_col varchar [pk]
+}
+Table core.fk_tbl {
+    fk_col varchar [ref: > core.pk_tbl.pk_col]
+}
+'''
+        p = PyDBMLParser(source)
+        p.parse()
+        r = p.refs
+        pk_tbl = p.tables[0]
+        fk_tble = p.tables[1]
+        ref = p.refs[0]
+        self.assertEqual(ref.table1, fk_tble.name)
+        self.assertEqual(ref.table2, pk_tbl.name)
+        self.assertEqual(ref.schema1, fk_tble.schema)
+        self.assertEqual(ref.schema2, pk_tbl.schema)
 
 class TestRefs(TestCase):
     def test_reference_aliases(self):
