@@ -10,3 +10,4 @@ pydbml.egg-info
 .mypy_cache
 .coverage
 .eggs
+.idea
