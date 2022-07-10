@@ -1,3 +1,7 @@
+# 1.0.2
+
+- Fix: inline ref schema bug, thanks to @jens-koster
+
 # 1.0.1
 
 - Fixed setup.py, thanks to @vosskj03.
