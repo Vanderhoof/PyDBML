@@ -79,14 +79,14 @@ class PyDBML:
         return parser.parse()
 
     @staticmethod
-    def parse_file(file: Union[str, Path, TextIOWrapper]) -> Database:
+    def parse_file(file: Union[str, Path, TextIOWrapper], reformat_notes: bool = True) -> Database:
         if isinstance(file, TextIOWrapper):
             source = file.read()
         else:
             with open(file, encoding='utf8') as f:
                 source = f.read()
         source = remove_bom(source)
-        parser = PyDBMLParser(source)
+        parser = PyDBMLParser(source, reformat_notes=reformat_notes)
         return parser.parse()
 
 
