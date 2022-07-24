@@ -22,6 +22,15 @@ class EnumItem:
         self.note = Note(note)
         self.comment = comment
 
+    @property
+    def note(self):
+        return self._note
+
+    @note.setter
+    def note(self, val: Note) -> None:
+        self._note = val
+        val.parent = self
+
     def __repr__(self):
         '''
         >>> EnumItem('en-US')
