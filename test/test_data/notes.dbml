@@ -1,0 +1,60 @@
+Project "my project" {
+    author: 'me'
+    reason: 'testing'
+    Note: '''
+    # DBML - Database Markup Language
+    DBML (database markup language) is a simple, readable DSL language designed to define database structures.
+
+    ## Benefits
+
+    * It is simple, flexible and highly human-readable
+    * It is database agnostic, focusing on the essential database structure definition without worrying about the detailed syntaxes of each database
+    * Comes with a free, simple database visualiser at [dbdiagram.io](http://dbdiagram.io)
+  '''
+}
+
+Enum "level" {
+    "junior" [note: 'enum item note']
+    "middle"
+    "senior"
+}
+
+Table "orders" [headercolor: #fff] {
+  "id" int [pk, increment]
+  "user_id" int [unique, not null]
+  "status" orders_status [note: "test note"]
+  "created_at" varchar
+  Note: 'Simple one line note'
+}
+
+Table "order_items" {
+  "order_id" int
+  "product_id" int
+  "quantity" int [default: 1]
+  Note: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Doloremque exercitationem facere eos, quod error consectetur.'
+  indexes {
+    order_id [unique, Note: 'Index note']
+    `ROUND(quantity)`
+  }
+}
+
+Table "products" {
+  "id" int [pk]
+  "name" varchar
+  "merchant_id" int [not null]
+  "price" int
+  "status" "product status"
+  "created_at" datetime [default: `now()`]
+  Note {
+  '''Indented note which is actually a Markdown formated string:
+
+      - List item 1
+      - Another list item
+
+      ```[python
+      def test():
+            print('Hello world!')
+            return 1
+      ```'''
+  }
+}

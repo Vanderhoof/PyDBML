@@ -45,8 +45,7 @@ class PyDBML:
     >>> p = PyDBML(Path('test_schema.dbml'))
     '''
 
-    def __new__(cls,
-                source_: Optional[Union[str, Path, TextIOWrapper]] = None):
+    def __new__(cls, source_: Optional[Union[str, Path, TextIOWrapper]] = None):
         if source_ is not None:
             if isinstance(source_, str):
                 source = source_
@@ -96,7 +95,7 @@ class PyDBMLParser:
         self.ref_blueprints: List[ReferenceBlueprint] = []
         self.table_groups: List[TableGroupBlueprint] = []
         self.source = source
-        self.tables: List[TableGroupBlueprint] = []
+        self.tables: List[TableBlueprint] = []
         self.refs: List[ReferenceBlueprint] = []
         self.enums: List[EnumBlueprint] = []
         self.project: Optional[ProjectBlueprint] = None
@@ -149,16 +148,27 @@ class PyDBMLParser:
                 ref_bp.parser = self
             for col_bp in col_bps:
                 col_bp.parser = self
+                if col_bp.note:
+                    col_bp.note.parser = self
             for index_bp in index_bps:
                 index_bp.parser = self
+                if index_bp.note:
+                    index_bp.note.parser = self
+            if blueprint.note:
+                blueprint.note.parser = self
         elif isinstance(blueprint, ReferenceBlueprint):
             self.refs.append(blueprint)
         elif isinstance(blueprint, EnumBlueprint):
             self.enums.append(blueprint)
+            for enum_item in blueprint.items:
+                if enum_item.note:
+                    enum_item.note.parser = self
         elif isinstance(blueprint, TableGroupBlueprint):
             self.table_groups.append(blueprint)
         elif isinstance(blueprint, ProjectBlueprint):
             self.project = blueprint
+            if blueprint.note:
+                blueprint.note.parser = self
         else:
             raise RuntimeError(f'type unknown: {blueprint}')
         blueprint.parser = self

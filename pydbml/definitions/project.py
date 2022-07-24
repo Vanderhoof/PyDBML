@@ -4,6 +4,7 @@ from .common import _
 from .common import _c
 from .common import n
 from .common import note
+from .common import note_object
 from .generic import name
 from .generic import string_literal
 from pydbml.parser.blueprints import NoteBlueprint
@@ -13,7 +14,7 @@ pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 project_field = pp.Group(name + _ + pp.Suppress(':') + _ - string_literal)
 
-project_element = _ + (note | project_field) + _
+project_element = _ + (note | note_object | project_field) + _
 
 project_body = project_element[...]
 
