@@ -61,6 +61,7 @@ def remove_indentation(source: str) -> str:
     lines = [l[indent:] for l in lines]
     return '\n'.join(lines)
 
+
 def reformat_note_text(source: str, spaces=4) -> str:
     """
     Add line breaks at approx 80-90 characters.

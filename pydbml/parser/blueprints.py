@@ -31,9 +31,14 @@ class Blueprint:
 class NoteBlueprint(Blueprint):
     text: str
 
+    def _preformat_text(self) -> str:
+        '''Preformat the note text for idempotence'''
+        result = strip_empty_lines(self.text)
+        result = remove_indentation(result)
+        return result
+
     def build(self) -> 'Note':
-        text = strip_empty_lines(self.text)
-        text = remove_indentation(text)
+        text = self._preformat_text()
         if self.parser:
             reformat = self.parser.options['reformat_notes']
             return Note(text, reformat=reformat)
