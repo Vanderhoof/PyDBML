@@ -39,7 +39,7 @@ class TestColumn(TestCase):
         self.assertEqual(col.pk, pk)
         self.assertEqual(col.autoinc, autoinc)
         self.assertEqual(col.default, default)
-        self.assertEqual(col.note, note)
+        self.assertEqual(col.note.text, note.text)
         self.assertEqual(col.comment, comment)
 
     def test_database_set(self) -> None:
@@ -289,3 +289,9 @@ multiline''']"""
         self.assertEqual(c2.dbml, expected)
         expected = '"client_id" integer'
         self.assertEqual(c1.dbml, expected)
+
+    def test_note_property(self):
+        note1 = Note('column note')
+        c1 = Column(name='client_id', type='integer')
+        c1.note = note1
+        self.assertIs(c1.note.parent, c1)

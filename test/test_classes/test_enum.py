@@ -1,5 +1,6 @@
 from pydbml.classes import Enum
 from pydbml.classes import EnumItem
+from pydbml.classes import Note
 from unittest import TestCase
 
 
@@ -20,6 +21,12 @@ class TestEnumItem(TestCase):
 '''// EnumItem comment
 "en-US" [note: 'preferred']'''
         self.assertEqual(ei.dbml, expected)
+
+    def test_note_property(self):
+        note1 = Note('enum item note')
+        ei = EnumItem('en-US', note='preferred', comment='EnumItem comment')
+        ei.note = note1
+        self.assertIs(ei.note.parent, ei)
 
 
 class TestEnum(TestCase):

@@ -3,6 +3,7 @@ from unittest import TestCase
 from pydbml.classes import Column
 from pydbml.classes import Expression
 from pydbml.classes import Index
+from pydbml.classes import Note
 from pydbml.classes import Table
 from pydbml.exceptions import ColumnNotFoundError
 
@@ -128,3 +129,11 @@ CREATE INDEX ON "products" ("id");'''
 '''// Comment on the index
 (id, `getdate()`) [name: 'Dated id', pk, unique, type: hash, note: 'Note on the column']'''
         self.assertEqual(i.dbml, expected)
+
+    def test_note_property(self):
+        note1 = Note('column note')
+        t = Table('products')
+        c = Column('id', 'integer')
+        i = Index(subjects=[c])
+        i.note = note1
+        self.assertIs(i.note.parent, i)
