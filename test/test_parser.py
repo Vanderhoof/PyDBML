@@ -68,6 +68,7 @@ Table core.fk_tbl {
         self.assertEqual(ref.schema1, fk_tble.schema)
         self.assertEqual(ref.schema2, pk_tbl.schema)
 
+
 class TestRefs(TestCase):
     def test_reference_aliases(self):
         results = PyDBML.parse_file(TEST_DATA_PATH / 'relationships_aliases.dbml')
@@ -124,3 +125,46 @@ class TestPyDBMLParser(TestCase):
             p.locate_table('myschema', 'test')
         with self.assertRaises(RuntimeError):
             p.parse_blueprint(1, 1, [1])
+
+
+class TestNotesIdempotent(TestCase):
+    def test_note_is_idempotent(self):
+        dbml_source = """
+Table test {
+    id integer
+    Note {
+        '''
+        Indented note which is actually a Markdown formatted string:
+        
+        - List item 1
+        - Another list item
+        
+        ```python
+        def test():
+              print('Hello world!')
+              return 1
+        ```
+        '''
+    }
+}
+"""
+        source_text = \
+"""Indented note which is actually a Markdown formatted string:
+
+- List item 1
+- Another list item
+
+```python
+def test():
+      print('Hello world!')
+      return 1
+```"""
+        p = PyDBML(dbml_source)
+        note = p.tables[0].note
+        self.assertEqual(source_text, note.text)
+
+        p_mod = p
+        for _ in range(10):
+            p_mod = PyDBML(p_mod.dbml)
+            note2 = p_mod.tables[0].note
+            self.assertEqual(source_text, note2.text)

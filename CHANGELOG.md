@@ -1,6 +1,8 @@
 # 1.0.2
 
 - Fix: inline ref schema bug, thanks to @jens-koster
+- Fix: notes are not idempotent, thanks @jens-koster for reporting
+- Fix: note objects are now supported in project definition, thanks @jens-koster for reporting
 
 # 1.0.1
 

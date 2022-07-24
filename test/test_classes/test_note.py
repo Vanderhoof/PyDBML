@@ -24,27 +24,14 @@ class TestNote(TestCase):
 }'''
         self.assertEqual(note.dbml, expected)
 
-    def test_multiline(self):
-        note = Note('The number of spaces you use to indent a block string will be the minimum number of leading spaces among all lines. The parser will automatically remove the number of indentation spaces in the final output.')
-        expected = \
-"""Note {
-    '''
-    The number of spaces you use to indent a block string will be the minimum number 
-    of leading spaces among all lines. The parser will automatically remove the number 
-    of indentation spaces in the final output.
-    '''
-}"""
-        self.assertEqual(note.dbml, expected)
-
     def test_forced_multiline(self):
-        note = Note('The number of spaces you use to indent a block string\nwill\nbe the minimum number of leading spaces among all lines. The parser will automatically remove the number of indentation spaces in the final output.')
+        note = Note('The number of spaces you use to indent a block string\nwill\nbe the minimum number of leading spaces among all lines. The parser wont automatically remove the number of indentation spaces in the final output.')
         expected = \
 """Note {
     '''
     The number of spaces you use to indent a block string
     will
-    be the minimum number of leading spaces among all lines. The parser will automatically 
-    remove the number of indentation spaces in the final output.
+    be the minimum number of leading spaces among all lines. The parser wont automatically remove the number of indentation spaces in the final output.
     '''
 }"""
         self.assertEqual(note.dbml, expected)
@@ -54,9 +41,9 @@ class TestNote(TestCase):
         self.assertEqual(note1.sql, '')
         note2 = Note('One line of note text')
         self.assertEqual(note2.sql, '-- One line of note text')
-        note3 = Note('The number of spaces you use to indent a block string\nwill\nbe the minimum number of leading spaces among all lines. The parser will automatically remove the number of indentation spaces in the final output.')
+        note3 = Note('The number of spaces you use to indent a block string\nwill\nbe the minimum number of leading spaces among all lines. The parser wont automatically remove the number of indentation spaces in the final output.')
         expected = \
 """-- The number of spaces you use to indent a block string
 -- will
--- be the minimum number of leading spaces among all lines. The parser will automatically remove the number of indentation spaces in the final output."""
+-- be the minimum number of leading spaces among all lines. The parser wont automatically remove the number of indentation spaces in the final output."""
         self.assertEqual(note3.sql, expected)
