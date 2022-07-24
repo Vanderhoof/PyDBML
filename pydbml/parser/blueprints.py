@@ -39,11 +39,7 @@ class NoteBlueprint(Blueprint):
 
     def build(self) -> 'Note':
         text = self._preformat_text()
-        if self.parser:
-            reformat = self.parser.options['reformat_notes']
-            return Note(text, reformat=reformat)
-        else:
-            return Note(text)
+        return Note(text)
 
 
 @dataclass
