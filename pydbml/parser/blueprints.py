@@ -279,7 +279,7 @@ class TableGroupBlueprint(Blueprint):
         items = []
         for table_name in self.items:
             components = table_name.split('.')
-            schema, table = components if len(components) == 2 else 'public', components[0]
+            schema, table = components if len(components) == 2 else ('public', components[0])
             items.append(self.parser.locate_table(schema, table))
         return TableGroup(
             name=self.name,
