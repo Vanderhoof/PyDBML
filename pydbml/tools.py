@@ -63,7 +63,7 @@ def remove_indentation(source: str) -> str:
 
 def reformat_note_text(source: str, spaces=4) -> str:
     """
-    Add line breaks at approx 80-90 characters, indent text.
+    Add line breaks at approx 80-90 characters.
     If source is less than 90 characters and has no line breaks, leave it unchanged.
     """
     if '\n' not in source and len(source) <= 90:
