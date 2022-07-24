@@ -1,4 +1,3 @@
 - schema.add and .delete to support multiple arguments (handle errors properly)
-- add docstrings
-- comment class
-- add CI
+- support escape sequences in multiline strings
+- support 2.4.2 (many to many relationships)
