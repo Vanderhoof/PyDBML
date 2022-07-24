@@ -1,19 +1,18 @@
 from typing import Any
 
 from .base import SQLObject
-from pydbml.tools import reformat_note_text
-from pydbml.tools import remove_indentation
+# from pydbml.tools import reformat_note_text
+# from pydbml.tools import remove_indentation
 from pydbml.tools import indent
 
 
 class Note(SQLObject):
-    def __init__(self, text: Any, reformat: bool = True):
+    def __init__(self, text: Any):
+        self.text: str
         if isinstance(text, Note):
             self.text = text.text
-            self.reformat = text.reformat
         else:
             self.text = str(text) if text else ''
-            self.reformat = reformat
 
     def __str__(self):
         '''
@@ -43,13 +42,10 @@ class Note(SQLObject):
 
     @property
     def dbml(self):
-        if self.reformat:
-            note_text = reformat_note_text(self.text)
+        if '\n' in self.text:
+            note_text = f"'''\n{self.text}\n'''"
         else:
-            if '\n' in self.text:
-                note_text = f"'''\n{self.text}'''"
-            else:
-                note_text = f"'{self.text}'"
+            note_text = f"'{self.text}'"
 
         note_text = indent(note_text)
         result = f'Note {{\n{note_text}\n}}'

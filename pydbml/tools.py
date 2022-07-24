@@ -55,7 +55,9 @@ def remove_indentation(source: str) -> str:
     spaces = []
     for line in lines:
         if line and not line.isspace():
-            spaces.append(len(pattern.search(line).group()))
+            indent_match = pattern.search(line)
+            if indent_match is not None:  # this is just for you mypy
+                spaces.append(len(indent_match[0]))
 
     indent = min(spaces)
     lines = [l[indent:] for l in lines]
@@ -64,6 +66,8 @@ def remove_indentation(source: str) -> str:
 
 def reformat_note_text(source: str, spaces=4) -> str:
     """
+    Currently not used.
+
     Add line breaks at approx 80-90 characters.
     If source is less than 90 characters and has no line breaks, leave it unchanged.
     """

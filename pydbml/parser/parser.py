@@ -45,9 +45,7 @@ class PyDBML:
     >>> p = PyDBML(Path('test_schema.dbml'))
     '''
 
-    def __new__(cls,
-                source_: Optional[Union[str, Path, TextIOWrapper]] = None,
-                reformat_notes: bool = True):
+    def __new__(cls, source_: Optional[Union[str, Path, TextIOWrapper]] = None):
         if source_ is not None:
             if isinstance(source_, str):
                 source = source_
@@ -60,7 +58,7 @@ class PyDBML:
                 raise TypeError('Source must be str, path or file stream')
 
             source = remove_bom(source)
-            return cls.parse(source, reformat_notes)
+            return cls.parse(source)
         else:
             return super().__new__(cls)
 
@@ -73,30 +71,27 @@ class PyDBML:
         return "<PyDBML>"
 
     @staticmethod
-    def parse(text: str, reformat_notes: bool = True) -> Database:
+    def parse(text: str) -> Database:
         text = remove_bom(text)
-        parser = PyDBMLParser(text, reformat_notes)
+        parser = PyDBMLParser(text)
         return parser.parse()
 
     @staticmethod
-    def parse_file(file: Union[str, Path, TextIOWrapper], reformat_notes: bool = True) -> Database:
+    def parse_file(file: Union[str, Path, TextIOWrapper]) -> Database:
         if isinstance(file, TextIOWrapper):
             source = file.read()
         else:
             with open(file, encoding='utf8') as f:
                 source = f.read()
         source = remove_bom(source)
-        parser = PyDBMLParser(source, reformat_notes=reformat_notes)
+        parser = PyDBMLParser(source)
         return parser.parse()
 
 
 class PyDBMLParser:
-    def __init__(self, source: str, reformat_notes: bool = True):
+    def __init__(self, source: str):
         self.database = None
 
-        self.options = {
-            'reformat_notes': reformat_notes
-        }
         self.ref_blueprints: List[ReferenceBlueprint] = []
         self.table_groups: List[TableGroupBlueprint] = []
         self.source = source
