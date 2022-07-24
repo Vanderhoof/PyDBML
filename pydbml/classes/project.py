@@ -28,6 +28,15 @@ class Project:
         return f'<Project {self.name!r}>'
 
     @property
+    def note(self):
+        return self._note
+
+    @note.setter
+    def note(self, val: Note) -> None:
+        self._note = val
+        val.parent = self
+
+    @property
     def dbml(self):
         result = comment_to_dbml(self.comment) if self.comment else ''
         result += f'Project "{self.name}" {{\n'

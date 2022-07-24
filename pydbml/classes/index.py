@@ -39,6 +39,15 @@ class Index(SQLObject):
         self.comment = comment
 
     @property
+    def note(self):
+        return self._note
+
+    @note.setter
+    def note(self, val: Note) -> None:
+        self._note = val
+        val.parent = self
+
+    @property
     def subject_names(self):
         '''
         Returns updated list of subject names.

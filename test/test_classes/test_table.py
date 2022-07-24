@@ -464,3 +464,9 @@ Table "products" as "pd" {
     }
 }"""
         self.assertEqual(t.dbml, expected)
+
+    def test_note_property(self):
+        note1 = Note('table note')
+        t = Table(name='test')
+        t.note = note1
+        self.assertIs(t.note.parent, t)

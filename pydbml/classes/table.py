@@ -53,6 +53,15 @@ class Table(SQLObject):
         self.comment = comment
 
     @property
+    def note(self):
+        return self._note
+
+    @note.setter
+    def note(self, val: Note) -> None:
+        self._note = val
+        val.parent = self
+
+    @property
     def full_name(self) -> str:
         return f'{self.schema}.{self.name}'
 
@@ -199,9 +208,7 @@ class Table(SQLObject):
         result += '\n'.join(components)
 
         if self.note:
-            quoted_note = f"'{self.note.text}'"
-            note_sql = f'COMMENT ON TABLE "{self.name}" IS {quoted_note};'
-            result += f'\n\n{note_sql}'
+            result += f'\n\n{self.note.sql}'
 
         for col in self.columns:
             if col.note:

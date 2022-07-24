@@ -45,6 +45,15 @@ class Column(SQLObject):
         self.default = default
         self.table: Optional['Table'] = None
 
+    @property
+    def note(self):
+        return self._note
+
+    @note.setter
+    def note(self, val: Note) -> None:
+        self._note = val
+        val.parent = self
+
     def get_refs(self) -> List['Reference']:
         '''
         get all references related to this column (where this col is col1 in)
