@@ -8,7 +8,6 @@ from .base import SQLObject
 from .column import Column
 from .index import Index
 from .note import Note
-from .reference import Reference
 from pydbml.constants import MANY_TO_ONE
 from pydbml.constants import ONE_TO_MANY
 from pydbml.constants import ONE_TO_ONE
@@ -22,6 +21,7 @@ from pydbml.tools import indent
 
 if TYPE_CHECKING:  # pragma: no cover
     from pydbml.database import Database
+    from .reference import Reference
 
 
 class Table(SQLObject):
@@ -37,7 +37,8 @@ class Table(SQLObject):
                  indexes: Optional[Iterable[Index]] = None,
                  note: Optional[Union['Note', str]] = None,
                  header_color: Optional[str] = None,
-                 comment: Optional[str] = None):
+                 comment: Optional[str] = None,
+                 abstract: bool = False):
         self.database: Optional[Database] = None
         self.name = name
         self.schema = schema
@@ -51,6 +52,7 @@ class Table(SQLObject):
         self.note = Note(note)
         self.header_color = header_color
         self.comment = comment
+        self.abstract = abstract
 
     @property
     def note(self):
@@ -64,6 +66,9 @@ class Table(SQLObject):
     @property
     def full_name(self) -> str:
         return f'{self.schema}.{self.name}'
+
+    def _has_composite_pk(self) -> bool:
+        return sum(c.pk for c in self.columns) > 1
 
     def add_column(self, c: Column) -> None:
         '''
@@ -110,15 +115,17 @@ class Table(SQLObject):
             self.indexes[i].table = None
             return self.indexes.pop(i)
 
-    def get_refs(self) -> List[Reference]:
+    def get_refs(self) -> List['Reference']:
         if not self.database:
             raise UnknownDatabaseError('Database for the table is not set')
         return [ref for ref in self.database.refs if ref.table1 == self]
 
-    def _get_references_for_sql(self) -> List[Reference]:
+    def _get_references_for_sql(self) -> List['Reference']:
         '''
         return inline references for this table sql definition
         '''
+        if self.abstract:
+            return []
         if not self.database:
             raise UnknownDatabaseError(f'Database for the table {self} is not set')
         result = []
@@ -200,6 +207,12 @@ class Table(SQLObject):
         body.extend(indent(c.sql, 2) for c in self.columns)
         body.extend(indent(i.sql, 2) for i in self.indexes if i.pk)
         body.extend(indent(r.sql, 2) for r in self._get_references_for_sql())
+
+        if self._has_composite_pk():
+            body.append(
+                "  PRIMARY KEY ("
+                + ', '.join(f'"{c.name}"' for c in self.columns if c.pk)
+                + ')')
         components.append(',\n'.join(body))
         components.append(');')
         components.extend('\n' + i.sql for i in self.indexes if not i.pk)

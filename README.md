@@ -2,7 +2,7 @@
 
 # DBML parser for Python
 
-*Compliant with DBML **v2.4.1** syntax*
+*Compliant with DBML **v2.4.2** syntax*
 
 PyDBML is a Python parser and builder for [DBML](https://www.dbml.org) syntax. 
 

@@ -242,6 +242,27 @@ CREATE TABLE "products" (
 );'''
         self.assertEqual(t.sql, expected)
 
+    def test_composite_pk_sql(self):
+        table = Table(
+            'products',
+            columns=(
+                Column('id', 'integer', pk=True),
+                Column('name', 'varchar2', pk=True),
+                Column('prop', 'object', pk=True),
+            )
+        )
+        s = Database()
+        s.add(table)
+
+        expected = \
+'''CREATE TABLE "products" (
+  "id" integer,
+  "name" varchar2,
+  "prop" object,
+  PRIMARY KEY ("id", "name", "prop")
+);'''
+        self.assertEqual(table.sql, expected)
+
     def test_add_column(self) -> None:
         t = Table('products')
         c1 = Column('id', 'integer')

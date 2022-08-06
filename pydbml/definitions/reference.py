@@ -9,7 +9,7 @@ from pydbml.parser.blueprints import ReferenceBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
-relation = pp.oneOf("> - <")
+relation = pp.oneOf("> - < <>")
 
 col_name = (
     (

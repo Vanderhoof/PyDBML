@@ -115,6 +115,85 @@ ALTER TABLE "products" ADD CONSTRAINT "country_name" FOREIGN KEY ("name", "count
 
         self.assertEqual(ref.sql, expected)
 
+    def test_many_to_many_sql_simple(self) -> None:
+        t1 = Table('books')
+        c11 = Column('id', 'integer', pk=True)
+        c12 = Column('author', 'varchar')
+        t1.add_column(c11)
+        t1.add_column(c12)
+        t2 = Table('authors')
+        c21 = Column('id', 'integer', pk=True)
+        c22 = Column('name', 'varchar')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = Reference('<>', c11, c21)
+
+        expected = \
+'''CREATE TABLE "books_authors" (
+  "books_id" integer NOT NULL,
+  "authors_id" integer NOT NULL,
+  PRIMARY KEY ("books_id", "authors_id")
+);
+
+ALTER TABLE "books_authors" ADD FOREIGN KEY ("books_id") REFERENCES "books" ("id");
+
+ALTER TABLE "books_authors" ADD FOREIGN KEY ("authors_id") REFERENCES "authors" ("id");'''
+        self.assertEqual(expected, ref.sql)
+
+    def test_many_to_many_sql_composite(self) -> None:
+        t1 = Table('books')
+        c11 = Column('id', 'integer', pk=True)
+        c12 = Column('author', 'varchar')
+        t1.add_column(c11)
+        t1.add_column(c12)
+        t2 = Table('authors')
+        c21 = Column('id', 'integer', pk=True)
+        c22 = Column('name', 'varchar')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = Reference('<>', [c11, c12], [c21, c22])
+
+        expected = \
+'''CREATE TABLE "books_authors" (
+  "books_id" integer NOT NULL,
+  "books_author" varchar NOT NULL,
+  "authors_id" integer NOT NULL,
+  "authors_name" varchar NOT NULL,
+  PRIMARY KEY ("books_id", "books_author", "authors_id", "authors_name")
+);
+
+ALTER TABLE "books_authors" ADD FOREIGN KEY ("books_id", "books_author") REFERENCES "books" ("id", "author");
+
+ALTER TABLE "books_authors" ADD FOREIGN KEY ("authors_id", "authors_name") REFERENCES "authors" ("id", "name");'''
+        self.assertEqual(expected, ref.sql)
+
+    def test_many_to_many_sql_composite_different_schemas(self) -> None:
+        t1 = Table('books', schema="schema1")
+        c11 = Column('id', 'integer', pk=True)
+        c12 = Column('author', 'varchar')
+        t1.add_column(c11)
+        t1.add_column(c12)
+        t2 = Table('authors', schema="schema2")
+        c21 = Column('id', 'integer', pk=True)
+        c22 = Column('name', 'varchar')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = Reference('<>', [c11, c12], [c21, c22])
+
+        expected = \
+'''CREATE TABLE "books_authors" (
+  "books_id" integer NOT NULL,
+  "books_author" varchar NOT NULL,
+  "authors_id" integer NOT NULL,
+  "authors_name" varchar NOT NULL,
+  PRIMARY KEY ("books_id", "books_author", "authors_id", "authors_name")
+);
+
+ALTER TABLE "books_authors" ADD FOREIGN KEY ("books_id", "books_author") REFERENCES "schema1"."books" ("id", "author");
+
+ALTER TABLE "books_authors" ADD FOREIGN KEY ("authors_id", "authors_name") REFERENCES "schema2"."authors" ("id", "name");'''
+        self.assertEqual(expected, ref.sql)
+
     def test_dbml_simple(self):
         t = Table('products')
         c1 = Column('id', 'integer')
