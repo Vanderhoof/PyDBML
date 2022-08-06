@@ -14,6 +14,8 @@ PyDBML is a Python parser and builder for [DBML](https://www.dbml.org) syntax.
 * [Creating DBML schema](docs/creating_schema.md)
 * [Upgrading to PyDBML 1.0.0](docs/upgrading.md)
 
+> PyDBML requires Python v3.8 or higher
+
 ## Installation
 
 You can install PyDBML using pip:
