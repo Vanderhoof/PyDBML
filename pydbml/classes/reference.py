@@ -1,20 +1,24 @@
 from typing import Collection
 from typing import Literal
+from typing import List
 from typing import Optional
-from typing import Union
 from typing import TYPE_CHECKING
+from typing import Union
+from itertools import chain
 
-from .base import SQLObject
-from .column import Column
 from pydbml.constants import MANY_TO_ONE
+from pydbml.constants import MANY_TO_MANY
+from pydbml.constants import ONE_TO_MANY
 from pydbml.constants import ONE_TO_ONE
 from pydbml.exceptions import DBMLError
 from pydbml.exceptions import TableNotFoundError
 from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
+from .base import SQLObject
+from .column import Column
 
-if TYPE_CHECKING:  # pragma: no cover
-    from .table import Table
+# if TYPE_CHECKING:  # pragma: no cover
+from .table import Table
 
 
 class Reference(SQLObject):
@@ -26,7 +30,7 @@ class Reference(SQLObject):
     required_attributes = ('type', 'col1', 'col2')
 
     def __init__(self,
-                 type: Literal['>', '<', '-'],
+                 type: Literal['>', '<', '-', '<>'],
                  col1: Union[Column, Collection[Column]],
                  col2: Union[Column, Collection[Column]],
                  name: Optional[str] = None,
@@ -43,6 +47,20 @@ class Reference(SQLObject):
         self.on_update = on_update
         self.on_delete = on_delete
         self.inline = inline
+
+    @property
+    def join_table(self) -> Optional['Table']:
+        if self.type != MANY_TO_MANY:
+            return
+
+        return Table(
+            name=f'{self.table1.name}_{self.table2.name}',
+            columns=(
+                Column(name=f'{c.table.name}_{c.name}', type=c.type, not_null=True, pk=True)
+                for c in chain(self.col1, self.col2)
+            ),
+            abstract=True
+        )
 
     @property
     def table1(self) -> Optional['Table']:
@@ -101,8 +119,47 @@ class Reference(SQLObject):
         if self.table2 is None:
             raise TableNotFoundError('Table on col2 is not set')
 
+    def _generate_inline_sql(self, source_col: List['Column'], ref_col: List['Column']) -> str:
+        result = comment_to_sql(self.comment) if self.comment else ''
+        result += (
+            f'{{c}}FOREIGN KEY ({self._col_names(source_col)}) '
+            f'REFERENCES {ref_col[0].table._get_full_name_for_sql()} ({self._col_names(ref_col)})'
+        )
+        if self.on_update:
+            result += f' ON UPDATE {self.on_update.upper()}'
+        if self.on_delete:
+            result += f' ON DELETE {self.on_delete.upper()}'
+        return result
+
+    def _generate_not_inline_sql(self, c1: List['Column'], c2: List['Column']):
+        result = comment_to_sql(self.comment) if self.comment else ''
+        result += (
+            f'ALTER TABLE {c1[0].table._get_full_name_for_sql()} ADD {{c}}FOREIGN KEY ({self._col_names(c1)}) '
+            f'REFERENCES {c2[0].table._get_full_name_for_sql()} ({self._col_names(c2)})'
+        )
+        if self.on_update:
+            result += f' ON UPDATE {self.on_update.upper()}'
+        if self.on_delete:
+            result += f' ON DELETE {self.on_delete.upper()}'
+        return result + ';'
+
+    def _generate_many_to_many_sql(self) -> str:
+        join_table = self.join_table
+        table_sql = join_table.sql
+
+        n = len(self.col1)
+        ref1_sql = self._generate_not_inline_sql(join_table.columns[:n], self.col1)
+        ref2_sql = self._generate_not_inline_sql(join_table.columns[n:], self.col2)
+
+        result = '\n\n'.join((table_sql, ref1_sql, ref2_sql))
+        return result.format(c='')
+
+    @staticmethod
+    def _col_names(cols: List[Column]) -> str:
+        return ', '.join(f'"{c.name}"' for c in cols)
+
     @property
-    def sql(self):
+    def sql(self) -> str:
         '''
         Returns SQL of the reference:
 
@@ -111,55 +168,28 @@ class Reference(SQLObject):
         '''
         self.check_attributes_for_sql()
         self._validate_for_sql()
-        c = f'CONSTRAINT "{self.name}" ' if self.name else ''
 
+        if self.type == MANY_TO_MANY:
+            return self._generate_many_to_many_sql()
+
+        result = ''
         if self.inline:
             if self.type in (MANY_TO_ONE, ONE_TO_ONE):
-                source_col = self.col1
-                ref_table = self.table2
-                ref_col = self.col2
-            else:
-                source_col = self.col2
-                ref_table = self.table1
-                ref_col = self.col1
-
-            cols = '", "'.join(c.name for c in source_col)
-            ref_cols = '", "'.join(c.name for c in ref_col)
-            result = comment_to_sql(self.comment) if self.comment else ''
-            result += (
-                f'{c}FOREIGN KEY ("{cols}") '
-                f'REFERENCES {ref_table._get_full_name_for_sql()} ("{ref_cols}")'
-            )
-            if self.on_update:
-                result += f' ON UPDATE {self.on_update.upper()}'
-            if self.on_delete:
-                result += f' ON DELETE {self.on_delete.upper()}'
-            return result
+                result = self._generate_inline_sql(self.col1, self.col2)
+            elif self.type == ONE_TO_MANY:
+                result = self._generate_inline_sql(self.col2, self.col1)
         else:
             if self.type in (MANY_TO_ONE, ONE_TO_ONE):
-                t1 = self.table1
-                c1 = ', '.join(f'"{c.name}"' for c in self.col1)
-                t2 = self.table2
-                c2 = ', '.join(f'"{c.name}"' for c in self.col2)
-            else:
-                t1 = self.table2
-                c1 = ', '.join(f'"{c.name}"' for c in self.col2)
-                t2 = self.table1
-                c2 = ', '.join(f'"{c.name}"' for c in self.col1)
+                result = self._generate_not_inline_sql(c1=self.col1, c2=self.col2)
+            elif self.type == ONE_TO_MANY:
+                result = self._generate_not_inline_sql(c1=self.col2, c2=self.col1)
 
-            result = comment_to_sql(self.comment) if self.comment else ''
-            result += (
-                f'ALTER TABLE {t1._get_full_name_for_sql()} ADD {c}FOREIGN KEY ({c1}) '
-                f'REFERENCES {t2._get_full_name_for_sql()} ({c2})'
-            )
-            if self.on_update:
-                result += f' ON UPDATE {self.on_update.upper()}'
-            if self.on_delete:
-                result += f' ON DELETE {self.on_delete.upper()}'
-            return result + ';'
+        c = f'CONSTRAINT "{self.name}" ' if self.name else ''
+
+        return result.format(c=c)
 
     @property
-    def dbml(self):
+    def dbml(self) -> str:
         self._validate_for_sql()
         if self.inline:
             # settings are ignored for inline ref

@@ -52,7 +52,7 @@ class ExpressionBlueprint(Blueprint):
 
 @dataclass
 class ReferenceBlueprint(Blueprint):
-    type: Literal['>', '<', '-']
+    type: Literal['>', '<', '-', '<>']
     inline: bool
     name: Optional[str] = None
     schema1: str = 'public'

@@ -81,7 +81,8 @@ class Column(SQLObject):
         else:
             components.append(str(self.type))
 
-        if self.pk:
+        table_has_composite_pk = False if self.table is None else self.table._has_composite_pk()
+        if self.pk and not table_has_composite_pk:  # comp-PKs are rendered in table sql
             components.append('PRIMARY KEY')
         if self.autoinc:
             components.append('AUTOINCREMENT')

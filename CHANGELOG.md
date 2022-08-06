@@ -1,12 +1,15 @@
 # 1.0.2
 
 - New: "backslash newline" is supported in note text (line continuation)
-- New: notes have reference to their parent. Note.sql now depends on type of parent (for tables and columns it's COMMENT ON clause) 
+- New: notes have reference to their parent. Note.sql now depends on type of parent (for tables and columns it's COMMENT ON clause)
+- New: pydbml no longer splits long notes into multiple lines
 - Fix: inline ref schema bug, thanks to @jens-koster
 - Fix: (#16) notes were not idempotent, thanks @jens-koster for reporting
 - Fix: (#15) note objects were not supported in project definition, thanks @jens-koster for reporting
 - Fix: (#20) schema didn't work in table group definition, thanks @mjfii for reporting
 - Fix: quotes in note text broke sql and dbml
+- New: proper support of composite primary keys without creating an index
+- New: support of many-to-many relationships
 
 # 1.0.1
 

@@ -1,2 +1,1 @@
 - schema.add and .delete to support multiple arguments (handle errors properly)
-- support 2.4.2 (many to many relationships)
