@@ -212,6 +212,29 @@ ALTER TABLE "books_authors" ADD FOREIGN KEY ("authors_id", "authors_name") REFER
         self.assertEqual(ref.join_table.name, 'books_authors')
         self.assertEqual(len(ref.join_table.columns), 4)
 
+    def test_join_table_none(self) -> None:
+        t1 = Table('books')
+        c11 = Column('id', 'integer', pk=True)
+        c12 = Column('author', 'varchar')
+        t1.add_column(c11)
+        t1.add_column(c12)
+        t2 = Table('authors')
+        c21 = Column('id', 'integer', pk=True)
+        c22 = Column('name', 'varchar')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        ref = Reference('<>', [c11], [c21])
+
+        _table1 = ref.table1
+        ref.col1[0].table = None
+        with self.assertRaises(TableNotFoundError):
+            ref.join_table
+
+        ref.col1[0].table = _table1
+        ref.col2[0].table = None
+        with self.assertRaises(TableNotFoundError):
+            ref.join_table
+
     def test_dbml_simple(self):
         t = Table('products')
         c1 = Column('id', 'integer')
