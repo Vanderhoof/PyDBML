@@ -43,7 +43,15 @@ class Reference(SQLObject):
         self.comment = comment
         self.on_update = on_update
         self.on_delete = on_delete
-        self.inline = inline
+        self._inline = inline
+
+    @property
+    def inline(self) -> bool:
+        return self._inline and not self.type == MANY_TO_MANY
+
+    @inline.setter
+    def inline(self, val) -> None:
+        self._inline = val
 
     @property
     def join_table(self) -> Optional['Table']:
