@@ -1,3 +1,7 @@
+# 1.0.3
+
+- Fix: inline many-to-many references were not rendered in sql
+
 # 1.0.2
 
 - New: "backslash newline" is supported in note text (line continuation)
