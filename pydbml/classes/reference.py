@@ -132,7 +132,7 @@ class Reference(SQLObject):
         result = comment_to_sql(self.comment) if self.comment else ''
         result += (
             f'{{c}}FOREIGN KEY ({self._col_names(source_col)}) '  # type: ignore
-            f'REFERENCES {ref_col[0].table._get_full_name_for_sql()} ({self._col_names(ref_col)})'
+            f'REFERENCES {ref_col[0].table._get_full_name_for_sql()} ({self._col_names(ref_col)})'  # type: ignore
         )
         if self.on_update:
             result += f' ON UPDATE {self.on_update.upper()}'
@@ -145,7 +145,7 @@ class Reference(SQLObject):
         result += (
             f'ALTER TABLE {c1[0].table._get_full_name_for_sql()}'  # type: ignore
             f' ADD {{c}}FOREIGN KEY ({self._col_names(c1)})'
-            f' REFERENCES {c2[0].table._get_full_name_for_sql()} ({self._col_names(c2)})'
+            f' REFERENCES {c2[0].table._get_full_name_for_sql()} ({self._col_names(c2)})' # type: ignore
         )
         if self.on_update:
             result += f' ON UPDATE {self.on_update.upper()}'
@@ -234,9 +234,9 @@ class Reference(SQLObject):
             options_str = f' [{", ".join(options)}]' if options else ''
             result += (
                 ' {\n    '  # type: ignore
-                f'{self.table1._get_full_name_for_sql()}.{col1} '
+                f'{self.table1._get_full_name_for_sql()}.{col1} '  # type: ignore
                 f'{self.type} '
-                f'{self.table2._get_full_name_for_sql()}.{col2}'
+                f'{self.table2._get_full_name_for_sql()}.{col2}'  # type: ignore
                 f'{options_str}'
                 '\n}'
             )

@@ -24,9 +24,9 @@ def reorder_tables_for_sql(tables: List['Table'], refs: list['Reference']) -> Li
     references: Dict[str, int] = {}
     for ref in refs:
         if ref.inline:
-            if ref.type == MANY_TO_ONE:
+            if ref.type == MANY_TO_ONE and ref.table1 is not None:
                 table_name = ref.table1.name
-            elif ref.type == ONE_TO_MANY:
+            elif ref.type == ONE_TO_MANY and ref.table2 is not None:
                 table_name = ref.table2.name
             else:
                 continue
