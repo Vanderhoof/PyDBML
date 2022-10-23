@@ -11,6 +11,28 @@ from .classes import Table
 from .classes import TableGroup
 from .exceptions import DatabaseValidationError
 
+from .constants import MANY_TO_ONE, ONE_TO_MANY
+
+
+def reorder_tables_for_sql(tables: List['Table'], refs: list['Reference']) -> List['Table']:
+    """
+    Attempt to reorder the tables, so that they are defined in SQL before they are referenced by
+    inline foreign keys.
+
+    Won't aid the rare cases of cross-references and many-to-many relations.
+    """
+    references: Dict[str: int] = {}
+    for ref in refs:
+        if ref.inline:
+            if ref.type == MANY_TO_ONE:
+                table_name = ref.table1.name
+            elif ref.type == ONE_TO_MANY:
+                table_name = ref.table2.name
+            else:
+                continue
+            references[table_name] = references.get(table_name, 0) + 1
+    return sorted(tables, key=lambda t: references.get(t.name, 0), reverse=True)
+
 
 class Database:
     def __init__(self) -> None:
@@ -185,7 +207,8 @@ class Database:
     def sql(self):
         '''Returs SQL of the parsed results'''
         refs = (ref for ref in self.refs if not ref.inline)
-        components = (i.sql for i in (*self.enums, *self.tables, *refs))
+        tables = reorder_tables_for_sql(self.tables, self.refs)
+        components = (i.sql for i in (*self.enums, *tables, *refs))
         return '\n\n'.join(components)
 
     @property

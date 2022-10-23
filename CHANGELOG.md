@@ -1,3 +1,7 @@
+# 1.0.4
+
+- New: referenced tables in SQL are now defined first in SQL (#23 reported by @minhl)  
+
 # 1.0.3
 
 - Fix: inline many-to-many references were not rendered in sql
