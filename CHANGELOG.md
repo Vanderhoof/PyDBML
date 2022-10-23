@@ -1,6 +1,7 @@
 # 1.0.4
 
 - New: referenced tables in SQL are now defined first in SQL (#23 reported by @minhl)  
+- Fix: single quotes were not escaped in column notes (#24 reported by @fivegrant)
 
 # 1.0.3
 
