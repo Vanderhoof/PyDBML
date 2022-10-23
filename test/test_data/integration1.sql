@@ -4,6 +4,14 @@ CREATE TYPE "level" AS ENUM (
   'senior',
 );
 
+CREATE TABLE "books" (
+  "id" integer PRIMARY KEY AUTOINCREMENT,
+  "title" varchar,
+  "author" varchar,
+  "country_id" integer,
+  CONSTRAINT "Country Reference" FOREIGN KEY ("country_id") REFERENCES "countries" ("id")
+);
+
 CREATE TABLE "Employees" (
   "id" integer PRIMARY KEY AUTOINCREMENT,
   "name" varchar,
@@ -13,14 +21,6 @@ CREATE TABLE "Employees" (
 );
 
 COMMENT ON COLUMN "Employees"."name" IS 'Full employee name';
-
-CREATE TABLE "books" (
-  "id" integer PRIMARY KEY AUTOINCREMENT,
-  "title" varchar,
-  "author" varchar,
-  "country_id" integer,
-  CONSTRAINT "Country Reference" FOREIGN KEY ("country_id") REFERENCES "countries" ("id")
-);
 
 CREATE TABLE "countries" (
   "id" integer PRIMARY KEY AUTOINCREMENT,
