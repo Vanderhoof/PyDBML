@@ -44,9 +44,18 @@ class TestNoteOptionToDBML(TestCase):
         note = Note('one line note')
         self.assertEqual(f"note: 'one line note'", note_option_to_dbml(note))
 
+    def test_oneline_with_quote(self) -> None:
+        note = Note('one line\'d note')
+        self.assertEqual(f"note: 'one line\\'d note'", note_option_to_dbml(note))
+
     def test_multiline(self) -> None:
         note = Note('line1\nline2\nline3')
         expected = "note: '''line1\nline2\nline3'''"
+        self.assertEqual(expected, note_option_to_dbml(note))
+
+    def test_multiline_with_quotes(self) -> None:
+        note = Note('line1\n\'\'\'line2\nline3')
+        expected = "note: '''line1\n\\'''line2\nline3'''"
         self.assertEqual(expected, note_option_to_dbml(note))
 
 

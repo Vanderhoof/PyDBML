@@ -225,7 +225,7 @@ class Table(SQLObject):
 
         for col in self.columns:
             if col.note:
-                quoted_note = f"'{col.note.text}'"
+                quoted_note = f"'{col.note._prepare_text_for_sql()}'"
                 note_sql = f'COMMENT ON COLUMN "{self.name}"."{col.name}" IS {quoted_note};'
                 result += f'\n\n{note_sql}'
         return result
