@@ -21,7 +21,7 @@ def reorder_tables_for_sql(tables: List['Table'], refs: list['Reference']) -> Li
 
     Won't aid the rare cases of cross-references and many-to-many relations.
     """
-    references: Dict[str: int] = {}
+    references: Dict[str, int] = {}
     for ref in refs:
         if ref.inline:
             if ref.type == MANY_TO_ONE:

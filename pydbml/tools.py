@@ -17,11 +17,11 @@ def comment_to_sql(val: str) -> str:
     return comment(val, '--')
 
 
-def note_option_to_dbml(val: 'Note') -> str:
-    if '\n' in val.text:
-        return f"note: '''{val.text}'''"
+def note_option_to_dbml(note: 'Note') -> str:
+    if '\n' in note.text:
+        return f"note: '''{note._prepare_text_for_dbml()}'''"
     else:
-        return f"note: '{val.text}'"
+        return f"note: '{note._prepare_text_for_dbml()}'"
 
 
 def indent(val: str, spaces=4) -> str:
