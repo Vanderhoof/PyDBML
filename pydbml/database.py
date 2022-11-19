@@ -14,7 +14,7 @@ from .exceptions import DatabaseValidationError
 from .constants import MANY_TO_ONE, ONE_TO_MANY
 
 
-def reorder_tables_for_sql(tables: List['Table'], refs: list['Reference']) -> List['Table']:
+def reorder_tables_for_sql(tables: List['Table'], refs: List['Reference']) -> List['Table']:
     """
     Attempt to reorder the tables, so that they are defined in SQL before they are referenced by
     inline foreign keys.
