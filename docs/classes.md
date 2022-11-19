@@ -1,3 +1,15 @@
+
+* [Database](#database)
+* [Table](#table)
+* [Column](#column)
+* [Index](#index)
+* [Reference](#reference)
+* [Enum](#enum)
+* [Note](#note)
+* [Expression](#expression)
+* [Project](#project)
+* [TableGroup](#tablegroup)
+
 # Class Reference
 
 PyDBML classes represent database entities. They live in the `pydbml.classes` package.
