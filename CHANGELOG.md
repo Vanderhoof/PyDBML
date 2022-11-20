@@ -1,3 +1,8 @@
+# 1.0.5
+
+- Fix: junction table now has the schema of the first referenced table (as introduced in DBML 2.4.3)
+- Fix: typing issue which failed for Python 3.8 and Python 3.9
+
 # 1.0.4
 
 - New: referenced tables in SQL are now defined first in SQL (#23 reported by @minhl)  
