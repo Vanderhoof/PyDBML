@@ -181,7 +181,7 @@ ALTER TABLE "books_authors" ADD FOREIGN KEY ("authors_id", "authors_name") REFER
         ref = Reference('<>', [c11, c12], [c21, c22])
 
         expected = \
-'''CREATE TABLE "books_authors" (
+'''CREATE TABLE "schema1"."books_authors" (
   "books_id" integer NOT NULL,
   "books_author" varchar NOT NULL,
   "authors_id" integer NOT NULL,
@@ -189,9 +189,9 @@ ALTER TABLE "books_authors" ADD FOREIGN KEY ("authors_id", "authors_name") REFER
   PRIMARY KEY ("books_id", "books_author", "authors_id", "authors_name")
 );
 
-ALTER TABLE "books_authors" ADD FOREIGN KEY ("books_id", "books_author") REFERENCES "schema1"."books" ("id", "author");
+ALTER TABLE "schema1"."books_authors" ADD FOREIGN KEY ("books_id", "books_author") REFERENCES "schema1"."books" ("id", "author");
 
-ALTER TABLE "books_authors" ADD FOREIGN KEY ("authors_id", "authors_name") REFERENCES "schema2"."authors" ("id", "name");'''
+ALTER TABLE "schema1"."books_authors" ADD FOREIGN KEY ("authors_id", "authors_name") REFERENCES "schema2"."authors" ("id", "name");'''
         self.assertEqual(expected, ref.sql)
 
     def test_join_table(self) -> None:
