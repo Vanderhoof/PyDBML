@@ -1,3 +1,7 @@
+# 1.0.6
+
+- Fix: (#26) bug in note empty line stripping, thanks @Jaschenn for reporting
+
 # 1.0.5
 
 - Fix: junction table now has the schema of the first referenced table (as introduced in DBML 2.4.3)
