@@ -43,6 +43,9 @@ def strip_empty_lines(source: str) -> str:
 
 
 def remove_indentation(source: str) -> str:
+    if not source:
+        return source
+
     pattern = re.compile(r'^\s*')
 
     lines = source.split('\n')

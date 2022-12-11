@@ -1,5 +1,9 @@
 # 1.0.6
 
+- Fix: removing indentation bug
+
+# 1.0.6
+
 - Fix: (#26) bug in note empty line stripping, thanks @Jaschenn for reporting
 - New: get_references_for_sql table method
 
