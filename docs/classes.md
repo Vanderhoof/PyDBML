@@ -116,6 +116,7 @@ When you are creating PyDBML schema from scratch, you have to add each created o
 * **add_index** (i: `Index`) —  add an index to the table,
 * **delete_index** (i: Index or int) — delete an index from the table by Index object or index number.
 * **get_refs** — get list of references, defined for this table.
+* **get_references_for_sql** — get list of references where this table is on the left side of FOREIGN KEY definition in SQL.
 
 ## Column
 
