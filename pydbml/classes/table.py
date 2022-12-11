@@ -120,23 +120,29 @@ class Table(SQLObject):
             raise UnknownDatabaseError('Database for the table is not set')
         return [ref for ref in self.database.refs if ref.table1 == self]
 
-    def _get_references_for_sql(self) -> List['Reference']:
-        '''
-        return inline references for this table sql definition
-        '''
-        if self.abstract:
-            return []
+    def get_references_for_sql(self) -> List['Reference']:
+        """
+        Return all references in the database where this table is on the left side of SQL
+        reference definition.
+        """
         if not self.database:
             raise UnknownDatabaseError(f'Database for the table {self} is not set')
         result = []
         for ref in self.database.refs:
-            if ref.inline:
-                if (ref.type in (MANY_TO_ONE, ONE_TO_ONE)) and\
-                        (ref.table1 == self):
-                    result.append(ref)
-                elif (ref.type == ONE_TO_MANY) and (ref.table2 == self):
-                    result.append(ref)
+            if (ref.type in (MANY_TO_ONE, ONE_TO_ONE)) and\
+                    (ref.table1 == self):
+                result.append(ref)
+            elif (ref.type == ONE_TO_MANY) and (ref.table2 == self):
+                result.append(ref)
         return result
+
+    def _get_references_for_sql(self) -> List['Reference']:
+        '''
+        Return inline references for this table sql definition
+        '''
+        if self.abstract:
+            return []
+        return [r for r in self.get_references_for_sql() if r.inline]
 
     def _get_full_name_for_sql(self) -> str:
         if self.schema == 'public':

@@ -353,6 +353,34 @@ CREATE TABLE "products" (
         self.assertEqual(t._get_references_for_sql(), [r1, r2])
         self.assertEqual(t2._get_references_for_sql(), [r3])
 
+    def test_get_references_for_sql_public(self):
+        t = Table('products')
+        with self.assertRaises(UnknownDatabaseError):
+            t._get_references_for_sql()
+        c11 = Column('id', 'integer')
+        c12 = Column('name', 'varchar2')
+        t.add_column(c11)
+        t.add_column(c12)
+        t2 = Table('names')
+        c21 = Column('id', 'integer')
+        c22 = Column('name_val', 'varchar2')
+        t2.add_column(c21)
+        t2.add_column(c22)
+        s = Database()
+        s.add(t)
+        s.add(t2)
+        r1 = Reference('>', c12, c22, inline=True)
+        r2 = Reference('-', c11, c21, inline=True)
+        r3 = Reference('<', c11, c22, inline=True)
+        s.add(r1)
+        s.add(r2)
+        s.add(r3)
+        self.assertEqual(t.get_references_for_sql(), [r1, r2])
+        self.assertEqual(t2.get_references_for_sql(), [r3])
+        r1.inline = r2.inline = r3.inline = False
+        self.assertEqual(t.get_references_for_sql(), [r1, r2])
+        self.assertEqual(t2.get_references_for_sql(), [r3])
+
     def test_get_refs(self):
         t = Table('products')
         with self.assertRaises(UnknownDatabaseError):
