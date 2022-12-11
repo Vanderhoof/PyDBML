@@ -5,6 +5,7 @@ from pydbml.tools import comment_to_dbml
 from pydbml.tools import comment_to_sql
 from pydbml.tools import indent
 from pydbml.tools import note_option_to_dbml
+from pydbml.tools import strip_empty_lines
 
 
 class TestCommentToDBML(TestCase):
@@ -71,3 +72,30 @@ class TestIndent(TestCase):
         self.assertEqual(indent(source), expected)
         expected2 = '  line1\n  line2\n  line3'
         self.assertEqual(indent(source, 2), expected2)
+
+
+class TestStripEmptyLines(TestCase):
+    def test_empty(self) -> None:
+        source = ''
+        self.assertEqual(strip_empty_lines(source), source)
+
+    def test_no_empty_lines(self) -> None:
+        source = 'line1\n\n\nline2'
+        self.assertEqual(strip_empty_lines(source), source)
+
+    def test_empty_lines(self) -> None:
+        stripped = '   line1\n\n line2'
+        source = f'\n \n   \n\t \t \n  \n{stripped}\n\n\n   \n \t \n\t \n   \n'
+        self.assertEqual(strip_empty_lines(source), stripped)
+
+    def test_one_empty_line(self) -> None:
+        stripped = '   line1\n\n line2'
+        source = f'\n{stripped}'
+        self.assertEqual(strip_empty_lines(source), stripped)
+        source = f'{stripped}\n'
+        self.assertEqual(strip_empty_lines(source), stripped)
+
+    def test_end(self) -> None:
+        stripped = '   line1\n\n line2'
+        source = f'\n{stripped}\n   '
+        self.assertEqual(strip_empty_lines(source), stripped)
