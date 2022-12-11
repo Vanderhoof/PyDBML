@@ -38,14 +38,8 @@ def remove_bom(source: str) -> str:
 
 def strip_empty_lines(source: str) -> str:
     """Remove empty lines or lines with just spaces from beginning and end."""
-    first_line = 0
-    lines = source.split('\n')
-    last_line = len(lines) - 1
-    while not lines[first_line] or lines[first_line].isspace():
-        first_line += 1
-    while not lines[last_line] or lines[last_line].isspace():
-        last_line -= 1
-    return '\n'.join(lines[first_line: last_line + 1])
+    pattern = re.compile(r'^([ \t]*\n)*(?P<content>[\s\S]+?)(\n[ \t]*)*$')
+    return pattern.sub('\g<content>', source)
 
 
 def remove_indentation(source: str) -> str:
