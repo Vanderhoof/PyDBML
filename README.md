@@ -2,11 +2,11 @@
 
 # DBML parser for Python
 
-*Compliant with DBML **v2.4.4** syntax*
+*Compliant with DBML **v2.5.3** syntax*
 
 PyDBML is a Python parser and builder for [DBML](https://www.dbml.org) syntax. 
 
-> The project was rewritten in May 2022, the new version 1.0.0 is not compatible with the previous ones. See details in [Upgrading to PyDBML 1.0.0](docs/upgrading.md).
+> The project was rewritten in May 2022, the new version 1.0.0 is not compatible with versions 0.x.x. See details in [Upgrading to PyDBML 1.0.0](docs/upgrading.md).
 
 **Docs:**
 
