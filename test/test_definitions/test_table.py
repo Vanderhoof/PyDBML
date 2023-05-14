@@ -172,6 +172,24 @@ table ids as ii [
         self.assertEqual(res[0].note.text, 'bodynote')
         self.assertEqual(len(res[0].columns), 1)
 
+    def test_comment_after(self) -> None:
+        val = '''
+// some comment before table
+table ids as ii [
+  headercolor: #ccc,
+  note: "headernote"]
+{
+  id integer
+  note: "bodynote"
+} // some somment after table'''
+        res = table.parse_string(val, parseAll=True)
+        self.assertEqual(res[0].comment, 'some comment before table')
+        self.assertEqual(res[0].name, 'ids')
+        self.assertEqual(res[0].alias, 'ii')
+        self.assertEqual(res[0].header_color, '#ccc')
+        self.assertEqual(res[0].note.text, 'bodynote')
+        self.assertEqual(len(res[0].columns), 1)
+
     def test_with_indexes(self) -> None:
         val = '''
 table ids as ii [

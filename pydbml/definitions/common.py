@@ -20,7 +20,9 @@ _c = (pp.Suppress('\n') | comment('comment_before*'))[...]
 c = comment('comment')[0, 1]
 
 n = pp.LineEnd()
-end = n | pp.StringEnd()
+
+end = comment[...].suppress() + n | pp.StringEnd()
+
 # obligatory newline
 # n = pp.Suppress('\n')[1, ...]
 
