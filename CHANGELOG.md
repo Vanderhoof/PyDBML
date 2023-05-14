@@ -1,3 +1,7 @@
+# 1.0.8
+
+- Fix: (#27) allowing comments after Tables, Enums, etc. Thanks @marktaff for reporting
+
 # 1.0.7
 
 - Fix: removing indentation bug
