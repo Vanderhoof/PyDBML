@@ -118,8 +118,8 @@ class Database:
         if obj in self.enums:
             raise DatabaseValidationError(f'{obj} is already in the database.')
         for enum in self.enums:
-            if enum.name == obj.name:
-                raise DatabaseValidationError(f'Enum {obj.name} is already in the database.')
+            if enum.name == obj.name and enum.schema == obj.schema:
+                raise DatabaseValidationError(f'Enum {obj.schema}.{obj.name} is already in the database.')
 
         self._set_database(obj)
         self.enums.append(obj)
