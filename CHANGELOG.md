@@ -1,3 +1,7 @@
+# 1.0.9
+
+- Fix: enum collision from different schemas. Thanks @ewdurbin for the contribution
+
 # 1.0.8
 
 - Fix: (#27) allowing comments after Tables, Enums, etc. Thanks @marktaff for reporting
