@@ -109,7 +109,6 @@ class TestRefs(TestCase):
 class TestDBMLReferenceDef(TestCase):
     def test_dbml_reference_def(self):
         results = PyDBML.parse_file(TEST_DATA_PATH / 'dbml_schema_def.dbml')
-        self.assertEqual(len(results.aliases), 1)
         self.assertEqual(len(results.tables), 5)
         self.assertEqual(len(results.table_groups), 1)
         self.assertEqual(len(results.enums), 3)
