@@ -33,13 +33,14 @@ class Table(SQLObject):
                  name: str,
                  schema: str = 'public',
                  alias: Optional[str] = None,
+                 database: Optional[Database] = None
                  columns: Optional[Iterable[Column]] = None,
                  indexes: Optional[Iterable[Index]] = None,
                  note: Optional[Union['Note', str]] = None,
                  header_color: Optional[str] = None,
                  comment: Optional[str] = None,
                  abstract: bool = False):
-        self.database: Optional[Database] = None
+        self.database: database
         self.name = name
         self.schema = schema
         self.columns: List[Column] = []
