@@ -9,8 +9,7 @@ from pathlib import Path
 from unittest import TestCase
 
 from pydbml import PyDBML
-from pydbml.classes import Expression
-
+from pydbml.classes import Expression, Enum
 
 TEST_DOCS_PATH = Path(os.path.abspath(__file__)).parent / 'test_data/docs'
 TestCase.maxDiff = None
@@ -227,13 +226,18 @@ class TestDocs(TestCase):
     def test_enum_definition(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'enum_definition.dbml')
         jobs = results['public.jobs']
-        jobs['status'].type == 'job_status'
+        self.assertIsInstance(jobs['status'].type, Enum)
+        self.assertIsInstance(jobs['grade'].type, Enum)
 
-        self.assertEqual(len(results.enums), 1)
-        js = results.enums[0]
+        self.assertEqual(len(results.enums), 2)
+        js, g = results.enums
 
         self.assertEqual(js.name, 'job_status')
         self.assertEqual([ei.name for ei in js.items], ['created', 'running', 'done', 'failure'])
+
+        self.assertEqual(g.name, 'grade')
+        self.assertEqual([ei.name for ei in g.items], ['A+', 'A', 'A-', 'Not Yet Set'])
+
 
     def test_table_group(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'table_group.dbml')
