@@ -5,8 +5,18 @@ enum job_status {
     failure
 }
 
+enum grade {
+    "A+"
+    "A"
+    "A-"
+    "Not Yet Set"
+}
+
+
+
 Table jobs {
     id integer
     status job_status
+    grade grade
 }
 
