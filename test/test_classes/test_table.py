@@ -422,6 +422,24 @@ CREATE TABLE "products" (
 }'''
         self.assertEqual(t.dbml, expected)
 
+    def test_header_color_dbml(self):
+        t = Table('products')
+        t.header_color = '#C84432'
+        c1 = Column('id', 'integer')
+        c2 = Column('name', 'varchar2')
+        t.add_column(c1)
+        t.add_column(c2)
+        s = Database()
+        s.add(t)
+
+        expected = \
+'''Table "products" [headercolor: #C84432] {
+    "id" integer
+    "name" varchar2
+}'''
+        self.assertEqual(t.dbml, expected)
+
+
     def test_schema_dbml(self):
         t = Table('products', schema="myschema")
         c1 = Column('id', 'integer')
