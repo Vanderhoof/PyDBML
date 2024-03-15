@@ -245,6 +245,8 @@ class Table(SQLObject):
         result += f'Table {name} '
         if self.alias:
             result += f'as "{self.alias}" '
+        if self.header_color:
+            result += f'[headercolor: {self.header_color}] '
         result += '{\n'
         columns_str = '\n'.join(c.dbml for c in self.columns)
         result += indent(columns_str) + '\n'
