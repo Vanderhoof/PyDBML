@@ -33,8 +33,8 @@ number_literal = (
 
 # Expression
 
-expr_chars = pp.Word(pp.alphanums + "'`,._+- \n\t")
-expr_chars_no_comma_space = pp.Word(pp.alphanums + "'`._+-")
+expr_chars = pp.Word(pp.alphanums + "\"'`,._+- \n\t")
+expr_chars_no_comma_space = pp.Word(pp.alphanums + "\"'`._+-")
 expression = pp.Forward()
 factor = (
     pp.Word(pp.alphanums + '_')[0, 1] + '(' + expression + ')'
