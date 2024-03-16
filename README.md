@@ -138,7 +138,7 @@ Enum "product status" {
     "In Stock"
 }
 <BLANKLINE>
-Table "orders" {
+Table "orders" [headercolor: #fff] {
     "id" int [pk, increment]
     "user_id" int [unique, not null]
     "status" "orders_status"
