@@ -28,3 +28,7 @@ class DBMLError(Exception):
 
 class DatabaseValidationError(Exception):
     pass
+
+
+class ValidationError(Exception):
+    pass

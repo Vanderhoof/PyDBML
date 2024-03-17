@@ -3,6 +3,7 @@ from unittest.mock import Mock
 
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
+from pydbml.exceptions import ValidationError
 from pydbml.parser.blueprints import TableGroupBlueprint
 
 
@@ -51,3 +52,20 @@ class TestTableGroupBlueprint(TestCase):
         self.assertEqual(locate_table_calls[1].args, ('myschema', 'table2'))
         for i in result.items:
             self.assertIsInstance(i, Table)
+
+    def test_duplicate_table(self) -> None:
+        bp = TableGroupBlueprint(
+            name='TestTableGroup',
+            items=['table1', 'table2', 'table1'],
+            comment='Comment text'
+        )
+
+        parserMock = Mock()
+        parserMock.locate_table.side_effect = [
+            Table(name='table1'),
+            Table(name='table2'),
+            Table(name='table1')
+        ]
+        bp.parser = parserMock
+        with self.assertRaises(ValidationError):
+            bp.build()

@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, Union
 
 from .base import SQLObject
 from pydbml.tools import indent
@@ -7,13 +7,11 @@ from pydbml import classes
 
 
 class Note(SQLObject):
+    dont_compare_fields = ('parent',)
 
-    def __init__(self, text: Any):
+    def __init__(self, text: Any) -> None:
         self.text: str
-        if isinstance(text, Note):
-            self.text = text.text
-        else:
-            self.text = str(text) if text else ''
+        self.text = str(text) if text is not None else ''
         self.parent: Any = None
 
     def __str__(self):

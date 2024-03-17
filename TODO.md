@@ -1,1 +1,0 @@
-- schema.add and .delete to support multiple arguments (handle errors properly)

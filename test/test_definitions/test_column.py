@@ -37,6 +37,11 @@ class TestColumnType(TestCase):
         res = column_type.parse_string(val, parseAll=True)
         self.assertEqual(res[0], val)
 
+    def test_array(self) -> None:
+        val = 'int[]'
+        res = column_type.parse_string(val, parseAll=True)
+        self.assertEqual(res[0], val)
+
     def test_symbols(self) -> None:
         val = '(*#^)'
         with self.assertRaises(ParseException):
