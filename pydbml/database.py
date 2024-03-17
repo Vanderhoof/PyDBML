@@ -4,11 +4,12 @@ from typing import List
 from typing import Optional
 from typing import Union
 
-from .classes import Enum
+from .classes import Enum, Note
 from .classes import Project
 from .classes import Reference
 from .classes import Table
 from .classes import TableGroup
+from .classes.sticky_note import StickyNote
 from .exceptions import DatabaseValidationError
 
 from .constants import MANY_TO_ONE, ONE_TO_MANY
@@ -41,6 +42,7 @@ class Database:
         self.refs: List['Reference'] = []
         self.enums: List['Enum'] = []
         self.table_groups: List['TableGroup'] = []
+        self.sticky_notes: List['StickyNote'] = []
         self.project: Optional['Project'] = None
 
     def __repr__(self) -> str:
@@ -79,6 +81,8 @@ class Database:
             return self.add_table_group(obj)
         elif isinstance(obj, Project):
             return self.add_project(obj)
+        elif isinstance(obj, StickyNote):
+            return self.add_sticky_note(obj)
         else:
             raise DatabaseValidationError(f'Unsupported type {type(obj)}.')
 
@@ -123,6 +127,11 @@ class Database:
 
         self._set_database(obj)
         self.enums.append(obj)
+        return obj
+
+    def add_sticky_note(self, obj: StickyNote) -> StickyNote:
+        self._set_database(obj)
+        self.sticky_notes.append(obj)
         return obj
 
     def add_table_group(self, obj: TableGroup) -> TableGroup:
@@ -216,7 +225,7 @@ class Database:
         '''Generates DBML code out of parsed results'''
         items = [self.project] if self.project else []
         refs = (ref for ref in self.refs if not ref.inline)
-        items.extend((*self.enums, *self.tables, *refs, *self.table_groups))
+        items.extend((*self.enums, *self.tables, *refs, *self.table_groups, *self.sticky_notes))
         components = (
             i.dbml for i in items
         )
