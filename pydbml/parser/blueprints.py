@@ -17,8 +17,10 @@ from pydbml.classes import Project
 from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
+from pydbml.classes.sticky_note import StickyNote
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
+from pydbml.exceptions import ValidationError
 from pydbml.tools import remove_indentation
 from pydbml.tools import strip_empty_lines
 
@@ -40,6 +42,23 @@ class NoteBlueprint(Blueprint):
     def build(self) -> 'Note':
         text = self._preformat_text()
         return Note(text)
+
+
+@dataclass
+class StickyNoteBlueprint(Blueprint):
+    name: str
+    text: str
+
+    def _preformat_text(self) -> str:
+        '''Preformat the note text for idempotence'''
+        result = strip_empty_lines(self.text)
+        result = remove_indentation(result)
+        return result
+
+    def build(self) -> StickyNote:
+        text = self._preformat_text()
+        name = self.name
+        return StickyNote(name=name, text=text)
 
 
 @dataclass
@@ -280,7 +299,10 @@ class TableGroupBlueprint(Blueprint):
         for table_name in self.items:
             components = table_name.split('.')
             schema, table = components if len(components) == 2 else ('public', components[0])
-            items.append(self.parser.locate_table(schema, table))
+            table_obj = self.parser.locate_table(schema, table)
+            if table_obj in items:
+                raise ValidationError(f'Table "{table}" is already in group "{self.name}"')
+            items.append(table_obj)
         return TableGroup(
             name=self.name,
             items=items,

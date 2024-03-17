@@ -21,6 +21,7 @@ class Column(SQLObject):
     '''Class representing table column.'''
 
     required_attributes = ('name', 'type')
+    dont_compare_fields = ('table',)
 
     def __init__(self,
                  name: str,
@@ -44,6 +45,15 @@ class Column(SQLObject):
 
         self.default = default
         self.table: Optional['Table'] = None
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, self.__class__):
+            return False
+        self_table = self.table.full_name if self.table else None
+        other_table = other.table.full_name if other.table else None
+        if self_table != other_table:
+            return False
+        return super().__eq__(other)
 
     @property
     def note(self):

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from io import TextIOWrapper
 from pathlib import Path
 from typing import List
@@ -7,22 +8,22 @@ from typing import Union
 
 import pyparsing as pp
 
-from .blueprints import EnumBlueprint
-from .blueprints import ProjectBlueprint
-from .blueprints import ReferenceBlueprint
-from .blueprints import TableBlueprint
-from .blueprints import TableGroupBlueprint
 from pydbml.classes import Table
 from pydbml.database import Database
 from pydbml.definitions.common import comment
 from pydbml.definitions.enum import enum
 from pydbml.definitions.project import project
 from pydbml.definitions.reference import ref
+from pydbml.definitions.sticky_note import sticky_note
 from pydbml.definitions.table import table
 from pydbml.definitions.table_group import table_group
 from pydbml.exceptions import TableNotFoundError
 from pydbml.tools import remove_bom
-
+from .blueprints import EnumBlueprint, StickyNoteBlueprint
+from .blueprints import ProjectBlueprint
+from .blueprints import ReferenceBlueprint
+from .blueprints import TableBlueprint
+from .blueprints import TableGroupBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
@@ -99,6 +100,7 @@ class PyDBMLParser:
         self.refs: List[ReferenceBlueprint] = []
         self.enums: List[EnumBlueprint] = []
         self.project: Optional[ProjectBlueprint] = None
+        self.sticky_notes: List[StickyNoteBlueprint] = []
 
     def parse(self):
         self._set_syntax()
@@ -120,12 +122,14 @@ class PyDBMLParser:
         enum_expr = enum.copy()
         table_group_expr = table_group.copy()
         project_expr = project.copy()
+        note_expr = sticky_note.copy()
 
         table_expr.addParseAction(self.parse_blueprint)
         ref_expr.addParseAction(self.parse_blueprint)
         enum_expr.addParseAction(self.parse_blueprint)
         table_group_expr.addParseAction(self.parse_blueprint)
         project_expr.addParseAction(self.parse_blueprint)
+        note_expr.addParseAction(self.parse_blueprint)
 
         expr = (
             table_expr
@@ -133,6 +137,7 @@ class PyDBMLParser:
             | enum_expr
             | table_group_expr
             | project_expr
+            | note_expr
         )
         self._syntax = expr[...] + ('\n' | comment)[...] + pp.StringEnd()
 
@@ -169,6 +174,8 @@ class PyDBMLParser:
             self.project = blueprint
             if blueprint.note:
                 blueprint.note.parser = self
+        elif isinstance(blueprint, StickyNoteBlueprint):
+            self.sticky_notes.append(blueprint)
         else:
             raise RuntimeError(f'type unknown: {blueprint}')
         blueprint.parser = self
@@ -194,6 +201,8 @@ class PyDBMLParser:
             self.ref_blueprints.extend(table_bp.get_reference_blueprints())
         for table_group_bp in self.table_groups:
             self.database.add(table_group_bp.build())
+        for note_bp in self.sticky_notes:
+            self.database.add(note_bp.build())
         if self.project:
             self.database.add(self.project.build())
         for ref_bp in self.refs:

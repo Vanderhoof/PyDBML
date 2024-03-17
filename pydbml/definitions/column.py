@@ -22,7 +22,7 @@ pp.ParserElement.set_default_whitespace_chars(' \t\r')
 type_args = ("(" + pp.original_text_for(expression) + ")")
 
 # column type is parsed as a single string, it will be split by blueprint
-column_type = pp.Combine((name + '.' + name) | ((name) + type_args[0, 1]))
+column_type = pp.Combine((name + pp.Literal('[]')) | (name + '.' + name) | ((name) + type_args[0, 1]))
 
 default = pp.CaselessLiteral('default:').suppress() + _ - (
     string_literal

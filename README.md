@@ -2,7 +2,7 @@
 
 # DBML parser for Python
 
-*Compliant with DBML **v2.6.1** syntax*
+*Compliant with DBML **v3.2.0** syntax*
 
 PyDBML is a Python parser and builder for [DBML](https://www.dbml.org) syntax. 
 
@@ -138,7 +138,7 @@ Enum "product status" {
     "In Stock"
 }
 <BLANKLINE>
-Table "orders" {
+Table "orders" [headercolor: #fff] {
     "id" int [pk, increment]
     "user_id" int [unique, not null]
     "status" "orders_status"

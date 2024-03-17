@@ -6,6 +6,7 @@
 * [Reference](#reference)
 * [Enum](#enum)
 * [Note](#note)
+* [StickyNote](#sticky_note)
 * [Expression](#expression)
 * [Project](#project)
 * [TableGroup](#tablegroup)
@@ -258,6 +259,18 @@ Note is a basic class, which may appear in some other classes' `note` attribute.
 
 **text** (str) — note text.
 * **sql** (str) — SQL definition for this note.
+* **dbml** (str) — DBML definition for this note.
+
+## Note
+
+**new in PyDBML 1.0.10**
+
+Sticky notes are similar to regular notes, except that they are defined at the root of your DBML file and have a name.
+
+### Attributes
+
+**name** (str) — note name.
+**text** (str) — note text.
 * **dbml** (str) — DBML definition for this note.
 
 ## Expression

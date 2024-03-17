@@ -238,7 +238,6 @@ class TestDocs(TestCase):
         self.assertEqual(g.name, 'grade')
         self.assertEqual([ei.name for ei in g.items], ['A+', 'A', 'A-', 'Not Yet Set'])
 
-
     def test_table_group(self) -> None:
         results = PyDBML.parse_file(TEST_DOCS_PATH / 'table_group.dbml')
 
@@ -253,3 +252,15 @@ class TestDocs(TestCase):
         self.assertEqual(tg1.items, [tb1, tb2, tb3])
         self.assertEqual(tg2.name, 'e_commerce1')
         self.assertEqual(tg2.items, [merchants, countries])
+
+    def test_sticky_notes(self) -> None:
+        results = PyDBML.parse_file(TEST_DOCS_PATH / 'sticky_notes.dbml')
+
+        self.assertEqual(len(results.sticky_notes), 2)
+
+        sn1, sn2 = results.sticky_notes
+
+        self.assertEqual(sn1.name, 'single_line_note')
+        self.assertEqual(sn1.text, 'This is a single line note')
+        self.assertEqual(sn2.name, 'multiple_lines_note')
+        self.assertEqual(sn2.text, '''This is a multiple lines note\nThis string can spans over multiple lines.''')
