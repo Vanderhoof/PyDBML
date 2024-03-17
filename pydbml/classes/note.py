@@ -1,5 +1,5 @@
 import re
-from typing import Any
+from typing import Any, Union
 
 from .base import SQLObject
 from pydbml.tools import indent
@@ -8,7 +8,7 @@ from pydbml import classes
 
 class Note(SQLObject):
 
-    def __init__(self, text: Any):
+    def __init__(self, text: Union[str, 'Note']) -> None:
         self.text: str
         if isinstance(text, Note):
             self.text = text.text
