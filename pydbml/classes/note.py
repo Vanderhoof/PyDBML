@@ -7,6 +7,7 @@ from pydbml import classes
 
 
 class Note(SQLObject):
+    dont_compare_fields = ('parent',)
 
     def __init__(self, text: Union[str, 'Note']) -> None:
         self.text: str

@@ -28,6 +28,7 @@ class Table(SQLObject):
     '''Class representing table.'''
 
     required_attributes = ('name', 'schema')
+    dont_compare_fields = ('database',)
 
     def __init__(self,
                  name: str,

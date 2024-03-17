@@ -8,6 +8,8 @@ from pydbml.tools import indent
 
 
 class Project:
+    dont_compare_fields = ('database',)
+
     def __init__(self,
                  name: str,
                  items: Optional[Dict[str, str]] = None,
