@@ -9,6 +9,7 @@ class SQLObject:
     Base class for all SQL objects.
     '''
     required_attributes: Tuple[str, ...] = ()
+    dont_compare_fields = ()
 
     def check_attributes_for_sql(self):
         '''
@@ -36,14 +37,12 @@ class SQLObject:
         if not isinstance(other, self.__class__):
             return False
         # not comparing those because they are circular references
-        not_compared_fields = ('parent', 'table', 'database')
 
         self_dict = dict(self.__dict__)
         other_dict = dict(other.__dict__)
 
-        for field in not_compared_fields:
+        for field in self.dont_compare_fields:
             self_dict.pop(field, None)
             other_dict.pop(field, None)
 
         return self_dict == other_dict
-        return False

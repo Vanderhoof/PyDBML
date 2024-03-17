@@ -83,7 +83,7 @@ class Database:
             raise DatabaseValidationError(f'Unsupported type {type(obj)}.')
 
     def add_table(self, obj: Table) -> Table:
-        if obj.database == self and obj in self.tables:
+        if obj in self.tables:
             raise DatabaseValidationError(f'{obj} is already in the database.')
         if obj.full_name in self.table_dict:
             raise DatabaseValidationError(f'Table {obj.full_name} is already in the database.')
@@ -107,7 +107,7 @@ class Database:
                 'Cannot add reference. At least one of the referenced tables'
                 ' should belong to this database'
             )
-        if obj.database == self and obj in self.refs:
+        if obj in self.refs:
             raise DatabaseValidationError(f'{obj} is already in the database.')
 
         self._set_database(obj)
@@ -115,7 +115,7 @@ class Database:
         return obj
 
     def add_enum(self, obj: Enum) -> Enum:
-        if obj.database == self and obj in self.enums:
+        if obj in self.enums:
             raise DatabaseValidationError(f'{obj} is already in the database.')
         for enum in self.enums:
             if enum.name == obj.name and enum.schema == obj.schema:
@@ -126,7 +126,7 @@ class Database:
         return obj
 
     def add_table_group(self, obj: TableGroup) -> TableGroup:
-        if obj.database == self and obj in self.table_groups:
+        if obj in self.table_groups:
             raise DatabaseValidationError(f'{obj} is already in the database.')
         for table_group in self.table_groups:
             if table_group.name == obj.name:
