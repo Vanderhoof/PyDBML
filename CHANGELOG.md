@@ -1,3 +1,11 @@
+# 1.0.10
+- New: Sticky notes syntax (DBML v3.2.0)
+- Fix: Table header color was not rendered in `dbml()` (thanks @tristangrebot for the contribution)
+- New: allow array column types (DBML v3.1.0)
+- New: allow double quotes in expressions (DBML v3.1.2)
+- Fix: recursion in object equality check
+- New: don't allow duplicate refs even if they have different inline method (DBML v3.1.6)
+
 # 1.0.9
 
 - Fix: enum collision from different schemas. Thanks @ewdurbin for the contribution
