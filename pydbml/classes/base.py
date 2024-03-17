@@ -9,7 +9,7 @@ class SQLObject:
     Base class for all SQL objects.
     '''
     required_attributes: Tuple[str, ...] = ()
-    dont_compare_fields = ()
+    dont_compare_fields: Tuple[str, ...] = ()
 
     def check_attributes_for_sql(self):
         '''

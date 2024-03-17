@@ -1,0 +1,10 @@
+Note single_line_note {
+  'This is a single line note'
+}
+
+Note multiple_lines_note {
+'''
+  This is a multiple lines note
+  This string can spans over multiple lines.
+'''
+}

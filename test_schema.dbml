@@ -74,7 +74,7 @@ Table "merchants" {
 }
 
 
-Ref:"products"."id" < "order_items"."product_id"
+Ref:"products"."id" < "order_items"."product_id" [update: set default, delete: set null]
 
 Ref:"countries"."code" < "users"."country_code"
 
@@ -88,4 +88,15 @@ Table "countries" {
   "code" int [pk]
   "name" varchar
   "continent_name" varchar
+}
+
+Note sticky_note1 {
+  'One line note'
+}
+
+Note sticky_note2 {
+  '''
+    # Title
+    body
+  '''
 }
