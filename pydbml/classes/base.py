@@ -33,6 +33,17 @@ class SQLObject:
         attributes are equal.
         """
 
-        if isinstance(other, self.__class__):
-            return self.__dict__ == other.__dict__
+        if not isinstance(other, self.__class__):
+            return False
+        # not comparing those because they are circular references
+        not_compared_fields = ('parent', 'table', 'database')
+
+        self_dict = dict(self.__dict__)
+        other_dict = dict(other.__dict__)
+
+        for field in not_compared_fields:
+            self_dict.pop(field, None)
+            other_dict.pop(field, None)
+
+        return self_dict == other_dict
         return False
