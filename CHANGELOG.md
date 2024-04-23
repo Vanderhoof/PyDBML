@@ -1,3 +1,6 @@
+# 1.0.11
+- Fix: allow pk in named indexes (thanks @pierresouchay for the contribution)
+
 # 1.0.10
 - New: Sticky notes syntax (DBML v3.2.0)
 - Fix: Table header color was not rendered in `dbml()` (thanks @tristangrebot for the contribution)
