@@ -22,10 +22,10 @@ index_setting = (
     | index_type
     | pp.CaselessLiteral("name:") + _ - string_literal('name')
     | note('note')
+    | pk('pk')
 )
 index_settings = (
-    '[' + _ + pk('pk') + _ - ']' + c
-    | '[' + _ + index_setting + (_ + ',' + _ - index_setting)[...] + _ - ']' + c
+    '[' + _ + index_setting + (_ + ',' + _ - index_setting)[...] + _ - ']' + c
 )
 
 

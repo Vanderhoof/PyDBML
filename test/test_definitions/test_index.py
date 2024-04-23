@@ -80,14 +80,6 @@ class TestIndexSettings(TestCase):
         res = index_settings.parse_string(val, parseAll=True)
         self.assertTrue(res[0]['pk'])
 
-    def test_wrong_pk(self) -> None:
-        val = '[pk, name: "not allowed"]'
-        with self.assertRaises(ParseSyntaxException):
-            index_settings.parse_string(val, parseAll=True)
-        val2 = '[note: "pk not allowed", pk]'
-        with self.assertRaises(ParseSyntaxException):
-            index_settings.parse_string(val2, parseAll=True)
-
     def test_all(self) -> None:
         val = '[type: hash, name: "index name", note: "index note", unique]'
         res = index_settings.parse_string(val, parseAll=True)

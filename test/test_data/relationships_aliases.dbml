@@ -29,3 +29,11 @@ Table reviews2 as re2 {
 Table users2 as us2 {
     id integer
 }
+
+Table "alembic_version" {
+  "version_num" "character varying(32)" [not null]
+
+Indexes {
+  version_num [pk, name: "alembic_version_pk"]
+}
+}
