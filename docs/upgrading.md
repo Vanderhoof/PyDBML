@@ -116,30 +116,21 @@ Let's define an inline reference.
 >>> db = Database()
 >>> table1 = Table('products')
 >>> db.add(table1)
-< Table
-'public' 'products' >
+< Table 'public' 'products' >
 >>> c1 = Column('name', 'varchar2')
 >>> table1.add_column(c1)
 >>> table2 = Table('names')
 >>> db.add(table2)
-< Table
-'public' 'names' >
+< Table 'public' 'names' >
 >>> c2 = Column('name_val', 'varchar2')
 >>> table2.add_column(c2)
 >>> ref = Reference('>', c1, c2, inline=True)
 >>> db.add(ref)
-< Reference
-'>', ['name'], ['name_val'] >
+< Reference '>', ['name'], ['name_val'] >
 >>> print(table1.sql)
-CREATE
-TABLE
-"products"(
-    "name"
-varchar2,
-FOREIGN
-KEY("name")
-REFERENCES
-"names"("name_val")
+CREATE TABLE "products" (
+  "name" varchar2,
+  FOREIGN KEY ("name") REFERENCES "names" ("name_val")
 );
 
 ```
@@ -165,20 +156,17 @@ Previously you would initialize a `Column`, `Index` and `Reference` type with `t
 >>> from pydbml.classes import Index, Column
 >>> c = Column(name='name', type='varchar')
 >>> c
-< Column
-'name', 'varchar' >
+< Column 'name', 'varchar' >
 >>> t = Table('names')
 >>> t.add_column(c)
 >>> i = Index(subjects=[c], type='btree')
 >>> t.add_index(i)
 >>> i
-< Index
-'names', ['name'] >
+< Index 'names', ['name'] >
 >>> t2 = Table('names_caps', columns=[Column('name_caps', 'varchar')])
 >>> ref = Reference(type='-', col1=t['name'], col2=t2['name_caps'])
 >>> ref
-< Reference
-'-', ['name'], ['name_caps'] >
+< Reference '-', ['name'], ['name_caps'] >
 
 ```
 
@@ -189,25 +177,18 @@ SQL expressions are allowed in column's `default` value definition and in index'
 ```python
 >>> from pydbml.classes import Expression
 >>> c = Column(
-    ...
-name = 'upper_name',
-...
-type = 'varchar',
-...
-default = Expression('upper(name)')
+...     name='upper_name',
+...     type='varchar',
+...     default=Expression('upper(name)')
 ... )
 >>> t = Table('names')
 >>> t.add_column(c)
 >>> db = Database()
 >>> db.add(t)
-< Table
-'public' 'names' >
+< Table 'public' 'names' >
 >>> print(c.sql)
-"upper_name"
-varchar
-DEFAULT(upper(name))
+"upper_name" varchar DEFAULT (upper(name))
 >>> print(c.dbml)
-"upper_name"
-varchar[default: `upper(name)`]
+"upper_name" varchar [default: `upper(name)`]
 
 ```
