@@ -1,10 +1,9 @@
-import re
 from typing import Any
 
-from pydbml.tools import indent
+from pydbml._classes.base import DBMLObject
 
 
-class StickyNote:
+class StickyNote(DBMLObject):
     dont_compare_fields = ('database',)
 
     def __init__(self, name: str, text: Any) -> None:
@@ -31,20 +30,3 @@ class StickyNote:
         '''
 
         return f'<{self.__class__.__name__} {self.name!r}, {self.text!r}>'
-
-    def _prepare_text_for_dbml(self):
-        '''Escape single quotes'''
-        pattern = re.compile(r"('''|')")
-        return pattern.sub(r'\\\1', self.text)
-
-    @property
-    def dbml(self):
-        text = self._prepare_text_for_dbml()
-        if '\n' in text:
-            note_text = f"'''\n{text}\n'''"
-        else:
-            note_text = f"'{text}'"
-
-        note_text = indent(note_text)
-        result = f'Note {self.name} {{\n{note_text}\n}}'
-        return result

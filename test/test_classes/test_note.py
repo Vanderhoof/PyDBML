@@ -87,11 +87,11 @@ class TestNote(TestCase):
 
         note = Note(line_escape)
         expected = 'This text is not split into lines'
-        self.assertEqual(note._prepare_text_for_sql(), expected)
+        self.assertEqual(note.prepare_text_for_sql(), expected)
 
         note = Note(quotes)
         expected = '"asd" There"s """ asda """"  asd """"" asdsa ""'
-        self.assertEqual(note._prepare_text_for_sql(), expected)
+        self.assertEqual(note.prepare_text_for_sql(), expected)
 
     def test_prepare_text_for_dbml(self):
         quotes = "'asd' There's ''' asda ''''  asd ''''' asdsa ''"

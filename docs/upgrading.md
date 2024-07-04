@@ -111,26 +111,35 @@ Reference now can be explicitly inline. This is defined by the `Reference.inline
 Let's define an inline reference.
 
 ```python
->>> from pydbml import Database
->>> from pydbml.classes import Table, Column, Reference
->>> db = Database()
->>> table1 = Table('products')
->>> db.add(table1)
-<Table 'public' 'products'>
->>> c1 = Column('name', 'varchar2')
->>> table1.add_column(c1)
->>> table2 = Table('names')
->>> db.add(table2)
-<Table 'public' 'names'>
->>> c2 = Column('name_val', 'varchar2')
->>> table2.add_column(c2)
->>> ref = Reference('>', c1, c2, inline=True)
->>> db.add(ref)
-<Reference '>', ['name'], ['name_val']>
->>> print(table1.sql)
-CREATE TABLE "products" (
-  "name" varchar2,
-  FOREIGN KEY ("name") REFERENCES "names" ("name_val")
+>> > from pydbml import Database
+>> > from pydbml.classes import Table, Column, Reference
+>> > db = Database()
+>> > table1 = Table('products')
+>> > db.add(table1)
+< Table
+'public' 'products' >
+>> > c1 = Column('name', 'varchar2')
+>> > table1.add_column(c1)
+>> > table2 = Table('names')
+>> > db.add(table2)
+< Table
+'public' 'names' >
+>> > c2 = Column('name_val', 'varchar2')
+>> > table2.add_column(c2)
+>> > ref = Reference('>', c1, c2, inline=True)
+>> > db.add(ref)
+< Reference
+'>', ['name'], ['name_val'] >
+>> > print(table1.sql)
+CREATE
+TABLE
+"products"(
+    "name"
+varchar2,
+FOREIGN
+KEY("name")
+REFERENCES
+"names"("name_val")
 );
 
 ```
@@ -153,20 +162,23 @@ ALTER TABLE "products" ADD FOREIGN KEY ("name") REFERENCES "names" ("name_val");
 Previously you would initialize a `Column`, `Index` and `Reference` type with `type_` parameter. Now, this parameter is renamed to simply `type`.
 
 ```python
->>> from pydbml.classes import Index, Column
->>> c = Column(name='name', type='varchar')
->>> c
-<Column 'name', 'varchar'>
->>> t = Table('names')
->>> t.add_column(c)
->>> i = Index(subjects=[c], type='btree')
->>> t.add_index(i)
->>> i
-<Index 'names', ['name']>
->>> t2 = Table('names_caps', columns=[Column('name_caps', 'varchar')])
->>> ref = Reference(type='-', col1=t['name'], col2=t2['name_caps'])
->>> ref
-<Reference '-', ['name'], ['name_caps']>
+>> > from pydbml.classes import Index, Column
+>> > c = Column(name='name', type='varchar')
+>> > c
+< Column
+'name', 'varchar' >
+>> > t = Table('names')
+>> > t.add_column(c)
+>> > i = Index(subjects=[c], type='btree')
+>> > t.add_index(i)
+>> > i
+< Index
+'names', ['name'] >
+>> > t2 = Table('names_caps', columns=[Column('name_caps', 'varchar')])
+>> > ref = Reference(type='-', col1=t['name'], col2=t2['name_caps'])
+>> > ref
+< Reference
+'-', ['name'], ['name_caps'] >
 
 ```
 
@@ -175,20 +187,27 @@ Previously you would initialize a `Column`, `Index` and `Reference` type with `t
 SQL expressions are allowed in column's `default` value definition and in index's subject definition. Previously, you defined expressions as parenthesized strings: `"(upper(name))"`. Now you have to use the `Expression` class. This will make sure the expression will be rendered properly in SQL and DBML.
 
 ```python
->>> from pydbml.classes import Expression
->>> c = Column(
-...     name='upper_name',
-...     type='varchar',
-...     default=Expression('upper(name)')
+>> > from pydbml.classes import Expression
+>> > c = Column(
+    ...
+name = 'upper_name',
+...
+type = 'varchar',
+...
+default = Expression('upper(name)')
 ... )
->>> t = Table('names')
->>> t.add_column(c)
->>> db = Database()
->>> db.add(t)
-<Table 'public' 'names'>
->>> print(c.sql)
-"upper_name" varchar DEFAULT (upper(name))
->>> print(c.dbml)
-"upper_name" varchar [default: `upper(name)`]
+>> > t = Table('names')
+>> > t.add_column(c)
+>> > db = Database()
+>> > db.add(t)
+< Table
+'public' 'names' >
+>> > print(c.sql)
+"upper_name"
+varchar
+DEFAULT(upper(name))
+>> > print(c.dbml)
+"upper_name"
+varchar[default: `upper(name)`]
 
 ```

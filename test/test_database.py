@@ -14,8 +14,7 @@ from pydbml.classes import TableGroup
 from pydbml.database import Database
 from pydbml.exceptions import DatabaseValidationError
 from pydbml.constants import ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY
-from pydbml.database import reorder_tables_for_sql
-
+from pydbml.renderer.sql.default.utils import reorder_tables_for_sql
 
 TEST_DATA_PATH = Path(os.path.abspath(__file__)).parent / 'test_data'
 

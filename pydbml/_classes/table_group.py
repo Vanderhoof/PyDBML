@@ -1,11 +1,11 @@
 from typing import List
 from typing import Optional
 
-from .table import Table
-from pydbml.tools import comment_to_dbml
+from pydbml._classes.base import DBMLObject
+from pydbml._classes.table import Table
 
 
-class TableGroup:
+class TableGroup(DBMLObject):
     '''
     TableGroup `items` parameter initially holds just the names of the tables,
     but after parsing the whole document, PyDBMLParseResults class replaces
@@ -42,13 +42,3 @@ class TableGroup:
 
     def __iter__(self):
         return iter(self.items)
-
-    @property
-    def dbml(self):
-
-        result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'TableGroup {self.name} {{\n'
-        for i in self.items:
-            result += f'    {i._get_full_name_for_sql()}\n'
-        result += '}'
-        return result

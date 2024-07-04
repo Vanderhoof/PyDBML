@@ -2,18 +2,17 @@ from typing import Dict
 from typing import Optional
 from typing import Union
 
-from .note import Note
-from pydbml.tools import comment_to_dbml
-from pydbml.tools import indent
+from pydbml._classes.base import DBMLObject
+from pydbml._classes.note import Note
 
 
-class Project:
+class Project(DBMLObject):
     dont_compare_fields = ('database',)
 
     def __init__(self,
                  name: str,
                  items: Optional[Dict[str, str]] = None,
-                 note: Optional[Union['Note', str]] = None,
+                 note: Optional[Union[Note, str]] = None,
                  comment: Optional[str] = None):
         self.database = None
         self.name = name
@@ -37,20 +36,3 @@ class Project:
     def note(self, val: Note) -> None:
         self._note = val
         val.parent = self
-
-    @property
-    def dbml(self):
-        result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'Project "{self.name}" {{\n'
-        if self.items:
-            items_str = ''
-            for k, v in self.items.items():
-                if '\n' in v:
-                    items_str += f"{k}: '''{v}'''\n"
-                else:
-                    items_str += f"{k}: '{v}'\n"
-            result += indent(items_str[:-1]) + '\n'
-        if self.note:
-            result += indent(self.note.dbml) + '\n'
-        result += '}'
-        return result

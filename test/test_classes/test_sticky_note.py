@@ -1,9 +1,6 @@
-from pydbml.classes import Table
-from pydbml.classes import Index
-from pydbml.classes import Column
 from unittest import TestCase
 
-from pydbml.classes.sticky_note import StickyNote
+from pydbml._classes.sticky_note import StickyNote
 
 
 class TestNote(TestCase):
