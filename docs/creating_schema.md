@@ -18,7 +18,7 @@ Now let's create a table and add it to the database.
 >>> from pydbml.classes import Table
 >>> table1 = Table(name='products')
 >>> db.add(table1)
-< Table 'public' 'products' >
+<Table 'public' 'products' >
 
 ```
 
@@ -66,7 +66,7 @@ Now to the relation:
 >>> from pydbml.classes import Reference
 >>> ref = Reference('>', table1['manufacturer_id'], table2['id'])
 >>> db.add(ref)
-< Reference '>', ['manufacturer_id'], ['id'] >
+<Reference '>', ['manufacturer_id'], ['id'] >
 
 ```
 
