@@ -15,9 +15,9 @@ You always start by creating a Database object. It will connect all other entiti
 Now let's create a table and add it to the database.
 
 ```python
->> > from pydbml.classes import Table
->> > table1 = Table(name='products')
->> > db.add(table1)
+>>> from pydbml.classes import Table
+>>> table1 = Table(name='products')
+>>> db.add(table1)
 < Table
 'public' 'products' >
 
@@ -26,22 +26,22 @@ Now let's create a table and add it to the database.
 To add columns to the table, you have to use the `add_column` method of the Table object.
 
 ```python
->> > from pydbml.classes import Column
->> > col1 = Column(name='id', type='Integer', pk=True, autoinc=True)
->> > table1.add_column(col1)
->> > col2 = Column(name='product_name', type='Varchar', unique=True)
->> > table1.add_column(col2)
->> > col3 = Column(name='manufacturer_id', type='Integer')
->> > table1.add_column(col3)
+>>> from pydbml.classes import Column
+>>> col1 = Column(name='id', type='Integer', pk=True, autoinc=True)
+>>> table1.add_column(col1)
+>>> col2 = Column(name='product_name', type='Varchar', unique=True)
+>>> table1.add_column(col2)
+>>> col3 = Column(name='manufacturer_id', type='Integer')
+>>> table1.add_column(col3)
 
 ```
 
 Index is also a part of a table, so you have to add it similarly, using `add_index` method:
 
 ```python
->> > from pydbml.classes import Index
->> > index1 = Index([col2], unique=True)
->> > table1.add_index(index1)
+>>> from pydbml.classes import Index
+>>> index1 = Index([col2], unique=True)
+>>> table1.add_index(index1)
 
 ```
 
@@ -64,9 +64,9 @@ The table's third column, `manufacturer_id` looks like it should be a foreign ke
 Now to the relation:
 
 ```python
->> > from pydbml.classes import Reference
->> > ref = Reference('>', table1['manufacturer_id'], table2['id'])
->> > db.add(ref)
+>>> from pydbml.classes import Reference
+>>> ref = Reference('>', table1['manufacturer_id'], table2['id'])
+>>> db.add(ref)
 < Reference
 '>', ['manufacturer_id'], ['id'] >
 

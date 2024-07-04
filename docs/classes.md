@@ -16,7 +16,7 @@
 PyDBML classes represent database entities. They live in the `pydbml.classes` package.
 
 ```python
->> > from pydbml.classes import Table, Column, Reference
+>>> from pydbml.classes import Table, Column, Reference
 
 ```
 
