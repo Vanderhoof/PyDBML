@@ -1,6 +1,17 @@
+from typing import Any
+
 from pydbml.classes import Expression, Index, Column
 from pydbml.renderer.sql.default.renderer import DefaultSQLRenderer
 from pydbml.renderer.sql.default.utils import comment_to_sql
+
+
+def render_subject(subject: Any) -> str:
+    if isinstance(subject, Column):
+        return f'"{subject.name}"'
+    elif isinstance(subject, Expression):
+        return DefaultSQLRenderer.render(subject)
+    else:
+        return subject
 
 
 @DefaultSQLRenderer.renderer_for(Index)
@@ -17,16 +28,8 @@ def render_index(model: Index) -> str:
     PRIMARY KEY ("id", "name")
     '''
 
-    subjects = []
+    keys = ', '.join(render_subject(s) for s in model.subjects)
 
-    for subj in model.subjects:
-        if isinstance(subj, Column):
-            subjects.append(f'"{subj.name}"')
-        elif isinstance(subj, Expression):
-            subjects.append(DefaultSQLRenderer.render(subj))
-        else:
-            subjects.append(subj)
-    keys = ', '.join(subj for subj in subjects)
     if model.pk:
         result = comment_to_sql(model.comment) if model.comment else ''
         result += f'PRIMARY KEY ({keys})'
@@ -35,7 +38,9 @@ def render_index(model: Index) -> str:
     components = ['CREATE']
     if model.unique:
         components.append('UNIQUE')
+
     components.append('INDEX')
+
     if model.name:
         components.append(f'"{model.name}"')
 

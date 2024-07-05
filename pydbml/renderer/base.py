@@ -9,16 +9,25 @@ def unsupported_renderer(model) -> str:
 
 
 class BaseRenderer:
+    _unsupported_renderer = unsupported_renderer
+
     @property
     def model_renderers(cls) -> Dict[Type, Callable]:
+        """A class attribute dictionary to store the model renderers."""
         raise NotImplementedError
 
     @classmethod
     def render(cls, model) -> str:
-        return cls.model_renderers.get(type(model), unsupported_renderer)(model)
+        """
+        Render the model to a string. If the model is not supported, fall back to
+        `self._unsupported_renderer` that by default returns an empty string.
+        """
+
+        return cls.model_renderers.get(type(model), cls._unsupported_renderer)(model)
 
     @classmethod
     def renderer_for(cls, model_cls: Type) -> Callable:
+        """A decorator to register a renderer for a model class."""
         def decorator(func) -> Callable:
             cls.model_renderers[model_cls] = func
             return func

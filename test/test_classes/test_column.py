@@ -52,27 +52,6 @@ class TestColumn(TestCase):
         database.add(table)
         self.assertIs(col.database, database)
 
-    def test_basic_sql(self) -> None:
-        r = Column(name='id',
-                   type='integer')
-        expected = '"id" integer'
-        self.assertEqual(r.sql, expected)
-
-    def test_sql_enum_type(self) -> None:
-        et = Enum('product status', ('production', 'development'))
-        db = Database()
-        db.add_enum(et)
-        r = Column(name='id',
-                   type=et,
-                   pk=True,
-                   autoinc=True)
-        expected = '"id" "product status" PRIMARY KEY AUTOINCREMENT'
-        self.assertEqual(r.sql, expected)
-
-        et.schema = 'myschema'
-        expected = '"id" "myschema"."product status" PRIMARY KEY AUTOINCREMENT'
-        self.assertEqual(r.sql, expected)
-
     def test_pk_autoinc(self) -> None:
         r = Column(name='id',
                    type='integer',

@@ -10,11 +10,6 @@ class TestEnumItem(TestCase):
         expected = '"en-US"'
         self.assertEqual(ei.dbml, expected)
 
-    def test_sql(self):
-        ei = EnumItem('en-US')
-        expected = "'en-US',"
-        self.assertEqual(ei.sql, expected)
-
     def test_dbml_full(self):
         ei = EnumItem('en-US', note='preferred', comment='EnumItem comment')
         expected = \
@@ -30,61 +25,6 @@ class TestEnumItem(TestCase):
 
 
 class TestEnum(TestCase):
-    def test_simple_enum(self) -> None:
-        items = [
-            EnumItem('created'),
-            EnumItem('running'),
-            EnumItem('donef'),
-            EnumItem('failure'),
-        ]
-        e = Enum('job_status', items)
-        expected = \
-'''CREATE TYPE "job_status" AS ENUM (
-  'created',
-  'running',
-  'donef',
-  'failure',
-);'''
-        self.assertEqual(e.sql, expected)
-
-    def test_schema(self) -> None:
-        items = [
-            EnumItem('created'),
-            EnumItem('running'),
-            EnumItem('donef'),
-            EnumItem('failure'),
-        ]
-        e = Enum('job_status', items, schema="myschema")
-        expected = \
-'''CREATE TYPE "myschema"."job_status" AS ENUM (
-  'created',
-  'running',
-  'donef',
-  'failure',
-);'''
-        self.assertEqual(e.sql, expected)
-
-    def test_comments(self) -> None:
-        items = [
-            EnumItem('created', comment='EnumItem comment'),
-            EnumItem('running'),
-            EnumItem('donef', comment='EnumItem\nmultiline comment'),
-            EnumItem('failure'),
-        ]
-        e = Enum('job_status', items, comment='Enum comment')
-        expected = \
-'''-- Enum comment
-CREATE TYPE "job_status" AS ENUM (
-  -- EnumItem comment
-  'created',
-  'running',
-  -- EnumItem
-  -- multiline comment
-  'donef',
-  'failure',
-);'''
-        self.assertEqual(e.sql, expected)
-
     def test_dbml_simple(self):
         items = [EnumItem('en-US'), EnumItem('ru-RU'), EnumItem('en-GB')]
         e = Enum('lang', items)

@@ -1,5 +1,4 @@
-from setuptools import setup
-
+from setuptools import setup, find_packages
 
 SHORT_DESCRIPTION = 'Python parser and builder for DBML'
 
@@ -21,14 +20,12 @@ setup(
     author='Daniil Minukhin',
     author_email='ddddsa@gmail.com',
     url='https://github.com/Vanderhoof/PyDBML',
-    packages=['pydbml', 'pydbml.classes', 'pydbml.definitions', 'pydbml.parser'],
+    packages=find_packages(exclude=['test', 'test.*']),
     license='MIT',
     platforms='any',
-    install_requires=[
-        'pyparsing>=3.0.0',
-    ],
+    install_requires=['pyparsing>=3.0.0'],
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",

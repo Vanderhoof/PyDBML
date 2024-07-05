@@ -5,42 +5,9 @@ from pydbml.classes import Expression
 from pydbml.classes import Index
 from pydbml.classes import Note
 from pydbml.classes import Table
-from pydbml.exceptions import ColumnNotFoundError
 
 
 class TestIndex(TestCase):
-    def test_basic_sql(self) -> None:
-        t = Table('products')
-        t.add_column(Column('id', 'integer'))
-        r = Index(subjects=[t.columns[0]])
-        t.add_index(r)
-        self.assertIs(r.table, t)
-        expected = 'CREATE INDEX ON "products" ("id");'
-        self.assertEqual(r.sql, expected)
-
-    def test_basic_sql_str(self) -> None:
-        t = Table('products')
-        t.add_column(Column('id', 'integer'))
-        r = Index(subjects=['id'])
-        t.add_index(r)
-        self.assertIs(r.table, t)
-        expected = 'CREATE INDEX ON "products" (id);'
-        self.assertEqual(r.sql, expected)
-
-    def test_column_not_in_table(self) -> None:
-        t = Table('products')
-        c = Column('id', 'integer')
-        i = Index(subjects=[c])
-        with self.assertRaises(ColumnNotFoundError):
-            t.add_index(i)
-        self.assertIsNone(i.table)
-        t2 = Table('customers')
-        t2.add_column(c)
-        i2 = Index(subjects=[c])
-        with self.assertRaises(ColumnNotFoundError):
-            t.add_index(i2)
-        self.assertIsNone(i2.table)
-
     def test_comment(self) -> None:
         t = Table('products')
         t.add_column(Column('id', 'integer'))

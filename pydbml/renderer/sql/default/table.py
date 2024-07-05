@@ -5,7 +5,7 @@ from pydbml.constants import MANY_TO_ONE, ONE_TO_ONE, ONE_TO_MANY
 from pydbml.classes import Table, Reference
 from pydbml.exceptions import UnknownDatabaseError
 from pydbml.renderer.sql.default.renderer import DefaultSQLRenderer
-from pydbml.renderer.sql.default.utils import comment_to_sql
+from pydbml.renderer.sql.default.utils import comment_to_sql, get_full_name_for_sql
 
 
 def get_references_for_sql(model: Table) -> List[Reference]:
@@ -32,13 +32,6 @@ def get_inline_references_for_sql(model: Table) -> List[Reference]:
     if model.abstract:
         return []
     return [r for r in get_references_for_sql(model) if r.inline]
-
-
-def get_full_name_for_sql(model: Table) -> str:
-    if model.schema == 'public':
-        return f'"{model.name}"'
-    else:
-        return f'"{model.schema}"."{model.name}"'
 
 
 @DefaultSQLRenderer.renderer_for(Table)

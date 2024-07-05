@@ -14,13 +14,6 @@ def validate_for_sql(model: Reference):
             raise TableNotFoundError(f'Table on {col} is not set')
 
 
-def get_full_name_for_sql(model) -> str:
-    if model.schema == 'public':
-        return f'"{model.name}"'
-    else:
-        return f'"{model.schema}"."{model.name}"'
-
-
 def generate_inline_sql(model: Reference, source_col: List[Column], ref_col: List[Column]) -> str:
     result = comment_to_sql(model.comment) if model.comment else ''
     result += (

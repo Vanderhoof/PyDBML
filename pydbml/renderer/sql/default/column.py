@@ -11,6 +11,7 @@ def render_column(model: Column) -> str:
 
     "id" integer PRIMARY KEY AUTOINCREMENT
     '''
+
     components = [f'"{model.name}"']
     if isinstance(model.type, Enum):
         components.append(get_full_name_for_sql_enum(model.type))
@@ -28,7 +29,7 @@ def render_column(model: Column) -> str:
         components.append('NOT NULL')
     if model.default is not None:
         if isinstance(model.default, Expression):
-            default = model.default.sql
+            default = DefaultSQLRenderer.render(model.default)
         else:
             default = model.default
         components.append(f'DEFAULT {default}')
