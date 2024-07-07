@@ -5,7 +5,11 @@ from pydbml.classes import Reference, Column
 from pydbml.constants import MANY_TO_MANY, MANY_TO_ONE, ONE_TO_ONE, ONE_TO_MANY
 from pydbml.exceptions import TableNotFoundError
 from pydbml.renderer.sql.default.renderer import DefaultSQLRenderer
-from pydbml.renderer.sql.default.utils import comment_to_sql
+from pydbml.renderer.sql.default.utils import comment_to_sql, get_full_name_for_sql
+
+
+def col_names(cols: List[Column]) -> str:
+    return ', '.join(f'"{c.name}"' for c in cols)
 
 
 def validate_for_sql(model: Reference):
@@ -17,8 +21,8 @@ def validate_for_sql(model: Reference):
 def generate_inline_sql(model: Reference, source_col: List[Column], ref_col: List[Column]) -> str:
     result = comment_to_sql(model.comment) if model.comment else ''
     result += (
-        f'{{c}}FOREIGN KEY ({model._col_names(source_col)}) '  # type: ignore
-        f'REFERENCES {get_full_name_for_sql(ref_col[0].table)} ({model._col_names(ref_col)})'  # type: ignore
+        f'{{c}}FOREIGN KEY ({col_names(source_col)}) '  # type: ignore
+        f'REFERENCES {get_full_name_for_sql(ref_col[0].table)} ({col_names(ref_col)})'  # type: ignore
     )
     if model.on_update:
         result += f' ON UPDATE {model.on_update.upper()}'
@@ -31,8 +35,8 @@ def generate_not_inline_sql(model: Reference, c1: List['Column'], c2: List['Colu
     result = comment_to_sql(model.comment) if model.comment else ''
     result += (
         f'ALTER TABLE {get_full_name_for_sql(c1[0].table)}'  # type: ignore
-        f' ADD {{c}}FOREIGN KEY ({model._col_names(c1)})'
-        f' REFERENCES {get_full_name_for_sql(c2[0].table)} ({model._col_names(c2)})' # type: ignore
+        f' ADD {{c}}FOREIGN KEY ({col_names(c1)})'
+        f' REFERENCES {get_full_name_for_sql(c2[0].table)} ({col_names(c2)})' # type: ignore
     )
     if model.on_update:
         result += f' ON UPDATE {model.on_update.upper()}'

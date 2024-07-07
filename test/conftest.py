@@ -1,7 +1,9 @@
+from textwrap import dedent
 
 import pytest
 
 from pydbml import Database
+from pydbml._classes.reference import Reference
 from pydbml.classes import Column, Enum, EnumItem, Note, Expression, Table, Index
 
 
@@ -60,9 +62,56 @@ def table1() -> Table:
 
 
 @pytest.fixture
+def table2() -> Table:
+    return Table(
+        name='products',
+        columns=[
+            Column('id', 'integer'),
+            Column('name', 'varchar'),
+        ]
+    )
+
+
+@pytest.fixture
+def table3() -> Table:
+    return Table(
+        name='orders',
+        columns=[
+            Column('id', 'integer'),
+            Column('product_id', 'integer'),
+            Column('price', 'float'),
+        ]
+    )
+
+@pytest.fixture
+def reference1(table2: Table, table3: Table) -> Reference:
+    return Reference(
+        type='>',
+        col1=[table3.columns[1]],
+        col2=[table2.columns[0]],
+    )
+
+
+@pytest.fixture
 def index1(table1: Table) -> Index:
     result = Index(
         subjects=[table1.columns[1]]
     )
     table1.add_index(result)
     return result
+
+
+@pytest.fixture
+def note1():
+    return Note('Simple note')
+
+
+@pytest.fixture
+def multiline_note():
+    return Note(
+        dedent(
+            '''\
+            This is a multiline note.
+            It has multiple lines.'''
+        )
+    )

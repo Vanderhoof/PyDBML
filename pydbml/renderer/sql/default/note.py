@@ -7,8 +7,7 @@ from pydbml.renderer.sql.default.renderer import DefaultSQLRenderer
 def prepare_text_for_sql(model: Note) -> str:
     '''
     - Process special escape sequence: slash before line break, which means no line break
-    https://www.dbml.org/docs/#multi-line-string
-
+      https://www.dbml.org/docs/#multi-line-string
     - replace all single quotes with double quotes
     '''
 

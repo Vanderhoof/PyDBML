@@ -119,7 +119,3 @@ class Reference(SQLObject, DBMLObject):
         table2 = self.col2[0].table
         if any(c.table != table2 for c in self.col2):
             raise DBMLError('Columns in col2 are from different tables')
-
-    @staticmethod
-    def _col_names(cols: List[Column]) -> str:
-        return ', '.join(f'"{c.name}"' for c in cols)
