@@ -31,12 +31,12 @@ def generate_inline_sql(model: Reference, source_col: List[Column], ref_col: Lis
     return result
 
 
-def generate_not_inline_sql(model: Reference, c1: List['Column'], c2: List['Column']):
+def generate_not_inline_sql(model: Reference, source_col: List['Column'], ref_col: List['Column']):
     result = comment_to_sql(model.comment) if model.comment else ''
     result += (
-        f'ALTER TABLE {get_full_name_for_sql(c1[0].table)}'  # type: ignore
-        f' ADD {{c}}FOREIGN KEY ({col_names(c1)})'
-        f' REFERENCES {get_full_name_for_sql(c2[0].table)} ({col_names(c2)})' # type: ignore
+        f'ALTER TABLE {get_full_name_for_sql(source_col[0].table)}'  # type: ignore
+        f' ADD {{c}}FOREIGN KEY ({col_names(source_col)})'
+        f' REFERENCES {get_full_name_for_sql(ref_col[0].table)} ({col_names(ref_col)})' # type: ignore
     )
     if model.on_update:
         result += f' ON UPDATE {model.on_update.upper()}'
@@ -71,16 +71,11 @@ def render_reference(model: Reference) -> str:
         return generate_many_to_many_sql(model)
 
     result = ''
-    if model.inline:
-        if model.type in (MANY_TO_ONE, ONE_TO_ONE):
-            result = generate_inline_sql(model, model.col1, model.col2)
-        elif model.type == ONE_TO_MANY:
-            result = generate_inline_sql(model, model.col2, model.col1)
-    else:
-        if model.type in (MANY_TO_ONE, ONE_TO_ONE):
-            result = generate_not_inline_sql(model=model, c1=model.col1, c2=model.col2)
-        elif model.type == ONE_TO_MANY:
-            result = generate_not_inline_sql(model=model, c1=model.col2, c2=model.col1)
+    func = generate_inline_sql if model.inline else generate_not_inline_sql
+    if model.type in (MANY_TO_ONE, ONE_TO_ONE):
+        result = func(model=model, source_col=model.col1, ref_col=model.col2)
+    elif model.type == ONE_TO_MANY:
+        result = func(model=model, source_col=model.col2, ref_col=model.col1)
 
     c = f'CONSTRAINT "{model.name}" ' if model.name else ''
 
