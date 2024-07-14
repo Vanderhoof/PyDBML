@@ -6,7 +6,7 @@ from pydbml.renderer.dbml.default.utils import comment_to_dbml, note_option_to_d
 from .enum import get_full_name_for_dbml as get_full_name_for_dbml_enum
 
 
-def default_to_str(val: Union[Expression, str]) -> str:
+def default_to_str(val: Union[Expression, str, int, float]) -> str:
     if isinstance(val, str):
         if val.lower() in ('null', 'true', 'false'):
             return val.lower()
@@ -15,18 +15,10 @@ def default_to_str(val: Union[Expression, str]) -> str:
     elif isinstance(val, Expression):
         return val.dbml
     else:  # int or float or bool
-        return val
+        return str(val)
 
 
-@DefaultDBMLRenderer.renderer_for(Column)
-def render_column(model: Column) -> str:
-    result = comment_to_dbml(model.comment) if model.comment else ''
-    result += f'"{model.name}" '
-    if isinstance(model.type, Enum):
-        result += get_full_name_for_dbml_enum(model.type)
-    else:
-        result += model.type
-
+def render_options(model: Column) -> str:
     options = [ref.dbml for ref in model.get_refs() if ref.inline]
     if model.pk:
         options.append('pk')
@@ -42,5 +34,18 @@ def render_column(model: Column) -> str:
         options.append(note_option_to_dbml(model.note))
 
     if options:
-        result += f' [{", ".join(options)}]'
+        return f' [{", ".join(options)}]'
+    return ''
+
+
+@DefaultDBMLRenderer.renderer_for(Column)
+def render_column(model: Column) -> str:
+    result = comment_to_dbml(model.comment) if model.comment else ''
+    result += f'"{model.name}" '
+    if isinstance(model.type, Enum):
+        result += get_full_name_for_dbml_enum(model.type)
+    else:
+        result += model.type
+
+    result += render_options(model)
     return result

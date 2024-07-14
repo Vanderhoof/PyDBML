@@ -36,6 +36,13 @@ def simple_column() -> Column:
 
 
 @pytest.fixture
+def simple_column_with_table(db: Database, table1: Table, simple_column: Column) -> Column:
+    table1.add_column(simple_column)
+    db.add(table1)
+    return simple_column
+
+
+@pytest.fixture
 def complex_column(enum1: Enum) -> Column:
     return Column(
         name='counter',
@@ -48,6 +55,13 @@ def complex_column(enum1: Enum) -> Column:
         comment='This is a counter column',
         note=Note('This is a note for the column')
     )
+
+
+@pytest.fixture
+def complex_column_with_table(db: Database, table1: Table, complex_column: Column) -> Column:
+    table1.add_column(complex_column)
+    db.add(table1)
+    return complex_column
 
 
 @pytest.fixture
