@@ -4,6 +4,7 @@ from typing import List
 from pydbml.constants import MANY_TO_ONE, ONE_TO_ONE, ONE_TO_MANY
 from pydbml.classes import Table, Reference, Column
 from pydbml.exceptions import UnknownDatabaseError
+from pydbml.renderer.sql.default.note import prepare_text_for_sql
 from pydbml.renderer.sql.default.renderer import DefaultSQLRenderer
 from pydbml.renderer.sql.default.utils import comment_to_sql, get_full_name_for_sql
 
@@ -59,10 +60,11 @@ def render_column_notes(model: Table) -> str:
     result = ''
     for col in model.columns:
         if col.note:
-            quoted_note = f"'{col.note.prepare_text_for_sql()}'"
+            quoted_note = f"'{prepare_text_for_sql(col.note)}'"
             note_sql = f'COMMENT ON COLUMN "{model.name}"."{col.name}" IS {quoted_note};'
             result += f'\n\n{note_sql}'
     return result
+
 
 @DefaultSQLRenderer.renderer_for(Table)
 def render_table(model: Table) -> str:
@@ -79,9 +81,6 @@ def render_table(model: Table) -> str:
 
     CREATE INDEX ON "products" ("id", "name");
     '''
-
-    model.check_attributes_for_sql()
-
     result = create_components(model)
 
     if model.note:

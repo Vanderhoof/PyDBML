@@ -5,11 +5,12 @@ import pytest
 
 import pydbml.renderer.sql.default.table
 from pydbml import Database
-from pydbml.classes import Table, Column, Reference
+from pydbml.classes import Table, Column, Reference, Note
 from pydbml.renderer.sql.default.table import (
     get_references_for_sql,
     get_inline_references_for_sql,
-    create_components
+    create_components,
+    render_column_notes,
 )
 
 
@@ -112,8 +113,14 @@ def test_create_body() -> None:
         columns=[Mock(), Mock()],
         indexes=[Mock(pk=True), Mock(pk=False)],
     )
-    with patch('pydbml.renderer.sql.default.table.get_inline_references_for_sql', Mock(return_value=[Mock()])) as get_inline_mock:
-        with patch('pydbml.renderer.sql.default.renderer.DefaultSQLRenderer.render', Mock(return_value='')) as render_mock:
+    with patch(
+        "pydbml.renderer.sql.default.table.get_inline_references_for_sql",
+        Mock(return_value=[Mock()]),
+    ) as get_inline_mock:
+        with patch(
+            "pydbml.renderer.sql.default.renderer.DefaultSQLRenderer.render",
+            Mock(return_value=""),
+        ) as render_mock:
             pydbml.renderer.sql.default.table.create_body(table)
             assert get_inline_mock.called
             assert render_mock.call_count == 4
@@ -122,21 +129,66 @@ def test_create_body() -> None:
 class TestCreateComponents:
     @staticmethod
     def test_simple(table1: Table) -> None:
-        with patch('pydbml.renderer.sql.default.table.create_body', Mock(return_value='body')) as create_body_mock:
+        with patch(
+            "pydbml.renderer.sql.default.table.create_body", Mock(return_value="body")
+        ) as create_body_mock:
             expected = 'CREATE TABLE "products" (\nbody\n);'
             assert create_components(table1) == expected
 
     @staticmethod
     def test_comment(table1: Table) -> None:
         table1.comment = "Simple comment"
-        with patch('pydbml.renderer.sql.default.table.create_body', Mock(return_value='body')) as create_body_mock:
+        with patch(
+            "pydbml.renderer.sql.default.table.create_body", Mock(return_value="body")
+        ) as create_body_mock:
             expected = '-- Simple comment\n\nCREATE TABLE "products" (\nbody\n);'
             assert create_components(table1) == expected
 
     @staticmethod
     def test_indexes(table1: Table) -> None:
         table1.indexes = [Mock(pk=False), Mock(pk=True)]
-        with patch('pydbml.renderer.sql.default.table.create_body', Mock(return_value='body')) as create_body_mock:
-            with patch('pydbml.renderer.sql.default.renderer.DefaultSQLRenderer.render', Mock(return_value='index')) as render_mock:
+        with patch(
+            "pydbml.renderer.sql.default.table.create_body", Mock(return_value="body")
+        ) as create_body_mock:
+            with patch(
+                "pydbml.renderer.sql.default.renderer.DefaultSQLRenderer.render",
+                Mock(return_value="index"),
+            ) as render_mock:
                 expected = 'CREATE TABLE "products" (\nbody\n);\n\nindex'
                 assert create_components(table1) == expected
+
+
+class TestRenderColumnNotes:
+    @staticmethod
+    def test_notes(table1: Table) -> None:
+        table1.columns[0].note = Note("First column note")
+        table1.columns[1].note = Note("Second column note")
+        expected = (
+            "\n"
+            "\n"
+            'COMMENT ON COLUMN "products"."id" IS \'First column note\';\n'
+            "\n"
+            'COMMENT ON COLUMN "products"."name" IS \'Second column note\';'
+        )
+        assert render_column_notes(table1) == expected
+
+    @staticmethod
+    def test_no_notes(table1: Table) -> None:
+        assert render_column_notes(table1) == ""
+
+
+def test_render_table(table1: Table) -> None:
+    table1.note = Mock(sql="-- Simple note")
+    with patch(
+        "pydbml.renderer.sql.default.table.create_components",
+        Mock(return_value="components"),
+    ) as create_components_mock:
+        with patch(
+            "pydbml.renderer.sql.default.table.render_column_notes",
+            Mock(return_value="\n\ncolumn notes"),
+        ) as render_column_notes_mock:
+            assert pydbml.renderer.sql.default.table.render_table(table1) == (
+                "components\n\n-- Simple note\n\ncolumn notes"
+            )
+            assert create_components_mock.called
+            assert render_column_notes_mock.called
