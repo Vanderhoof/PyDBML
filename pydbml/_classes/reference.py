@@ -1,6 +1,5 @@
 from itertools import chain
 from typing import Collection
-from typing import List
 from typing import Literal
 from typing import Optional
 from typing import Union

@@ -1,14 +1,8 @@
-import re
 from textwrap import indent
 
 from pydbml.classes import StickyNote
+from pydbml.renderer.dbml.default.note import prepare_text_for_dbml
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
-
-
-def prepare_text_for_dbml(model):
-    '''Escape single quotes'''
-    pattern = re.compile(r"('''|')")
-    return pattern.sub(r'\\\1', model.text)
 
 
 @DefaultDBMLRenderer.renderer_for(StickyNote)
