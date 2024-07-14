@@ -1,13 +1,14 @@
+from typing import List, Any
+
 from pydbml.classes import Index, Expression, Column
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
 from pydbml.renderer.dbml.default.utils import comment_to_dbml, note_option_to_dbml
 
 
-@DefaultDBMLRenderer.renderer_for(Index)
-def render_index(model: Index) -> str:
+def render_subjects(source_subjects: List[Any]) -> str:
     subjects = []
 
-    for subj in model.subjects:
+    for subj in source_subjects:
         if isinstance(subj, Column):
             subjects.append(subj.name)
         elif isinstance(subj, Expression):
@@ -15,13 +16,13 @@ def render_index(model: Index) -> str:
         else:
             subjects.append(subj)
 
-    result = comment_to_dbml(model.comment) if model.comment else ''
-
     if len(subjects) > 1:
-        result += f'({", ".join(subj for subj in subjects)})'
+        return f'({", ".join(subj for subj in subjects)})'
     else:
-        result += subjects[0]
+        return subjects[0]
 
+
+def render_options(model: Index) -> str:
     options = []
     if model.name:
         options.append(f"name: '{model.name}'")
@@ -35,5 +36,14 @@ def render_index(model: Index) -> str:
         options.append(note_option_to_dbml(model.note))
 
     if options:
-        result += f' [{", ".join(options)}]'
-    return result
+        return f' [{", ".join(options)}]'
+    return ''
+
+
+@DefaultDBMLRenderer.renderer_for(Index)
+def render_index(model: Index) -> str:
+    return (
+        (comment_to_dbml(model.comment) if model.comment else '')
+        + render_subjects(model.subjects)
+        + render_options(model)
+    )
