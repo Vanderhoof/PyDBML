@@ -6,10 +6,7 @@ from pydbml.renderer.dbml.default.utils import comment_to_dbml, note_option_to_d
 
 
 def get_full_name_for_dbml(model: Enum) -> str:
-    if model.schema == 'public':
-        return f'"{model.name}"'
-    else:
-        return f'"{model.schema}"."{model.name}"'
+    return bool(model.schema) * f'"{model.schema}".' + f'"{model.name}"'
 
 
 @DefaultDBMLRenderer.renderer_for(Enum)
