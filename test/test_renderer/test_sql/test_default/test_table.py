@@ -11,6 +11,7 @@ from pydbml.renderer.sql.default.table import (
     get_inline_references_for_sql,
     create_components,
     render_column_notes,
+    create_body,
 )
 
 
@@ -24,7 +25,7 @@ def table1(db1: Database) -> Table:
     t = Table(
         name="products",
         columns=[
-            Column("id", "integer"),
+            Column("id", "integer", pk=True),
             Column("name", "varchar"),
         ],
     )
@@ -108,22 +109,35 @@ class TestGetInlineReferencesForSQL:
         assert get_inline_references_for_sql(table2) == []
 
 
-def test_create_body() -> None:
-    table = Mock(
-        columns=[Mock(), Mock()],
-        indexes=[Mock(pk=True), Mock(pk=False)],
-    )
-    with patch(
-        "pydbml.renderer.sql.default.table.get_inline_references_for_sql",
-        Mock(return_value=[Mock()]),
-    ) as get_inline_mock:
+class TestCreateBody:
+    @staticmethod
+    def test_create_body() -> None:
+        table = Mock(
+            columns=[Mock(), Mock()],
+            indexes=[Mock(pk=True), Mock(pk=False)],
+        )
         with patch(
-            "pydbml.renderer.sql.default.renderer.DefaultSQLRenderer.render",
-            Mock(return_value=""),
-        ) as render_mock:
-            pydbml.renderer.sql.default.table.create_body(table)
-            assert get_inline_mock.called
-            assert render_mock.call_count == 4
+            "pydbml.renderer.sql.default.table.get_inline_references_for_sql",
+            Mock(return_value=[Mock()]),
+        ) as get_inline_mock:
+            with patch(
+                "pydbml.renderer.sql.default.renderer.DefaultSQLRenderer.render",
+                Mock(return_value=""),
+            ) as render_mock:
+                create_body(table)
+                assert get_inline_mock.called
+                assert render_mock.call_count == 4
+
+    @staticmethod
+    def test_composite_pk(table1: Table) -> None:
+        table1.add_column(Column("id2", "integer", pk=True))
+        expected = (
+            '  "id" integer,\n'
+            '  "name" varchar,\n'
+            '  "id2" integer,\n'
+            '  PRIMARY KEY ("id", "id2")'
+        )
+        assert create_body(table1) == expected
 
 
 class TestCreateComponents:

@@ -5,6 +5,7 @@ from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.exceptions import DBMLError
 from pydbml.exceptions import TableNotFoundError
+from pydbml.renderer.sql.default.reference import validate_for_sql
 
 
 class TestReference(TestCase):
@@ -108,11 +109,11 @@ class TestReferenceInline(TestCase):
             c2
         )
         with self.assertRaises(TableNotFoundError):
-            ref1._validate_for_sql()
+            validate_for_sql(ref1)
         table = Table('name')
         table.add_column(c1)
         with self.assertRaises(TableNotFoundError):
-            ref1._validate_for_sql()
+            validate_for_sql(ref1)
         table.delete_column(c1)
 
         ref2 = Reference(
@@ -121,9 +122,9 @@ class TestReferenceInline(TestCase):
             [c3, c4]
         )
         with self.assertRaises(TableNotFoundError):
-            ref2._validate_for_sql()
+            validate_for_sql(ref2)
         table = Table('name')
         table.add_column(c1)
         table.add_column(c2)
         with self.assertRaises(TableNotFoundError):
-            ref2._validate_for_sql()
+            validate_for_sql(ref2)

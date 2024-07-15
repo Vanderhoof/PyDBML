@@ -40,6 +40,13 @@ def create_body(model: Table) -> str:
     body.extend(indent(DefaultSQLRenderer.render(c), "  ") for c in model.columns)
     body.extend(indent(DefaultSQLRenderer.render(i), "  ") for i in model.indexes if i.pk)
     body.extend(indent(DefaultSQLRenderer.render(r), "  ") for r in get_inline_references_for_sql(model))
+
+    if model._has_composite_pk():
+        body.append(
+            "  PRIMARY KEY ("
+            + ', '.join(f'"{c.name}"' for c in model.columns if c.pk)
+            + ')')
+
     return ',\n'.join(body)
 
 

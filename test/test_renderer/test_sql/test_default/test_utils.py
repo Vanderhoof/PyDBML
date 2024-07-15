@@ -19,7 +19,7 @@ class TestGetFullNameForSQL:
         assert get_full_name_for_sql(enum1) == '"myschema"."product status"'
 
 
-def test_reorder_tables(self) -> None:
+def test_reorder_tables() -> None:
     t1 = Mock(name="table1")  # 1 ref
     t2 = Mock(name="table2")  # 2 refs
     t3 = Mock(name="table3")
@@ -47,4 +47,4 @@ def test_reorder_tables(self) -> None:
     original = [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10]
     expected = [t6, t2, t1, t4, t3, t5, t7, t8, t9, t10]
     result = reorder_tables_for_sql(original, refs)  # type: ignore
-    self.assertEqual(expected, result)
+    assert expected == result
