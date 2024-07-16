@@ -1,11 +1,9 @@
 from unittest import TestCase
 
 from pydbml.classes import Column
-from pydbml.classes import Expression
 from pydbml.classes import Note
 from pydbml.classes import Reference
 from pydbml.classes import Table
-from pydbml.classes import Enum
 from pydbml.database import Database
 from pydbml.exceptions import TableNotFoundError
 
@@ -120,3 +118,49 @@ class TestColumn(TestCase):
         c1 = Column(name='client_id', type='integer')
         c1.note = note1
         self.assertIs(c1.note.parent, c1)
+
+
+class TestEqual:
+    @staticmethod
+    def test_other_type() -> None:
+        c1 = Column('name', 'VARCHAR2')
+        assert c1 != 'name'
+
+    @staticmethod
+    def test_different_tables() -> None:
+        t1 = Table('table1', columns=[Column('name', 'VARCHAR2')])
+        t2 = Table('table2', columns=[Column('name', 'VARCHAR2')])
+        assert t1.columns[0] != t2.columns[0]
+
+    @staticmethod
+    def test_same_table() -> None:
+        t1 = Table('table1', columns=[Column('name', 'VARCHAR2')])
+        t2 = Table('table1', columns=[Column('name', 'VARCHAR2')])
+        assert t1.columns[0] == t2.columns[0]
+
+    @staticmethod
+    def test_same_column() -> None:
+        c1 = Column('name', 'VARCHAR2')
+        assert c1 == c1
+
+    @staticmethod
+    def test_table_not_set() -> None:
+        c1 = Column('name', 'VARCHAR2')
+        c2 = Column('name', 'VARCHAR2')
+        assert c1 == c2
+
+    @staticmethod
+    def test_ont_table_not_set() -> None:
+        c1 = Column('name', 'VARCHAR2')
+        c2 = Column('name', 'VARCHAR2')
+        t1 = Table('table1')
+        c1.table = t1
+        assert c1 != c2
+
+        c1.table, c2.table = None, t1
+        assert c1 != c2
+
+
+def test_repr() -> None:
+    c1 = Column('name', 'VARCHAR2')
+    assert repr(c1) == "<Column 'name', 'VARCHAR2'>"

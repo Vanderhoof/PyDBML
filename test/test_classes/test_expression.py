@@ -3,7 +3,9 @@ from unittest import TestCase
 from pydbml.classes import Expression
 
 
-class TestNote(TestCase):
-    def test_dbml(self):
-        e = Expression('SUM(amount)')
-        self.assertEqual(e.dbml, '`SUM(amount)`')
+def test_str(expression1: Expression) -> None:
+    assert str(expression1) == 'SUM(amount)'
+
+
+def test_repr(expression1: Expression) -> None:
+    assert repr(expression1) == "Expression('SUM(amount)')"

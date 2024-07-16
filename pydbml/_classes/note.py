@@ -12,20 +12,12 @@ class Note(SQLObject, DBMLObject):
         self.parent: Any = None
 
     def __str__(self):
-        '''
-        >>> print(Note('Note text'))
-        Note text
-        '''
-
+        '''Note text'''
         return self.text
 
     def __bool__(self):
         return bool(self.text)
 
     def __repr__(self):
-        '''
-        >>> Note('Note text')
-        Note('Note text')
-        '''
-
+        '''Note('Note text')'''
         return f'Note({repr(self.text)})'

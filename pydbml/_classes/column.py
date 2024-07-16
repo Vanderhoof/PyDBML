@@ -44,6 +44,8 @@ class Column(SQLObject, DBMLObject):
         self.table: Optional['Table'] = None
 
     def __eq__(self, other: object) -> bool:
+        if other is self:
+            return True
         if not isinstance(other, self.__class__):
             return False
         self_table = self.table.full_name if self.table else None

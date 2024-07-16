@@ -21,11 +21,7 @@ class Project(DBMLObject):
         self.comment = comment
 
     def __repr__(self):
-        """
-        >>> Project('myproject')
-        <Project 'myproject'>
-        """
-
+        """<Project 'myproject'>"""
         return f'<Project {self.name!r}>'
 
     @property

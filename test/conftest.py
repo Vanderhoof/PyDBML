@@ -4,6 +4,7 @@ import pytest
 
 from pydbml import Database
 from pydbml._classes.reference import Reference
+from pydbml._classes.sticky_note import StickyNote
 from pydbml.classes import Column, Enum, EnumItem, Note, Expression, Table, Index
 
 
@@ -118,6 +119,11 @@ def index1(table1: Table) -> Index:
 @pytest.fixture
 def note1():
     return Note('Simple note')
+
+
+@pytest.fixture
+def sticky_note1():
+    return StickyNote(name='mynote', text='Simple note')
 
 
 @pytest.fixture

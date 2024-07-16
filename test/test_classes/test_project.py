@@ -1,12 +1,15 @@
-from pydbml.classes import Project
 from pydbml.classes import Note
+from pydbml.classes import Project
 
-from unittest import TestCase
+
+def test_note_property():
+    note1 = Note('column note')
+    p = Project('myproject')
+    p.note = note1
+    assert p.note.parent is p
 
 
-class TestProject(TestCase):
-    def test_note_property(self):
-        note1 = Note('column note')
-        p = Project('myproject')
-        p.note = note1
-        self.assertIs(p.note.parent, p)
+def test_repr() -> None:
+    project = Project('myproject')
+    assert repr(project) == "<Project 'myproject'>"
+

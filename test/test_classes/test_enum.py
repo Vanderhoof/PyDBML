@@ -43,3 +43,8 @@ class TestEnum(TestCase):
 
         for i1, i2 in zip(e, [ei1, ei2, ei3, ei4]):
             self.assertIs(i1, i2)
+
+
+def test_str():
+    ei = EnumItem('en-US')
+    assert str(ei) == 'en-US'

@@ -13,20 +13,12 @@ class StickyNote(DBMLObject):
         self.database = None
 
     def __str__(self):
-        '''
-        >>> print(StickyNote('mynote', 'Note text'))
-        StickyNote('mynote', 'Note text')
-        '''
-
+        '''StickyNote('mynote', 'Note text')'''
         return self.__class__.__name__ + f'({repr(self.name)}, {repr(self.text)})'
 
     def __bool__(self):
         return bool(self.text)
 
     def __repr__(self):
-        '''
-        >>> StickyNote('mynote', 'Note text')
-        <StickyNote 'mynote', 'Note text'>
-        '''
-
+        '''<StickyNote 'mynote', 'Note text'>'''
         return f'<{self.__class__.__name__} {self.name!r}, {self.text!r}>'
