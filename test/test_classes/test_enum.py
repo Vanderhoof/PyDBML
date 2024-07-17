@@ -45,6 +45,10 @@ class TestEnum(TestCase):
             self.assertIs(i1, i2)
 
 
-def test_str():
+def test_repr(enum_item1: EnumItem) -> None:
+    assert repr(enum_item1) == "<EnumItem 'en-US'>"
+
+
+def test_str() -> None:
     ei = EnumItem('en-US')
     assert str(ei) == 'en-US'

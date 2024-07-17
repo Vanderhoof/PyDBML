@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+import pytest
+
 from pydbml.classes import Column
 from pydbml.classes import Expression
 from pydbml.classes import Index
@@ -178,3 +180,22 @@ class TestTable(TestCase):
         t = Table(name='test')
         t.note = note1
         self.assertIs(t.note.parent, t)
+
+
+class TestAddIndex:
+    @staticmethod
+    def test_wrong_type(table1: Table) -> None:
+        with pytest.raises(TypeError):
+            table1.add_index('wrong_type')
+
+
+    @staticmethod
+    def test_column_not_in_table(table1: Table, table2: Table) -> None:
+        with pytest.raises(ColumnNotFoundError):
+            table1.add_index(Index([table2.columns[0]]))
+
+    @staticmethod
+    def test_ok(table1: Table) -> None:
+        i = Index([table1.columns[0]])
+        table1.add_index(i)
+        assert i.table is table1

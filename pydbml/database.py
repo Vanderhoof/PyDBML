@@ -35,11 +35,6 @@ class Database:
         self.project: Optional['Project'] = None
 
     def __repr__(self) -> str:
-        """
-        >>> Database()
-        <Database>
-        """
-
         return f"<Database>"
 
     def __getitem__(self, k: Union[int, str]) -> Table:

@@ -93,7 +93,7 @@ class Table(SQLObject, DBMLObject):
         if not isinstance(i, Index):
             raise TypeError('Indexes must be of type Index')
         for subject in i.subjects:
-            if isinstance(subject, Column) and subject.table != self:
+            if isinstance(subject, Column) and subject.table is not self:
                 raise ColumnNotFoundError(f'Column {subject} not in the table')
         i.table = self
         self.indexes.append(i)

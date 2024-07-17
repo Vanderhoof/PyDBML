@@ -6,6 +6,7 @@ import pytest
 import pydbml.renderer.sql.default.table
 from pydbml import Database
 from pydbml.classes import Table, Column, Reference, Note
+from pydbml.exceptions import UnknownDatabaseError
 from pydbml.renderer.sql.default.table import (
     get_references_for_sql,
     get_inline_references_for_sql,
@@ -88,6 +89,12 @@ class TestGetReferencesForSQL:
         r1, r2, r3 = inline_refs
         assert get_references_for_sql(table1) == [r1, r2]
         assert get_references_for_sql(table2) == [r3]
+
+    @staticmethod
+    def test_db_not_set(table1: Table) -> None:
+        table1.database = None
+        with pytest.raises(UnknownDatabaseError):
+            get_references_for_sql(table1)
 
 
 class TestGetInlineReferencesForSQL:

@@ -4,7 +4,7 @@ from pydbml.renderer.sql.default.utils import reorder_tables_for_sql
 from pydbml.renderer.base import BaseRenderer
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from pydbml.database import Database
 
 

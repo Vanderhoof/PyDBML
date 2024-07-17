@@ -176,3 +176,12 @@ def test():
             p_mod = PyDBML(p_mod.dbml)
             note2 = p_mod.tables[0].note
             self.assertEqual(source_text, note2.text)
+
+
+def test_repr_pydbml() -> None:
+    assert repr(PyDBML()) == "<PyDBML>"
+
+
+def test_repr_pydbml_parser() -> None:
+    assert repr(PyDBMLParser('')) == "<PyDBMLParser>"
+

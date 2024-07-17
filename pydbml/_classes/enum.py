@@ -30,19 +30,11 @@ class EnumItem(SQLObject, DBMLObject):
         val.parent = self
 
     def __repr__(self):
-        '''
-        >>> EnumItem('en-US')
-        <EnumItem 'en-US'>
-        '''
-
+        '''<EnumItem 'en-US'>'''
         return f'<EnumItem {self.name!r}>'
 
     def __str__(self):
-        '''
-        >>> print(EnumItem('en-US'))
-        en-US
-        '''
-
+        '''en-US'''
         return self.name
 
 

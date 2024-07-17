@@ -368,3 +368,7 @@ class TestDatabase(TestCase):
             database.delete(t)
         with self.assertRaises(AttributeError):
             t.database
+
+
+def test_repr() -> None:
+    assert repr(Database()) == "<Database>"

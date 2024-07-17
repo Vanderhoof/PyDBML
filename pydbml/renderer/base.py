@@ -1,6 +1,6 @@
 from typing import Type, Callable, Dict, TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from pydbml.database import Database
 
 
@@ -14,7 +14,7 @@ class BaseRenderer:
     @property
     def model_renderers(cls) -> Dict[Type, Callable]:
         """A class attribute dictionary to store the model renderers."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def render(cls, model) -> str:
@@ -35,4 +35,4 @@ class BaseRenderer:
 
     @classmethod
     def render_db(cls, db: 'Database') -> str:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover

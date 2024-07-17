@@ -42,6 +42,7 @@ def create_components(model: Index, keys: str) -> str:
     components.append(f'({keys})')
     return ''.join(components) + ';'
 
+
 @DefaultSQLRenderer.renderer_for(Index)
 def render_index(model: Index) -> str:
     '''

@@ -63,11 +63,20 @@ class TestRenderComponents:
         expected = 'CREATE INDEX ON "products" USING HASH ("name");'
         assert render_index(index1) == expected
 
-def test_render_index(index1: Index) -> None:
-    index1.comment = "Test comment"
-    index1.unique = True
-    index1.name = "test"
-    index1.type = "hash"
 
-    expected = '-- Test comment\nCREATE UNIQUE INDEX "test" ON "products" USING HASH ("name");'
-    assert render_index(index1) == expected
+class TestRenderIndex:
+    @staticmethod
+    def test_render_index(index1: Index) -> None:
+        index1.comment = "Test comment"
+        index1.unique = True
+        index1.name = "test"
+        index1.type = "hash"
+
+        expected = '-- Test comment\nCREATE UNIQUE INDEX "test" ON "products" USING HASH ("name");'
+        assert render_index(index1) == expected
+
+    @staticmethod
+    def test_render_pk(index1: Index) -> None:
+        index1.pk = True
+        expected = 'PRIMARY KEY ("name")'
+        assert render_index(index1) == expected

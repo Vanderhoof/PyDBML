@@ -1,6 +1,6 @@
 from typing import List, Dict, Union
 
-from pydbml.classes import Column, Enum, Reference, Table
+from pydbml.classes import Enum, Reference, Table
 from pydbml.constants import MANY_TO_ONE, ONE_TO_MANY
 from pydbml.tools import comment
 
@@ -24,7 +24,7 @@ def reorder_tables_for_sql(tables: List['Table'], refs: List['Reference']) -> Li
                 table_name = ref.table1.name
             elif ref.type == ONE_TO_MANY and ref.table2 is not None:
                 table_name = ref.table2.name
-            else:
+            else:  # pragma: no cover
                 continue
             references[table_name] = references.get(table_name, 0) + 1
     return sorted(tables, key=lambda t: references.get(t.name, 0), reverse=True)
