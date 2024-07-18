@@ -21,6 +21,15 @@ class SQLObject:
                 raise AttributeMissingError(
                     f'Cannot render SQL. Missing required attribute "{attr}".'
                 )
+    @property
+    def sql(self) -> str:
+        if hasattr(self, 'database') and self.database is not None:
+            renderer = self.database.sql_renderer
+        else:
+            from pydbml.renderer.sql.default import DefaultSQLRenderer
+            renderer = DefaultSQLRenderer
+
+        return renderer.render(self)
 
     def __setattr__(self, name: str, value: Any):
         """
@@ -46,3 +55,16 @@ class SQLObject:
             other_dict.pop(field, None)
 
         return self_dict == other_dict
+
+
+class DBMLObject:
+    '''Base class for all DBML objects.'''
+    @property
+    def dbml(self) -> str:
+        if hasattr(self, 'database') and self.database is not None:
+            renderer = self.database.dbml_renderer
+        else:
+            from pydbml.renderer.dbml.default import DefaultDBMLRenderer
+            renderer = DefaultDBMLRenderer
+
+        return renderer.render(self)

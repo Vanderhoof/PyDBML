@@ -64,11 +64,6 @@ class PyDBML:
             return super().__new__(cls)
 
     def __repr__(self):
-        """
-        >>> PyDBML()
-        <PyDBML>
-        """
-
         return "<PyDBML>"
 
     @staticmethod
@@ -109,11 +104,6 @@ class PyDBMLParser:
         return self.database
 
     def __repr__(self):
-        """
-        >>> PyDBMLParser('')
-        <PyDBMLParser>
-        """
-
         return "<PyDBMLParser>"
 
     def _set_syntax(self):

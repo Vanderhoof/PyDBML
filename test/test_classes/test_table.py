@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+import pytest
+
 from pydbml.classes import Column
 from pydbml.classes import Expression
 from pydbml.classes import Index
@@ -18,15 +20,6 @@ class TestTable(TestCase):
         self.assertEqual(t.schema, 'public')
         t2 = Table('test', 'schema1')
         self.assertEqual(t2.schema, 'schema1')
-
-    def test_one_column(self) -> None:
-        t = Table('products')
-        c = Column('id', 'integer')
-        t.add_column(c)
-        s = Database()
-        s.add(t)
-        expected = 'CREATE TABLE "products" (\n  "id" integer\n);'
-        self.assertEqual(t.sql, expected)
 
     def test_getitem(self) -> None:
         t = Table('products')
@@ -95,174 +88,6 @@ class TestTable(TestCase):
         for i1, i2 in zip(t, [c1, c2, c3]):
             self.assertIs(i1, i2)
 
-    def test_ref(self) -> None:
-        t = Table('products')
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
-        t2 = Table('names')
-        c21 = Column('name_val', 'varchar2')
-        t2.add_column(c21)
-        s = Database()
-        s.add(t)
-        s.add(t2)
-        r = Reference('>', c2, c21)
-        s.add(r)
-        expected = \
-'''CREATE TABLE "products" (
-  "id" integer,
-  "name" varchar2
-);'''
-        self.assertEqual(t.sql, expected)
-        r.inline = True
-        expected = \
-'''CREATE TABLE "products" (
-  "id" integer,
-  "name" varchar2,
-  FOREIGN KEY ("name") REFERENCES "names" ("name_val")
-);'''
-        self.assertEqual(t.sql, expected)
-
-    def test_notes(self) -> None:
-        n = Note('Table note')
-        nc1 = Note('First column note')
-        nc2 = Note('Another column\nmultiline note')
-        t = Table('products', note=n)
-        c1 = Column('id', 'integer', note=nc1)
-        c2 = Column('name', 'varchar')
-        c3 = Column('country', 'varchar', note=nc2)
-        t.add_column(c1)
-        t.add_column(c2)
-        t.add_column(c3)
-        s = Database()
-        s.add(t)
-        expected = \
-'''CREATE TABLE "products" (
-  "id" integer,
-  "name" varchar,
-  "country" varchar
-);
-
-COMMENT ON TABLE "products" IS 'Table note';
-
-COMMENT ON COLUMN "products"."id" IS 'First column note';
-
-COMMENT ON COLUMN "products"."country" IS 'Another column
-multiline note';'''
-        self.assertEqual(t.sql, expected)
-
-    def test_ref_index(self) -> None:
-        t = Table('products')
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
-        t2 = Table('names')
-        c21 = Column('name_val', 'varchar2')
-        t2.add_column(c21)
-        s = Database()
-        s.add(t)
-
-        r = Reference('>', c2, c21, inline=True)
-        s.add(r)
-        i = Index(subjects=[c1, c2])
-        t.add_index(i)
-        expected = \
-'''CREATE TABLE "products" (
-  "id" integer,
-  "name" varchar2,
-  FOREIGN KEY ("name") REFERENCES "names" ("name_val")
-);
-
-CREATE INDEX ON "products" ("id", "name");'''
-        self.assertEqual(t.sql, expected)
-
-    def test_index_inline(self) -> None:
-        t = Table('products')
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
-        i = Index(subjects=[c1, c2], pk=True)
-        t.add_index(i)
-        s = Database()
-        s.add(t)
-
-        expected = \
-'''CREATE TABLE "products" (
-  "id" integer,
-  "name" varchar2,
-  PRIMARY KEY ("id", "name")
-);'''
-        self.assertEqual(t.sql, expected)
-
-    def test_schema_sql(self) -> None:
-        t = Table('products')
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
-        s = Database()
-        s.add(t)
-        expected = \
-'''CREATE TABLE "products" (
-  "id" integer,
-  "name" varchar2
-);'''
-        self.assertEqual(t.sql, expected)
-        t.schema = 'myschema'
-        expected = \
-'''CREATE TABLE "myschema"."products" (
-  "id" integer,
-  "name" varchar2
-);'''
-        self.assertEqual(t.sql, expected)
-
-    def test_index_inline_and_comments(self) -> None:
-        t = Table('products', comment='Multiline\ntable comment')
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
-        i = Index(subjects=[c1, c2], pk=True, comment='Multiline\nindex comment')
-        t.add_index(i)
-        s = Database()
-        s.add(t)
-
-        expected = \
-'''-- Multiline
--- table comment
-CREATE TABLE "products" (
-  "id" integer,
-  "name" varchar2,
-  -- Multiline
-  -- index comment
-  PRIMARY KEY ("id", "name")
-);'''
-        self.assertEqual(t.sql, expected)
-
-    def test_composite_pk_sql(self):
-        table = Table(
-            'products',
-            columns=(
-                Column('id', 'integer', pk=True),
-                Column('name', 'varchar2', pk=True),
-                Column('prop', 'object', pk=True),
-            )
-        )
-        s = Database()
-        s.add(table)
-
-        expected = \
-'''CREATE TABLE "products" (
-  "id" integer,
-  "name" varchar2,
-  "prop" object,
-  PRIMARY KEY ("id", "name", "prop")
-);'''
-        self.assertEqual(table.sql, expected)
-
     def test_add_column(self) -> None:
         t = Table('products')
         c1 = Column('id', 'integer')
@@ -325,62 +150,6 @@ CREATE TABLE "products" (
         with self.assertRaises(IndexNotFoundError):
             t.delete_index(i1)
 
-    def test_get_references_for_sql(self):
-        t = Table('products')
-        with self.assertRaises(UnknownDatabaseError):
-            t._get_references_for_sql()
-        c11 = Column('id', 'integer')
-        c12 = Column('name', 'varchar2')
-        t.add_column(c11)
-        t.add_column(c12)
-        t2 = Table('names')
-        c21 = Column('id', 'integer')
-        c22 = Column('name_val', 'varchar2')
-        t2.add_column(c21)
-        t2.add_column(c22)
-        s = Database()
-        s.add(t)
-        s.add(t2)
-        r1 = Reference('>', c12, c22)
-        r2 = Reference('-', c11, c21)
-        r3 = Reference('<', c11, c22)
-        s.add(r1)
-        s.add(r2)
-        s.add(r3)
-        self.assertEqual(t._get_references_for_sql(), [])
-        self.assertEqual(t2._get_references_for_sql(), [])
-        r1.inline = r2.inline = r3.inline = True
-        self.assertEqual(t._get_references_for_sql(), [r1, r2])
-        self.assertEqual(t2._get_references_for_sql(), [r3])
-
-    def test_get_references_for_sql_public(self):
-        t = Table('products')
-        with self.assertRaises(UnknownDatabaseError):
-            t._get_references_for_sql()
-        c11 = Column('id', 'integer')
-        c12 = Column('name', 'varchar2')
-        t.add_column(c11)
-        t.add_column(c12)
-        t2 = Table('names')
-        c21 = Column('id', 'integer')
-        c22 = Column('name_val', 'varchar2')
-        t2.add_column(c21)
-        t2.add_column(c22)
-        s = Database()
-        s.add(t)
-        s.add(t2)
-        r1 = Reference('>', c12, c22, inline=True)
-        r2 = Reference('-', c11, c21, inline=True)
-        r3 = Reference('<', c11, c22, inline=True)
-        s.add(r1)
-        s.add(r2)
-        s.add(r3)
-        self.assertEqual(t.get_references_for_sql(), [r1, r2])
-        self.assertEqual(t2.get_references_for_sql(), [r3])
-        r1.inline = r2.inline = r3.inline = False
-        self.assertEqual(t.get_references_for_sql(), [r1, r2])
-        self.assertEqual(t2.get_references_for_sql(), [r3])
-
     def test_get_refs(self):
         t = Table('products')
         with self.assertRaises(UnknownDatabaseError):
@@ -406,134 +175,27 @@ CREATE TABLE "products" (
         self.assertEqual(t.get_refs(), [r1, r2, r3])
         self.assertEqual(t2.get_refs(), [])
 
-    def test_dbml_simple(self):
-        t = Table('products')
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
-        s = Database()
-        s.add(t)
-
-        expected = \
-'''Table "products" {
-    "id" integer
-    "name" varchar2
-}'''
-        self.assertEqual(t.dbml, expected)
-
-    def test_header_color_dbml(self):
-        t = Table('products')
-        t.header_color = '#C84432'
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
-        s = Database()
-        s.add(t)
-
-        expected = \
-'''Table "products" [headercolor: #C84432] {
-    "id" integer
-    "name" varchar2
-}'''
-        self.assertEqual(t.dbml, expected)
-
-
-    def test_schema_dbml(self):
-        t = Table('products', schema="myschema")
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
-        s = Database()
-        s.add(t)
-
-        expected = \
-'''Table "myschema"."products" {
-    "id" integer
-    "name" varchar2
-}'''
-        self.assertEqual(t.dbml, expected)
-
-    def test_dbml_reference(self):
-        t = Table('products')
-        c1 = Column('id', 'integer')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c1)
-        t.add_column(c2)
-        t2 = Table('names')
-        c21 = Column('name_val', 'varchar2')
-        t2.add_column(c21)
-        s = Database()
-        s.add(t)
-        s.add(t2)
-        r = Reference('>', c2, c21)
-        s.add(r)
-        expected = \
-'''Table "products" {
-    "id" integer
-    "name" varchar2
-}'''
-        self.assertEqual(t.dbml, expected)
-        r.inline = True
-        expected = \
-'''Table "products" {
-    "id" integer
-    "name" varchar2 [ref: > "names"."name_val"]
-}'''
-        self.assertEqual(t.dbml, expected)
-        expected = \
-'''Table "names" {
-    "name_val" varchar2
-}'''
-        self.assertEqual(t2.dbml, expected)
-
-    def test_dbml_full(self):
-        t = Table(
-            'products',
-            alias='pd',
-            note='My multiline\nnote',
-            comment='My multiline\ncomment'
-        )
-        c0 = Column('zero', 'number')
-        c1 = Column('id', 'integer', unique=True, note='Multiline\ncomment note')
-        c2 = Column('name', 'varchar2')
-        t.add_column(c0)
-        t.add_column(c1)
-        t.add_column(c2)
-        i1 = Index(['zero', 'id'], unique=True)
-        i2 = Index([Expression('capitalize(name)')], comment="index comment")
-        t.add_index(i1)
-        t.add_index(i2)
-        s = Database()
-        s.add(t)
-
-        expected = \
-"""// My multiline
-// comment
-Table "products" as "pd" {
-    "zero" number
-    "id" integer [unique, note: '''Multiline
-    comment note''']
-    "name" varchar2
-    Note {
-        '''
-        My multiline
-        note
-        '''
-    }
-
-    indexes {
-        (zero, id) [unique]
-        // index comment
-        `capitalize(name)`
-    }
-}"""
-        self.assertEqual(t.dbml, expected)
-
     def test_note_property(self):
         note1 = Note('table note')
         t = Table(name='test')
         t.note = note1
         self.assertIs(t.note.parent, t)
+
+
+class TestAddIndex:
+    @staticmethod
+    def test_wrong_type(table1: Table) -> None:
+        with pytest.raises(TypeError):
+            table1.add_index('wrong_type')
+
+
+    @staticmethod
+    def test_column_not_in_table(table1: Table, table2: Table) -> None:
+        with pytest.raises(ColumnNotFoundError):
+            table1.add_index(Index([table2.columns[0]]))
+
+    @staticmethod
+    def test_ok(table1: Table) -> None:
+        i = Index([table1.columns[0]])
+        table1.add_index(i)
+        assert i.table is table1
