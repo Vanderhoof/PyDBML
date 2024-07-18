@@ -1,15 +1,15 @@
 import doctest
 
 from pydbml import database
-from pydbml.classes import column
-from pydbml.classes import enum
-from pydbml.classes import expression
-from pydbml.classes import index
-from pydbml.classes import note
-from pydbml.classes import project
-from pydbml.classes import reference
-from pydbml.classes import table
-from pydbml.classes import table_group
+from pydbml._classes import column
+from pydbml._classes import enum
+from pydbml._classes import expression
+from pydbml._classes import index
+from pydbml._classes import note
+from pydbml._classes import project
+from pydbml._classes import reference
+from pydbml._classes import table
+from pydbml._classes import table_group
 from pydbml.parser import parser
 
 

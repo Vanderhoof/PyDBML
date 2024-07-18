@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pydbml.classes.base import SQLObject
+from pydbml._classes.base import SQLObject
 from pydbml.exceptions import AttributeMissingError
 
 

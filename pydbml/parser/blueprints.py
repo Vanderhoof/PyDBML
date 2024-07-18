@@ -17,7 +17,7 @@ from pydbml.classes import Project
 from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
-from pydbml.classes.sticky_note import StickyNote
+from pydbml._classes.sticky_note import StickyNote
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
 from pydbml.exceptions import ValidationError
