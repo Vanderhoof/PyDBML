@@ -31,10 +31,13 @@ Table "order_items" {
 Table "products" {
   "id" int [pk]
   "name" varchar
-  "merchant_id" int [not null]
+  "merchant_id" int [not null, foo: 'bar', baz: 'qux fff asdas qweqw']
   "price" int
   "status" "product status"
   "created_at" datetime [default: `now()`]
+
+  Any_prop: 'Any value'
+  asd: 'dsa'
 
 
 Indexes {

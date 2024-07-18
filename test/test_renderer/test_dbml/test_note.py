@@ -1,5 +1,6 @@
 from pydbml.classes import Note
-from pydbml.renderer.dbml.default.note import prepare_text_for_dbml, render_note
+from pydbml.renderer.dbml.default.note import render_note
+from pydbml.renderer.dbml.default.utils import prepare_text_for_dbml
 
 
 def test_prepare_text_for_dbml() -> None:
