@@ -78,7 +78,20 @@ class TestRenderOptions:
         assert render_options(simple_column_with_table) == ""
 
     @staticmethod
+    def test_properties(simple_column_with_table: Column) -> None:
+        simple_column_with_table.properties = {"key": "value"}
+        simple_column_with_table.table.database.allow_properties = True
+        assert render_options(simple_column_with_table) == " [key: 'value']"
+
+    @staticmethod
+    def test_properties_not_allowed(simple_column_with_table: Column) -> None:
+        simple_column_with_table.properties = {"key": "value"}
+        simple_column_with_table.table.database.allow_properties = False
+        assert render_options(simple_column_with_table) == ""
+
+    @staticmethod
     def test_all_options(complex_column: Column) -> None:
+        complex_column.table = Mock(database=Mock(allow_properties=True))
         complex_column.get_refs = Mock(
             return_value=[
                 Mock(dbml="ref1", inline=True),
@@ -87,14 +100,19 @@ class TestRenderOptions:
             ]
         )
         complex_column.default = "null"
+
+        expected = (
+            " [ref1, ref3, pk, increment, default: null, unique, not null, note, foo: "
+            "'bar', baz: '''\n"
+            "qux\n"
+            "qux''']"
+        )
+
         with patch(
             "pydbml.renderer.dbml.default.column.note_option_to_dbml",
             Mock(return_value="note"),
         ):
-            assert (
-                render_options(complex_column)
-                == " [ref1, ref3, pk, increment, default: null, unique, not null, note]"
-            )
+            assert render_options(complex_column) == expected
 
 
 class TestRenderColumn:

@@ -2,7 +2,7 @@ from typing import Union
 
 from pydbml.classes import Column, Enum, Expression
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
-from pydbml.renderer.dbml.default.utils import comment_to_dbml, note_option_to_dbml
+from pydbml.renderer.dbml.default.utils import comment_to_dbml, note_option_to_dbml, quote_string
 from pydbml.renderer.sql.default.utils import get_full_name_for_sql
 
 
@@ -32,6 +32,10 @@ def render_options(model: Column) -> str:
         options.append('not null')
     if model.note:
         options.append(note_option_to_dbml(model.note))
+    if model.properties:
+        if model.table and model.table.database and model.table.database.allow_properties:
+            for key, value in model.properties.items():
+                options.append(f'{key}: {quote_string(value)}')
 
     if options:
         return f' [{", ".join(options)}]'

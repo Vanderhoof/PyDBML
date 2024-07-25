@@ -16,7 +16,7 @@ class Project(DBMLObject):
                  comment: Optional[str] = None):
         self.database = None
         self.name = name
-        self.items = items
+        self.items = items or {}
         self.note = Note(note)
         self.comment = comment
 
