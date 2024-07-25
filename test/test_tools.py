@@ -1,10 +1,10 @@
 from unittest import TestCase
 
 from pydbml.classes import Note
-from pydbml.tools import comment_to_dbml, remove_indentation
-from pydbml.tools import comment_to_sql
+from pydbml.tools import remove_indentation
+from pydbml.renderer.sql.default.utils import comment_to_sql
 from pydbml.tools import indent
-from pydbml.tools import note_option_to_dbml
+from pydbml.renderer.dbml.default.utils import note_option_to_dbml, comment_to_dbml
 from pydbml.tools import strip_empty_lines
 
 

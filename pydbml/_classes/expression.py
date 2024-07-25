@@ -1,7 +1,7 @@
-from .base import SQLObject
+from .base import SQLObject, DBMLObject
 
 
-class Expression(SQLObject):
+class Expression(SQLObject, DBMLObject):
     def __init__(self, text: str):
         self.text = text
 
@@ -20,11 +20,3 @@ class Expression(SQLObject):
         '''
 
         return f'Expression({repr(self.text)})'
-
-    @property
-    def sql(self) -> str:
-        return f'({self.text})'
-
-    @property
-    def dbml(self) -> str:
-        return f'`{self.text}`'

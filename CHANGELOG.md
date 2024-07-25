@@ -1,3 +1,9 @@
+# 1.1.0
+
+- New: SQL and DBML rendering rewritten tow support external renderers
+- New: allow unicode characters in identifiers (DBML v3.3.0)
+- New: support for arbitrary table and column properties (#37)
+
 # 1.0.11
 - Fix: allow pk in named indexes (thanks @pierresouchay for the contribution)
 

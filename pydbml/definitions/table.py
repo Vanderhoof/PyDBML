@@ -1,12 +1,12 @@
 import pyparsing as pp
 
-from .column import table_column
+from .column import table_column, table_column_with_properties
 from .common import _
 from .common import _c
 from .common import end
 from .common import note
 from .common import note_object
-from .generic import name
+from .generic import name, string_literal
 from .index import indexes
 from pydbml.parser.blueprints import TableBlueprint
 
@@ -42,9 +42,13 @@ table_settings.set_parse_action(parse_table_settings)
 
 note_element = note | note_object
 
+prop = name + pp.Suppress(":") + string_literal
+
 table_element = _ + (note_element('note') | indexes('indexes')) + _
+table_element_with_property = _ + (note_element('note') | indexes('indexes') | prop.set_results_name('property', list_all_matches=True)) + _
 
 table_body = table_column[1, ...]('columns') + _ + table_element[...]
+table_body_with_properties = table_column_with_properties[1, ...]('columns') + _ + table_element_with_property[...]
 
 table_name = (name('schema') + '.' + name('name')) | (name('name'))
 
@@ -54,6 +58,14 @@ table = _c + (
     + alias('alias')[0, 1]
     + table_settings('settings')[0, 1] + _
     + '{' - table_body + _ + '}'
+) + end
+
+table_with_properties = _c + (
+    pp.CaselessLiteral("table").suppress()
+    + table_name
+    + alias('alias')[0, 1]
+    + table_settings('settings')[0, 1] + _
+    + '{' - table_body_with_properties + _ + '}'
 ) + end
 
 
@@ -86,12 +98,15 @@ def parse_table(s, loc, tok):
         init_dict['indexes'] = tok['indexes']
     if 'columns' in tok:
         init_dict['columns'] = tok['columns']
-    if'comment_before' in tok:
+    if 'comment_before' in tok:
         comment = '\n'.join(c[0] for c in tok['comment_before'])
         init_dict['comment'] = comment
+    if 'property' in tok:
+        init_dict['properties'] = {k: v for k, v in tok['property']}
     result = TableBlueprint(**init_dict)
 
     return result
 
 
 table.set_parse_action(parse_table)
+table_with_properties.set_parse_action(parse_table)

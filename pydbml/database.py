@@ -1,42 +1,30 @@
-from typing import Any
+from typing import Any, Type
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
 
-from .classes import Enum, Note
+from ._classes.sticky_note import StickyNote
+from .classes import Enum
 from .classes import Project
 from .classes import Reference
 from .classes import Table
 from .classes import TableGroup
-from .classes.sticky_note import StickyNote
 from .exceptions import DatabaseValidationError
-
-from .constants import MANY_TO_ONE, ONE_TO_MANY
-
-
-def reorder_tables_for_sql(tables: List['Table'], refs: List['Reference']) -> List['Table']:
-    """
-    Attempt to reorder the tables, so that they are defined in SQL before they are referenced by
-    inline foreign keys.
-
-    Won't aid the rare cases of cross-references and many-to-many relations.
-    """
-    references: Dict[str, int] = {}
-    for ref in refs:
-        if ref.inline:
-            if ref.type == MANY_TO_ONE and ref.table1 is not None:
-                table_name = ref.table1.name
-            elif ref.type == ONE_TO_MANY and ref.table2 is not None:
-                table_name = ref.table2.name
-            else:
-                continue
-            references[table_name] = references.get(table_name, 0) + 1
-    return sorted(tables, key=lambda t: references.get(t.name, 0), reverse=True)
+from .renderer.base import BaseRenderer
+from .renderer.dbml.default.renderer import DefaultDBMLRenderer
+from .renderer.sql.default import DefaultSQLRenderer
 
 
 class Database:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        sql_renderer: Type[BaseRenderer] = DefaultSQLRenderer,
+        dbml_renderer: Type[BaseRenderer] = DefaultDBMLRenderer,
+        allow_properties: bool = False
+    ) -> None:
+        self.sql_renderer = sql_renderer
+        self.dbml_renderer = dbml_renderer
         self.tables: List['Table'] = []
         self.table_dict: Dict[str, 'Table'] = {}
         self.refs: List['Reference'] = []
@@ -44,13 +32,9 @@ class Database:
         self.table_groups: List['TableGroup'] = []
         self.sticky_notes: List['StickyNote'] = []
         self.project: Optional['Project'] = None
+        self.allow_properties = allow_properties
 
     def __repr__(self) -> str:
-        """
-        >>> Database()
-        <Database>
-        """
-
         return f"<Database>"
 
     def __getitem__(self, k: Union[int, str]) -> Table:
@@ -215,18 +199,9 @@ class Database:
     @property
     def sql(self):
         '''Returs SQL of the parsed results'''
-        refs = (ref for ref in self.refs if not ref.inline)
-        tables = reorder_tables_for_sql(self.tables, self.refs)
-        components = (i.sql for i in (*self.enums, *tables, *refs))
-        return '\n\n'.join(components)
+        return self.sql_renderer.render_db(self)
 
     @property
     def dbml(self):
         '''Generates DBML code out of parsed results'''
-        items = [self.project] if self.project else []
-        refs = (ref for ref in self.refs if not ref.inline)
-        items.extend((*self.enums, *self.tables, *refs, *self.table_groups, *self.sticky_notes))
-        components = (
-            i.dbml for i in items
-        )
-        return '\n\n'.join(components)
+        return self.dbml_renderer.render_db(self)

@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pydbml.classes.sticky_note import StickyNote
+from pydbml._classes.sticky_note import StickyNote
 from pydbml.parser.blueprints import StickyNoteBlueprint
 
 class TestNote(TestCase):
