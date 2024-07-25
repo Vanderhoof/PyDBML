@@ -13,5 +13,5 @@ class TestRenderNote:
         note = StickyNote(name='mynote', text="Note text\nwith multiple lines")
         assert (
             render_sticky_note(note)
-            == "Note mynote {\n    '''\n    Note text\n    with multiple lines\n    '''\n}"
+            == "Note mynote {\n    '''\n    Note text\n    with multiple lines'''\n}"
         )

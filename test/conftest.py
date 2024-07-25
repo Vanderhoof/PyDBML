@@ -54,7 +54,8 @@ def complex_column(enum1: Enum) -> Column:
         not_null=True,
         default=0,
         comment='This is a counter column',
-        note=Note('This is a note for the column')
+        note=Note('This is a note for the column'),
+        properties={'foo': 'bar', 'baz': "qux\nqux"}
     )
 
 

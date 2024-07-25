@@ -39,8 +39,9 @@ default = pp.CaselessLiteral('default:').suppress() + _ - (
     )
 )
 
+prop = name + pp.Suppress(":") + string_literal
 
-column_setting = _ + (
+column_setting = (
     pp.CaselessLiteral("not null").set_parse_action(
         lambda s, loc, tok: True
     )('notnull')
@@ -54,8 +55,13 @@ column_setting = _ + (
     | note('note')
     | ref_inline('ref*')
     | default('default')
-) + _
-column_settings = '[' - column_setting + ("," + column_setting)[...] + ']' + c
+)
+
+column_setting_with_property = column_setting | prop.set_results_name('property', list_all_matches=True)
+
+column_settings = '[' - (_ + column_setting + _) + ("," + column_setting)[...] + ']' + c
+
+column_settings_with_properties = '[' - (_ + column_setting_with_property + _) + ("," + column_setting_with_property)[...] + ']' + c
 
 
 def parse_column_settings(s, loc, tok):
@@ -79,10 +85,13 @@ def parse_column_settings(s, loc, tok):
         result['ref_blueprints'] = list(tok['ref'])
     if 'comment' in tok:
         result['comment'] = tok['comment'][0]
+    if 'property' in tok:
+        result['properties'] = {k: v for k, v in tok['property']}
     return result
 
 
 column_settings.set_parse_action(parse_column_settings)
+column_settings_with_properties.set_parse_action(parse_column_settings)
 
 
 constraint = pp.CaselessLiteral("unique") | pp.CaselessLiteral("pk")
@@ -92,6 +101,14 @@ table_column = _c + (
     + column_type('type')
     + constraint[...]('constraints') + c
     + column_settings('settings')[0, 1]
+) + n
+
+
+table_column_with_properties = _c + (
+    name('name')
+    + column_type('type')
+    + constraint[...]('constraints') + c
+    + column_settings_with_properties('settings')[0, 1]
 ) + n
 
 
@@ -124,3 +141,4 @@ def parse_column(s, loc, tok):
 
 
 table_column.set_parse_action(parse_column)
+table_column_with_properties.set_parse_action(parse_column)

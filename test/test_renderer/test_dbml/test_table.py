@@ -79,3 +79,31 @@ class TestRenderTable:
             "}"
         )
         assert render_table(table1) == expected
+
+    @staticmethod
+    def test_properties(db: Database, table1: Table) -> None:
+        table1.properties = {"key": "value"}
+        db.add(table1)
+        db.allow_properties = True
+        expected = (
+            'Table "products" {\n'
+            '    "id" integer\n'
+            '    "name" varchar\n'
+            "\n"
+            "    key: 'value'\n"
+            "}"
+        )
+        assert render_table(table1) == expected
+
+    @staticmethod
+    def test_properties_not_allowed(db: Database, table1: Table) -> None:
+        table1.properties = {"key": "value"}
+        db.add(table1)
+        db.allow_properties = False
+        expected = (
+            'Table "products" {\n'
+            '    "id" integer\n'
+            '    "name" varchar\n'
+            "}"
+        )
+        assert render_table(table1) == expected

@@ -4,25 +4,24 @@ from typing import List
 from typing import Optional
 from typing import Union
 
+from ._classes.sticky_note import StickyNote
 from .classes import Enum
 from .classes import Project
 from .classes import Reference
 from .classes import Table
 from .classes import TableGroup
-from ._classes.sticky_note import StickyNote
 from .exceptions import DatabaseValidationError
-
 from .renderer.base import BaseRenderer
 from .renderer.dbml.default.renderer import DefaultDBMLRenderer
 from .renderer.sql.default import DefaultSQLRenderer
-from .renderer.sql.default.utils import reorder_tables_for_sql
 
 
 class Database:
     def __init__(
         self,
         sql_renderer: Type[BaseRenderer] = DefaultSQLRenderer,
-        dbml_renderer: Type[BaseRenderer] = DefaultDBMLRenderer
+        dbml_renderer: Type[BaseRenderer] = DefaultDBMLRenderer,
+        allow_properties: bool = False
     ) -> None:
         self.sql_renderer = sql_renderer
         self.dbml_renderer = dbml_renderer
@@ -33,6 +32,7 @@ class Database:
         self.table_groups: List['TableGroup'] = []
         self.sticky_notes: List['StickyNote'] = []
         self.project: Optional['Project'] = None
+        self.allow_properties = allow_properties
 
     def __repr__(self) -> str:
         return f"<Database>"

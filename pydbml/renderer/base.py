@@ -23,13 +23,13 @@ class BaseRenderer:
         `self._unsupported_renderer` that by default returns an empty string.
         """
 
-        return cls.model_renderers.get(type(model), cls._unsupported_renderer)(model)
+        return cls.model_renderers.get(type(model), cls._unsupported_renderer)(model)  # type: ignore
 
     @classmethod
     def renderer_for(cls, model_cls: Type) -> Callable:
         """A decorator to register a renderer for a model class."""
         def decorator(func) -> Callable:
-            cls.model_renderers[model_cls] = func
+            cls.model_renderers[model_cls] = func  # type: ignore
             return func
         return decorator
 
