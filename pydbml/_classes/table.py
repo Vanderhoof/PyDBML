@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Dict
 from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
@@ -32,7 +32,9 @@ class Table(SQLObject, DBMLObject):
                  note: Optional[Union[Note, str]] = None,
                  header_color: Optional[str] = None,
                  comment: Optional[str] = None,
-                 abstract: bool = False):
+                 abstract: bool = False,
+                 properties: Union[Dict[str, str], None] = None
+                 ):
         self.database: Optional[Database] = None
         self.name = name
         self.schema = schema
@@ -47,6 +49,7 @@ class Table(SQLObject, DBMLObject):
         self.header_color = header_color
         self.comment = comment
         self.abstract = abstract
+        self.properties = properties if properties else {}
 
     @property
     def note(self):
