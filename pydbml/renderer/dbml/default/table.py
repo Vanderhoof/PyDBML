@@ -3,7 +3,7 @@ from textwrap import indent
 
 from pydbml.classes import Table
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
-from pydbml.renderer.dbml.default.utils import comment_to_dbml
+from pydbml.renderer.dbml.default.utils import comment_to_dbml, quote_string
 
 
 def get_full_name_for_dbml(model) -> str:
@@ -42,6 +42,13 @@ def render_table(model: Table) -> str:
     result += '{\n'
     columns_str = '\n'.join(DefaultDBMLRenderer.render(c) for c in model.columns)
     result += indent(columns_str, '    ') + '\n'
+
+    if model.properties:
+        if model.database and model.database.allow_properties:
+            properties_str = '\n' + '\n'.join(f'{key}: {quote_string(value)}' for key, value in model.properties.items()) + '\n'
+            properties_str = indent(properties_str, '    ')
+            result += properties_str
+
     if model.note:
         result += indent(model.note.dbml, '    ') + '\n'
 

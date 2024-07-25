@@ -31,7 +31,7 @@ def render_column(model: Column) -> str:
         if isinstance(model.default, Expression):
             default = DefaultSQLRenderer.render(model.default)
         else:
-            default = model.default
+            default = model.default  # type: ignore
         components.append(f'DEFAULT {default}')
 
     result = comment_to_sql(model.comment) if model.comment else ''

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Union
@@ -29,8 +29,9 @@ class Column(SQLObject, DBMLObject):
                  autoinc: bool = False,
                  default: Optional[Union[str, int, bool, float, Expression]] = None,
                  note: Optional[Union[Note, str]] = None,
-                 # ref_blueprints: Optional[List[ReferenceBlueprint]] = None,
-                 comment: Optional[str] = None):
+                 comment: Optional[str] = None,
+                 properties: Union[Dict[str, str], None] = None
+                 ):
         self.name = name
         self.type = type
         self.unique = unique
@@ -39,6 +40,7 @@ class Column(SQLObject, DBMLObject):
         self.autoinc = autoinc
         self.comment = comment
         self.note = Note(note)
+        self.properties = properties if properties else {}
 
         self.default = default
         self.table: Optional['Table'] = None

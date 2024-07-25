@@ -15,7 +15,7 @@ from pydbml.definitions.enum import enum
 from pydbml.definitions.project import project
 from pydbml.definitions.reference import ref
 from pydbml.definitions.sticky_note import sticky_note
-from pydbml.definitions.table import table
+from pydbml.definitions.table import table, table_with_properties
 from pydbml.definitions.table_group import table_group
 from pydbml.exceptions import TableNotFoundError
 from pydbml.tools import remove_bom
@@ -25,11 +25,11 @@ from .blueprints import ReferenceBlueprint
 from .blueprints import TableBlueprint
 from .blueprints import TableGroupBlueprint
 
-pp.ParserElement.set_default_whitespace_chars(' \t\r')
+pp.ParserElement.set_default_whitespace_chars(" \t\r")
 
 
 class PyDBML:
-    '''
+    """
     PyDBML parser factory. If properly initiated, returns parsed Database.
 
     Usage option 1:
@@ -44,22 +44,26 @@ class PyDBML:
     >>> # or
     >>> from pathlib import Path
     >>> p = PyDBML(Path('test_schema.dbml'))
-    '''
+    """
 
-    def __new__(cls, source_: Optional[Union[str, Path, TextIOWrapper]] = None):
+    def __new__(
+        cls,
+        source_: Optional[Union[str, Path, TextIOWrapper]] = None,
+        allow_properties: bool = False,
+    ):
         if source_ is not None:
             if isinstance(source_, str):
                 source = source_
             elif isinstance(source_, Path):
-                with open(source_, encoding='utf8') as f:
+                with open(source_, encoding="utf8") as f:
                     source = f.read()
             elif isinstance(source_, TextIOWrapper):
                 source = source_.read()
             else:
-                raise TypeError('Source must be str, path or file stream')
+                raise TypeError("Source must be str, path or file stream")
 
             source = remove_bom(source)
-            return cls.parse(source)
+            return cls.parse(source, allow_properties=allow_properties)
         else:
             return super().__new__(cls)
 
@@ -67,9 +71,9 @@ class PyDBML:
         return "<PyDBML>"
 
     @staticmethod
-    def parse(text: str) -> Database:
+    def parse(text: str, allow_properties: bool = False) -> Database:
         text = remove_bom(text)
-        parser = PyDBMLParser(text)
+        parser = PyDBMLParser(text, allow_properties=allow_properties)
         return parser.parse()
 
     @staticmethod
@@ -77,7 +81,7 @@ class PyDBML:
         if isinstance(file, TextIOWrapper):
             source = file.read()
         else:
-            with open(file, encoding='utf8') as f:
+            with open(file, encoding="utf8") as f:
                 source = f.read()
         source = remove_bom(source)
         parser = PyDBMLParser(source)
@@ -85,7 +89,7 @@ class PyDBML:
 
 
 class PyDBMLParser:
-    def __init__(self, source: str):
+    def __init__(self, source: str, allow_properties: bool = False):
         self.database = None
 
         self.ref_blueprints: List[ReferenceBlueprint] = []
@@ -96,6 +100,7 @@ class PyDBMLParser:
         self.enums: List[EnumBlueprint] = []
         self.project: Optional[ProjectBlueprint] = None
         self.sticky_notes: List[StickyNoteBlueprint] = []
+        self._allow_properties = allow_properties
 
     def parse(self):
         self._set_syntax()
@@ -107,7 +112,9 @@ class PyDBMLParser:
         return "<PyDBMLParser>"
 
     def _set_syntax(self):
-        table_expr = table.copy()
+        table_expr = (
+            table_with_properties.copy() if self._allow_properties else table.copy()
+        )
         ref_expr = ref.copy()
         enum_expr = enum.copy()
         table_group_expr = table_group.copy()
@@ -129,7 +136,7 @@ class PyDBMLParser:
             | project_expr
             | note_expr
         )
-        self._syntax = expr[...] + ('\n' | comment)[...] + pp.StringEnd()
+        self._syntax = expr[...] + ("\n" | comment)[...] + pp.StringEnd()
 
     def parse_blueprint(self, s, loc, tok):
         blueprint = tok[0]
@@ -167,23 +174,23 @@ class PyDBMLParser:
         elif isinstance(blueprint, StickyNoteBlueprint):
             self.sticky_notes.append(blueprint)
         else:
-            raise RuntimeError(f'type unknown: {blueprint}')
+            raise RuntimeError(f"type unknown: {blueprint}")
         blueprint.parser = self
 
-    def locate_table(self, schema: str, name: str) -> 'Table':
+    def locate_table(self, schema: str, name: str) -> "Table":
         if not self.database:
-            raise RuntimeError('Database is not ready')
+            raise RuntimeError("Database is not ready")
         # first by alias
         result = self.database.table_dict.get(name)
         if result is None:
-            full_name = f'{schema}.{name}'
+            full_name = f"{schema}.{name}"
             result = self.database.table_dict.get(full_name)
         if result is None:
-            raise TableNotFoundError(f'Table {full_name} not present in the database')
+            raise TableNotFoundError(f"Table {full_name} not present in the database")
         return result
 
     def build_database(self):
-        self.database = Database()
+        self.database = Database(allow_properties=self._allow_properties)
         for enum_bp in self.enums:
             self.database.add(enum_bp.build())
         for table_bp in self.tables:
