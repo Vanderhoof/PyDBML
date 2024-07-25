@@ -1,7 +1,5 @@
 from typing import Union
 
-from pyparsing import quoted_string
-
 from pydbml.classes import Column, Enum, Expression
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
 from pydbml.renderer.dbml.default.utils import comment_to_dbml, note_option_to_dbml, quote_string

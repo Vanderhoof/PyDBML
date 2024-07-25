@@ -1,6 +1,10 @@
 import re
+from typing import TYPE_CHECKING
 
 from pydbml.tools import comment
+
+if TYPE_CHECKING:
+    from pydbml.classes import Note
 
 
 def prepare_text_for_dbml(text: str) -> str:
@@ -11,7 +15,7 @@ def prepare_text_for_dbml(text: str) -> str:
 
 def quote_string(text: str) -> str:
     if '\n' in text:
-        return f"'''{prepare_text_for_dbml(text)}'''"
+        return f"'''\n{prepare_text_for_dbml(text)}'''"
     else:
         return f"'{prepare_text_for_dbml(text)}'"
 
