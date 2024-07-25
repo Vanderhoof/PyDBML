@@ -1,3 +1,8 @@
+# 1.1.0
+
+- New: allow unicode characters in identifiers (DBML v3.3.0)
+- 
+
 # 1.0.11
 - Fix: allow pk in named indexes (thanks @pierresouchay for the contribution)
 
