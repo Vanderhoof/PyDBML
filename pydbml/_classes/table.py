@@ -1,30 +1,23 @@
+from typing import Iterable, Dict
 from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Union
-from typing import Iterable
 
-from .base import SQLObject
-from .column import Column
-from .index import Index
-from .note import Note
-from pydbml.constants import MANY_TO_ONE
-from pydbml.constants import ONE_TO_MANY
-from pydbml.constants import ONE_TO_ONE
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import IndexNotFoundError
 from pydbml.exceptions import UnknownDatabaseError
-from pydbml.tools import comment_to_dbml
-from pydbml.tools import comment_to_sql
-from pydbml.tools import indent
-
+from .base import SQLObject, DBMLObject
+from .column import Column
+from .index import Index
+from .note import Note
 
 if TYPE_CHECKING:  # pragma: no cover
     from pydbml.database import Database
     from .reference import Reference
 
 
-class Table(SQLObject):
+class Table(SQLObject, DBMLObject):
     '''Class representing table.'''
 
     required_attributes = ('name', 'schema')
@@ -36,10 +29,12 @@ class Table(SQLObject):
                  alias: Optional[str] = None,
                  columns: Optional[Iterable[Column]] = None,
                  indexes: Optional[Iterable[Index]] = None,
-                 note: Optional[Union['Note', str]] = None,
+                 note: Optional[Union[Note, str]] = None,
                  header_color: Optional[str] = None,
                  comment: Optional[str] = None,
-                 abstract: bool = False):
+                 abstract: bool = False,
+                 properties: Union[Dict[str, str], None] = None
+                 ):
         self.database: Optional[Database] = None
         self.name = name
         self.schema = schema
@@ -54,6 +49,7 @@ class Table(SQLObject):
         self.header_color = header_color
         self.comment = comment
         self.abstract = abstract
+        self.properties = properties if properties else {}
 
     @property
     def note(self):
@@ -100,7 +96,7 @@ class Table(SQLObject):
         if not isinstance(i, Index):
             raise TypeError('Indexes must be of type Index')
         for subject in i.subjects:
-            if isinstance(subject, Column) and subject.table != self:
+            if isinstance(subject, Column) and subject.table is not self:
                 raise ColumnNotFoundError(f'Column {subject} not in the table')
         i.table = self
         self.indexes.append(i)
@@ -120,36 +116,6 @@ class Table(SQLObject):
         if not self.database:
             raise UnknownDatabaseError('Database for the table is not set')
         return [ref for ref in self.database.refs if ref.table1 == self]
-
-    def get_references_for_sql(self) -> List['Reference']:
-        """
-        Return all references in the database where this table is on the left side of SQL
-        reference definition.
-        """
-        if not self.database:
-            raise UnknownDatabaseError(f'Database for the table {self} is not set')
-        result = []
-        for ref in self.database.refs:
-            if (ref.type in (MANY_TO_ONE, ONE_TO_ONE)) and\
-                    (ref.table1 == self):
-                result.append(ref)
-            elif (ref.type == ONE_TO_MANY) and (ref.table2 == self):
-                result.append(ref)
-        return result
-
-    def _get_references_for_sql(self) -> List['Reference']:
-        '''
-        Return inline references for this table sql definition
-        '''
-        if self.abstract:
-            return []
-        return [r for r in self.get_references_for_sql() if r.inline]
-
-    def _get_full_name_for_sql(self) -> str:
-        if self.schema == 'public':
-            return f'"{self.name}"'
-        else:
-            return f'"{self.schema}"."{self.name}"'
 
     def __getitem__(self, k: Union[int, str]) -> Column:
         if isinstance(k, int):
@@ -190,74 +156,3 @@ class Table(SQLObject):
         '''
 
         return f'{self.schema}.{self.name}({", ".join(c.name for c in self.columns)})'
-
-    @property
-    def sql(self):
-        '''
-        Returns full SQL for table definition:
-
-        CREATE TABLE "countries" (
-          "code" int PRIMARY KEY,
-          "name" varchar,
-          "continent_name" varchar
-        );
-
-        Also returns indexes if they were defined:
-
-        CREATE INDEX ON "products" ("id", "name");
-        '''
-        self.check_attributes_for_sql()
-        name = self._get_full_name_for_sql()
-        components = [f'CREATE TABLE {name} (']
-
-        body = []
-        body.extend(indent(c.sql, 2) for c in self.columns)
-        body.extend(indent(i.sql, 2) for i in self.indexes if i.pk)
-        body.extend(indent(r.sql, 2) for r in self._get_references_for_sql())
-
-        if self._has_composite_pk():
-            body.append(
-                "  PRIMARY KEY ("
-                + ', '.join(f'"{c.name}"' for c in self.columns if c.pk)
-                + ')')
-        components.append(',\n'.join(body))
-        components.append(');')
-        components.extend('\n' + i.sql for i in self.indexes if not i.pk)
-
-        result = comment_to_sql(self.comment) if self.comment else ''
-        result += '\n'.join(components)
-
-        if self.note:
-            result += f'\n\n{self.note.sql}'
-
-        for col in self.columns:
-            if col.note:
-                quoted_note = f"'{col.note._prepare_text_for_sql()}'"
-                note_sql = f'COMMENT ON COLUMN "{self.name}"."{col.name}" IS {quoted_note};'
-                result += f'\n\n{note_sql}'
-        return result
-
-    @property
-    def dbml(self):
-        result = comment_to_dbml(self.comment) if self.comment else ''
-
-        name = self._get_full_name_for_sql()
-
-        result += f'Table {name} '
-        if self.alias:
-            result += f'as "{self.alias}" '
-        if self.header_color:
-            result += f'[headercolor: {self.header_color}] '
-        result += '{\n'
-        columns_str = '\n'.join(c.dbml for c in self.columns)
-        result += indent(columns_str) + '\n'
-        if self.note:
-            result += indent(self.note.dbml) + '\n'
-        if self.indexes:
-            result += '\n    indexes {\n'
-            indexes_str = '\n'.join(i.dbml for i in self.indexes)
-            result += indent(indexes_str, 8) + '\n'
-            result += '    }\n'
-
-        result += '}'
-        return result

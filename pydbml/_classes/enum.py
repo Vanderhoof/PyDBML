@@ -3,20 +3,18 @@ from typing import List
 from typing import Optional
 from typing import Union
 
-from .base import SQLObject
+from .base import SQLObject, DBMLObject
 from .note import Note
-from pydbml.tools import comment_to_dbml
-from pydbml.tools import comment_to_sql
-from pydbml.tools import indent
-from pydbml.tools import note_option_to_dbml
 
 
-class EnumItem:
+class EnumItem(SQLObject, DBMLObject):
     '''Single enum item'''
+
+    required_attributes = ('name',)
 
     def __init__(self,
                  name: str,
-                 note: Optional[Union['Note', str]] = None,
+                 note: Optional[Union[Note, str]] = None,
                  comment: Optional[str] = None):
         self.name = name
         self.note = Note(note)
@@ -32,37 +30,15 @@ class EnumItem:
         val.parent = self
 
     def __repr__(self):
-        '''
-        >>> EnumItem('en-US')
-        <EnumItem 'en-US'>
-        '''
-
+        '''<EnumItem 'en-US'>'''
         return f'<EnumItem {self.name!r}>'
 
     def __str__(self):
-        '''
-        >>> print(EnumItem('en-US'))
-        en-US
-        '''
-
+        '''en-US'''
         return self.name
 
-    @property
-    def sql(self):
-        result = comment_to_sql(self.comment) if self.comment else ''
-        result += f"'{self.name}',"
-        return result
 
-    @property
-    def dbml(self):
-        result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'"{self.name}"'
-        if self.note:
-            result += f' [{note_option_to_dbml(self.note)}]'
-        return result
-
-
-class Enum(SQLObject):
+class Enum(SQLObject, DBMLObject):
     required_attributes = ('name', 'schema', 'items')
 
     def __init__(self,
@@ -111,38 +87,3 @@ class Enum(SQLObject):
         '''
 
         return self.name
-
-    def _get_full_name_for_sql(self) -> str:
-        if self.schema == 'public':
-            return f'"{self.name}"'
-        else:
-            return f'"{self.schema}"."{self.name}"'
-
-    @property
-    def sql(self):
-        '''
-        Returns SQL for enum type:
-
-        CREATE TYPE "job_status" AS ENUM (
-          'created',
-          'running',
-          'donef',
-          'failure',
-        );
-
-        '''
-        self.check_attributes_for_sql()
-        result = comment_to_sql(self.comment) if self.comment else ''
-        result += f'CREATE TYPE {self._get_full_name_for_sql()} AS ENUM (\n'
-        result += '\n'.join(f'{indent(i.sql, 2)}' for i in self.items)
-        result += '\n);'
-        return result
-
-    @property
-    def dbml(self):
-        result = comment_to_dbml(self.comment) if self.comment else ''
-        result += f'Enum {self._get_full_name_for_sql()} {{\n'
-        items_str = '\n'.join(i.dbml for i in self.items)
-        result += indent(items_str)
-        result += '\n}'
-        return result

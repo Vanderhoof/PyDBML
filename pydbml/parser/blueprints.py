@@ -17,7 +17,7 @@ from pydbml.classes import Project
 from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
-from pydbml.classes.sticky_note import StickyNote
+from pydbml._classes.sticky_note import StickyNote
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
 from pydbml.exceptions import ValidationError
@@ -133,6 +133,7 @@ class ColumnBlueprint(Blueprint):
     note: Optional[NoteBlueprint] = None
     ref_blueprints: Optional[List[ReferenceBlueprint]] = None
     comment: Optional[str] = None
+    properties: Optional[Dict[str, str]] = None
 
     def build(self) -> 'Column':
         if isinstance(self.default, ExpressionBlueprint):
@@ -155,7 +156,8 @@ class ColumnBlueprint(Blueprint):
             autoinc=self.autoinc,
             default=self.default,
             note=self.note.build() if self.note else None,
-            comment=self.comment
+            comment=self.comment,
+            properties=self.properties,
         )
 
 
@@ -194,6 +196,7 @@ class TableBlueprint(Blueprint):
     note: Optional[NoteBlueprint] = None
     header_color: Optional[str] = None
     comment: Optional[str] = None
+    properties: Optional[Dict[str, str]] = None
 
     def build(self) -> 'Table':
         result = Table(
@@ -202,7 +205,8 @@ class TableBlueprint(Blueprint):
             alias=self.alias,
             note=self.note.build() if self.note else None,
             header_color=self.header_color,
-            comment=self.comment
+            comment=self.comment,
+            properties=self.properties
         )
         columns = self.columns or []
         indexes = self.indexes or []
