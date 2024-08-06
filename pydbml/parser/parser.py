@@ -4,6 +4,7 @@ from io import TextIOWrapper
 from pathlib import Path
 from typing import List
 from typing import Optional
+from typing import Type
 from typing import Union
 
 import pyparsing as pp
@@ -18,6 +19,8 @@ from pydbml.definitions.sticky_note import sticky_note
 from pydbml.definitions.table import table, table_with_properties
 from pydbml.definitions.table_group import table_group
 from pydbml.exceptions import TableNotFoundError
+from pydbml.renderer.base import BaseRenderer
+from pydbml.renderer.sql.default import DefaultSQLRenderer
 from pydbml.tools import remove_bom
 from .blueprints import EnumBlueprint, StickyNoteBlueprint
 from .blueprints import ProjectBlueprint
@@ -50,6 +53,7 @@ class PyDBML:
         cls,
         source_: Optional[Union[str, Path, TextIOWrapper]] = None,
         allow_properties: bool = False,
+        sql_renderer: Type[BaseRenderer] = DefaultSQLRenderer,
     ):
         if source_ is not None:
             if isinstance(source_, str):
@@ -63,7 +67,9 @@ class PyDBML:
                 raise TypeError("Source must be str, path or file stream")
 
             source = remove_bom(source)
-            return cls.parse(source, allow_properties=allow_properties)
+            return cls.parse(
+                source, allow_properties=allow_properties, sql_renderer=sql_renderer
+            )
         else:
             return super().__new__(cls)
 
@@ -71,9 +77,15 @@ class PyDBML:
         return "<PyDBML>"
 
     @staticmethod
-    def parse(text: str, allow_properties: bool = False) -> Database:
+    def parse(
+        text: str,
+        allow_properties: bool = False,
+        sql_renderer: Type[BaseRenderer] = DefaultSQLRenderer,
+    ) -> Database:
         text = remove_bom(text)
-        parser = PyDBMLParser(text, allow_properties=allow_properties)
+        parser = PyDBMLParser(
+            text, allow_properties=allow_properties, sql_renderer=sql_renderer
+        )
         return parser.parse()
 
     @staticmethod
@@ -89,7 +101,12 @@ class PyDBML:
 
 
 class PyDBMLParser:
-    def __init__(self, source: str, allow_properties: bool = False):
+    def __init__(
+        self,
+        source: str,
+        allow_properties: bool = False,
+        sql_renderer: Type[BaseRenderer] = DefaultSQLRenderer,
+    ):
         self.database = None
 
         self.ref_blueprints: List[ReferenceBlueprint] = []
@@ -101,6 +118,7 @@ class PyDBMLParser:
         self.project: Optional[ProjectBlueprint] = None
         self.sticky_notes: List[StickyNoteBlueprint] = []
         self._allow_properties = allow_properties
+        self._sql_renderer = sql_renderer
 
     def parse(self):
         self._set_syntax()
@@ -190,7 +208,9 @@ class PyDBMLParser:
         return result
 
     def build_database(self):
-        self.database = Database(allow_properties=self._allow_properties)
+        self.database = Database(
+            allow_properties=self._allow_properties, sql_renderer=self._sql_renderer
+        )
         for enum_bp in self.enums:
             self.database.add(enum_bp.build())
         for table_bp in self.tables:
