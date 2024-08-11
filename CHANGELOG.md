@@ -1,3 +1,6 @@
+# 1.1.1
+- New: SQL and DBML renderers can now be supplied to parser
+
 # 1.1.0
 
 - New: SQL and DBML rendering rewritten tow support external renderers
