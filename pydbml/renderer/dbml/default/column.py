@@ -2,7 +2,7 @@ from typing import Union
 
 from pydbml.classes import Column, Enum, Expression
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
-from pydbml.renderer.dbml.default.utils import comment_to_dbml, note_option_to_dbml, quote_string
+from pydbml.renderer.dbml.default.utils import comment_to_dbml, note_option_to_dbml, quote_string, prepare_text_for_dbml
 from pydbml.renderer.sql.default.utils import get_full_name_for_sql
 
 
@@ -11,7 +11,7 @@ def default_to_str(val: Union[Expression, str, int, float]) -> str:
         if val.lower() in ('null', 'true', 'false'):
             return val.lower()
         else:
-            return f"'{val}'"
+            return f"'{prepare_text_for_dbml(val)}'"
     elif isinstance(val, Expression):
         return val.dbml
     else:  # int or float or bool
