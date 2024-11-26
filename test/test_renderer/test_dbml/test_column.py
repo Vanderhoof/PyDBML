@@ -21,6 +21,7 @@ from pydbml.renderer.dbml.default.column import (
         (True, "True"),
         ("False", "false"),
         ("null", "null"),
+        ("b'0'", "'b\\'0\\''"),
     ],
 )
 def test_default_to_str(input: Any, expected: str) -> None:
