@@ -9,7 +9,7 @@ def test_render_table_group(table1: Table, table2: Table, table3: Table) -> None
     )
     expected = (
         "// My comment\n"
-        "TableGroup mygroup {\n"
+        "TableGroup \"mygroup\" {\n"
         '    "products"\n'
         '    "products"\n'
         '    "orders"\n'
