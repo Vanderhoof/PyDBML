@@ -17,7 +17,10 @@ Enum "product status" {
 
 Table "orders" [headercolor: #fff] {
   "id" int [pk, increment]
-  "user_id" int [unique, not null]
+  "user_id" int [
+    unique,
+    not null
+  ]
   "status" orders_status
   "created_at" varchar
 }
