@@ -44,11 +44,20 @@ note_element = note | note_object
 
 prop = name + pp.Suppress(":") + string_literal
 
-table_element = _ + (note_element('note') | indexes('indexes')) + _
-table_element_with_property = _ + (note_element('note') | indexes('indexes') | prop.set_results_name('property', list_all_matches=True)) + _
+table_element = _ + (
+    table_column.set_results_name('columns', list_all_matches=True) |
+    note_element('note') |
+    indexes.set_results_name('indexes', list_all_matches=True)
+) + _
+table_element_with_property = _ + (
+    table_column_with_properties.set_results_name('columns', list_all_matches=True) |
+    note_element('note') |
+    indexes.set_results_name('indexes', list_all_matches=True) |
+    prop.set_results_name('property', list_all_matches=True)
+) + _
 
-table_body = table_column[1, ...]('columns') + _ + table_element[...]
-table_body_with_properties = table_column_with_properties[1, ...]('columns') + _ + table_element_with_property[...]
+table_body = table_element[...]
+table_body_with_properties = table_element_with_property[...]
 
 table_name = (name('schema') + '.' + name('name')) | (name('name'))
 
@@ -95,7 +104,7 @@ def parse_table(s, loc, tok):
         # will override one from settings
         init_dict['note'] = tok['note'][0]
     if 'indexes' in tok:
-        init_dict['indexes'] = tok['indexes']
+        init_dict['indexes'] = tok['indexes'][0]
     if 'columns' in tok:
         init_dict['columns'] = tok['columns']
     if 'comment_before' in tok:
@@ -103,6 +112,10 @@ def parse_table(s, loc, tok):
         init_dict['comment'] = comment
     if 'property' in tok:
         init_dict['properties'] = {k: v for k, v in tok['property']}
+
+    if not init_dict.get('columns'):
+        raise SyntaxError(f'Table {init_dict["name"]} at position {loc} has no columns!')
+
     result = TableBlueprint(**init_dict)
 
     return result
