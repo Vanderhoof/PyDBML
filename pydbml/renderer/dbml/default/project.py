@@ -4,6 +4,7 @@ from typing import Dict
 from pydbml.classes import Project
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
 from pydbml.renderer.dbml.default.utils import comment_to_dbml
+from pydbml.tools import doublequote_string
 
 
 def render_items(items: Dict[str, str]) -> str:
@@ -19,7 +20,8 @@ def render_items(items: Dict[str, str]) -> str:
 @DefaultDBMLRenderer.renderer_for(Project)
 def render_project(model: Project) -> str:
     result = comment_to_dbml(model.comment) if model.comment else ''
-    result += f'Project "{model.name}" {{\n'
+    quoted_name = doublequote_string(model.name)
+    result += f'Project {quoted_name} {{\n'
     result += render_items(model.items)
     if model.note:
         result += indent(DefaultDBMLRenderer.render(model.note), '    ') + '\n'

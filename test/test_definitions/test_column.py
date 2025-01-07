@@ -1,3 +1,4 @@
+from textwrap import dedent
 from unittest import TestCase
 
 from pyparsing import ParseException
@@ -197,6 +198,20 @@ class TestColumn(TestCase):
 
     def test_with_settings(self) -> None:
         val = "_test_ \"mytype\" [unique, not null, note: 'to include unit number']\n"
+        res = table_column.parse_string(val, parseAll=True)
+        self.assertEqual(res[0].name, "_test_")
+        self.assertEqual(res[0].type, "mytype")
+        self.assertTrue(res[0].unique)
+        self.assertTrue(res[0].not_null)
+        self.assertTrue(res[0].note is not None)
+
+    def test_multiline_settings(self) -> None:
+        val = dedent("""_test_ \"mytype\" [
+                            unique,
+                            not null,
+                            note: 'to include unit number'
+                        ]
+                     """)
         res = table_column.parse_string(val, parseAll=True)
         self.assertEqual(res[0].name, "_test_")
         self.assertEqual(res[0].type, "mytype")

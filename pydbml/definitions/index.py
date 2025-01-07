@@ -17,15 +17,15 @@ pp.ParserElement.set_default_whitespace_chars(' \t\r')
 index_type = pp.CaselessLiteral("type:").suppress() + _ - (
     pp.CaselessLiteral("btree")('type') | pp.CaselessLiteral("hash")('type')
 )
-index_setting = (
+index_setting = _ + (
     unique('unique')
     | index_type
     | pp.CaselessLiteral("name:") + _ - string_literal('name')
     | note('note')
     | pk('pk')
-)
+) + _
 index_settings = (
-    '[' + _ + index_setting + (_ + ',' + _ - index_setting)[...] + _ - ']' + c
+    '[' + index_setting + (',' - index_setting)[...] - ']' + c
 )
 
 

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from pydbml.tools import comment
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from pydbml.classes import Note
 
 
