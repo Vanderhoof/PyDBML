@@ -9,7 +9,7 @@ from pydbml.definitions.table_group import table_group
 ParserElement.set_default_whitespace_chars(" \t\r")
 
 
-class TestProject(TestCase):
+class TestTableGroup(TestCase):
     def test_empty(self) -> None:
         val = "TableGroup name {}"
         res = table_group.parse_string(val, parseAll=True)
@@ -33,6 +33,21 @@ class TestProject(TestCase):
         res = table_group.parse_string(val, parseAll=True)
         self.assertEqual(res[0].name, "name")
         self.assertEqual(res[0].items, ["table1", "table2"])
+        self.assertEqual(res[0].note.text, "My note")
+
+    def test_color(self) -> None:
+        val = "TableGroup name [color: #FFF] \n{\ntable1\ntable2\n}"
+        res = table_group.parse_string(val, parseAll=True)
+        self.assertEqual(res[0].name, "name")
+        self.assertEqual(res[0].items, ["table1", "table2"])
+        self.assertEqual(res[0].color, "#FFF")
+
+    def test_all_settings(self) -> None:
+        val = "TableGroup name [color: #FFF, note: 'My note'] \n{\ntable1\ntable2\n}"
+        res = table_group.parse_string(val, parseAll=True)
+        self.assertEqual(res[0].name, "name")
+        self.assertEqual(res[0].items, ["table1", "table2"])
+        self.assertEqual(res[0].color, "#FFF")
         self.assertEqual(res[0].note.text, "My note")
 
     def test_note_body(self) -> None:

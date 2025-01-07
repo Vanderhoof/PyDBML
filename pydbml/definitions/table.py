@@ -1,22 +1,20 @@
 import pyparsing as pp
 
+from pydbml.parser.blueprints import TableBlueprint
 from .column import table_column, table_column_with_properties
-from .common import _
+from .common import _, hex_color
 from .common import _c
 from .common import end
 from .common import note
 from .common import note_object
 from .generic import name, string_literal
 from .index import indexes
-from pydbml.parser.blueprints import TableBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 alias = pp.WordStart() + pp.Literal('as').suppress() - pp.WordEnd() - name
 
 
-hex_char = pp.Word(pp.srange('[0-9a-fA-F]'), exact=1)
-hex_color = ("#" - (hex_char * 3 ^ hex_char * 6)).leaveWhitespace()
 header_color = (
     pp.CaselessLiteral('headercolor:').suppress() + _
     - pp.Combine(hex_color)('header_color')
