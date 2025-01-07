@@ -296,6 +296,7 @@ class TableGroupBlueprint(Blueprint):
     items: List[str]
     comment: Optional[str] = None
     note: Optional[NoteBlueprint] = None
+    color: Optional[str] = None
 
     def build(self) -> 'TableGroup':
         if not self.parser:
@@ -313,4 +314,5 @@ class TableGroupBlueprint(Blueprint):
             items=items,
             comment=self.comment,
             note=self.note.build() if self.note else None,
+            color=self.color
         )

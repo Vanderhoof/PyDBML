@@ -57,7 +57,7 @@ Table "users" {
 
 Ref:"orders"."id" < "order_items"."order_id"
 
-TableGroup g1 [note: 'test note'] {
+TableGroup g1 [note: 'test note', color: #FFF] {
   users
   merchants
   note: 'test note 2'
