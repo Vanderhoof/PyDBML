@@ -12,7 +12,7 @@ class TestTableGroup:
             items=[table1, table2, table3],
         )
         expected = (
-            'TableGroup mygroup {\n'
+            'TableGroup "mygroup" {\n'
             '    "products"\n'
             '    "products"\n'
             '    "orders"\n'
@@ -31,7 +31,7 @@ class TestTableGroup:
         )
         expected = (
             '// My comment\n'
-            'TableGroup mygroup [color: #FFF] {\n'
+            'TableGroup "mygroup" [color: #FFF] {\n'
             '    "products"\n'
             '    "products"\n'
             '    "orders"\n'

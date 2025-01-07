@@ -27,6 +27,14 @@ def strip_empty_lines(source: str) -> str:
     return pattern.sub('\g<content>', source)
 
 
+def doublequote_string(source: str) -> str:
+    """Safely wrap a single-line string in double quotes"""
+    if '\n' in source:
+        raise ValueError(f'Multiline strings are not allowed: {source!r}')
+    result = source.strip('"').replace('"', '\\"')
+    return f'"{result}"'
+
+
 def remove_indentation(source: str) -> str:
     if not source:
         return source
