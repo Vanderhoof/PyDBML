@@ -24,7 +24,7 @@ def remove_bom(source: str) -> str:
 def strip_empty_lines(source: str) -> str:
     """Remove empty lines or lines with just spaces from beginning and end."""
     pattern = re.compile(r'^([ \t]*\n)*(?P<content>[\s\S]+?)(\n[ \t]*)*$')
-    return pattern.sub('\g<content>', source)
+    return pattern.sub(r'\g<content>', source)
 
 
 def doublequote_string(source: str) -> str:
