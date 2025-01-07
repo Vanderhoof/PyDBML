@@ -57,9 +57,10 @@ Table "users" {
 
 Ref:"orders"."id" < "order_items"."order_id"
 
-TableGroup g1 {
+TableGroup g1 [note: 'test note'] {
   users
   merchants
+  note: 'test note 2'
 }
 
 TableGroup g2 {
