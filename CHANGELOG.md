@@ -1,3 +1,11 @@
+# 1.1.2
+- Fix: escaping single quotes in a column's default value. Thanks @ryanproback for the contribution
+- Fix: TableGroup and Project name are now safely quoted on render. Thanks @ryanproback for reporting
+- Fix: line breaks in column and index options are now allowed. Thanks @aardjon for reporting
+- Fix: table elements order is now not enforced by the parser. Thanks @aardjon for reporting
+- New: TableGroup now can have notes (DBML v.3.7.2)
+- New: TableGroup now can have color (DBML v.3.7.4)
+
 # 1.1.1
 - New: SQL and DBML renderers can now be supplied to parser
 
