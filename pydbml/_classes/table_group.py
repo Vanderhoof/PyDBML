@@ -18,12 +18,14 @@ class TableGroup(DBMLObject):
                  name: str,
                  items: List[Table],
                  comment: Optional[str] = None,
-                 note: Optional[Note] = None):
+                 note: Optional[Note] = None,
+                 color: Optional[str] = None):
         self.database = None
         self.name = name
         self.items = items
         self.comment = comment
         self.note = note
+        self.color = color
 
     def __repr__(self):
         """

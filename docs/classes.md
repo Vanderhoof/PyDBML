@@ -325,4 +325,5 @@ Sticky notes are similar to regular notes, except that they are defined at the r
 * **items** (str) — dictionary with tables in the group,
 * **comment** (str) — comment, if was added before table group definition.
 * **note** (Note) — table group's note if was defined.
+* **color** (str) — the color param, if defined.
 * **dbml** (str) — DBML definition for this table group.

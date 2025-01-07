@@ -1,10 +1,10 @@
 import pyparsing as pp
 
-from .common import _, note, note_object
+from pydbml.parser.blueprints import TableGroupBlueprint, NoteBlueprint
+from .common import _, note, note_object, hex_color
 from .common import _c
 from .common import end
 from .generic import name
-from pydbml.parser.blueprints import TableGroupBlueprint, NoteBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
@@ -15,9 +15,14 @@ tg_element = _ + (note_element('note') | table_name.set_results_name('items', li
 
 tg_body = tg_element[...]
 
-tg_settings = '[' + _ + note('note') + _ + ']'
 
+tg_color = (
+    pp.CaselessLiteral('color:').suppress() + _
+    - pp.Combine(hex_color)('color')
+)
+tg_setting = _ + (note('note') | tg_color) + _
 
+tg_settings = '[' + tg_setting + (',' + tg_setting)[...] + ']'
 
 table_group = _c + (
     pp.CaselessLiteral('TableGroup')
@@ -47,6 +52,8 @@ def parse_table_group(s, loc, tok):
     if 'note' in tok:
         note = tok['note']
         init_dict['note'] = note if isinstance(note, NoteBlueprint) else note[0]
+    if 'color' in tok:
+        init_dict['color'] = tok['color']
     return TableGroupBlueprint(**init_dict)
 
 
