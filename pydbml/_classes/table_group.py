@@ -2,6 +2,7 @@ from typing import List
 from typing import Optional
 
 from pydbml._classes.base import DBMLObject
+from pydbml._classes.note import Note
 from pydbml._classes.table import Table
 
 
@@ -16,11 +17,15 @@ class TableGroup(DBMLObject):
     def __init__(self,
                  name: str,
                  items: List[Table],
-                 comment: Optional[str] = None):
+                 comment: Optional[str] = None,
+                 note: Optional[Note] = None,
+                 color: Optional[str] = None):
         self.database = None
         self.name = name
         self.items = items
         self.comment = comment
+        self.note = note
+        self.color = color
 
     def __repr__(self):
         """

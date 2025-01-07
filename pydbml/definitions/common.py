@@ -34,3 +34,6 @@ note_object.set_parse_action(lambda s, loc, tok: NoteBlueprint(tok['text']))
 
 pk = pp.CaselessLiteral("pk")
 unique = pp.CaselessLiteral("unique")
+
+hex_char = pp.Word(pp.srange('[0-9a-fA-F]'), exact=1)
+hex_color = ("#" - (hex_char * 3 ^ hex_char * 6)).leaveWhitespace()

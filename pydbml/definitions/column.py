@@ -41,7 +41,7 @@ default = pp.CaselessLiteral('default:').suppress() + _ - (
 
 prop = name + pp.Suppress(":") + string_literal
 
-column_setting = (
+column_setting = _ + (
     pp.CaselessLiteral("not null").set_parse_action(
         lambda s, loc, tok: True
     )('notnull')
@@ -55,11 +55,11 @@ column_setting = (
     | note('note')
     | ref_inline('ref*')
     | default('default')
-)
+) + _
 
 column_setting_with_property = column_setting | prop.set_results_name('property', list_all_matches=True)
 
-column_settings = '[' - (_ + column_setting + _) + ("," + column_setting)[...] + ']' + c
+column_settings = '[' - column_setting + ("," + column_setting)[...] + ']' + c
 
 column_settings_with_properties = '[' - (_ + column_setting_with_property + _) + ("," + column_setting_with_property)[...] + ']' + c
 

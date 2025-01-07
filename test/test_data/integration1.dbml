@@ -38,7 +38,7 @@ Ref {
     "Employees"."favorite_book_id" > "books"."id"
 }
 
-TableGroup Unanimate {
+TableGroup "Unanimate" {
     "books"
     "countries"
 }

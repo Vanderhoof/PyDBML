@@ -101,24 +101,16 @@ indexes {
         self.assertEqual(len(res2["indexes"]), 1)
         self.assertIsNotNone(res2["note"])
 
-    def test_no_columns(self) -> None:
-        val = """
-note: 'mynote'
-indexes {
-    (id, country) [pk] // composite primary key
-}"""
-        with self.assertRaises(ParseException):
-            table_body.parse_string(val, parseAll=True)
-
-    def test_columns_after_indexes(self) -> None:
+    def test_columns_after_indexes_are_allowed(self) -> None:
         val = """
 note: 'mynote'
 indexes {
     (id, country) [pk] // composite primary key
 }
 id integer"""
-        with self.assertRaises(ParseException):
-            table_body.parse_string(val, parseAll=True)
+        res = table_body.parse_string(val, parseAll=True)
+        self.assertEqual(len(res["columns"]), 1)
+        self.assertEqual(len(res["indexes"]), 1)
 
 
 class TestTable(TestCase):
@@ -127,6 +119,11 @@ class TestTable(TestCase):
         res = table.parse_string(val, parseAll=True)
         self.assertEqual(res[0].name, "ids")
         self.assertEqual(len(res[0].columns), 1)
+
+    def test_no_columns(self) -> None:
+        val = "table ids {\nNote: 'No columns!'\n}"
+        with self.assertRaises(SyntaxError):
+            res = table.parse_string(val, parseAll=True)
 
     def test_with_alias(self) -> None:
         val = "table ids as ii {\nid integer\n}"
