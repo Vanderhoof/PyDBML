@@ -22,7 +22,17 @@ class Index(SQLObject, DBMLObject):
                  subjects: List[Union[str, Column, Expression]],
                  name: Optional[str] = None,
                  unique: bool = False,
-                 type: Optional[Literal['hash', 'btree']] = None,
+                 type: Optional[
+                     Literal[
+                         # https://www.postgresql.org/docs/current/indexes-types.html
+                         "brin",
+                         "btree",
+                         "gin",
+                         "gist",
+                         "hash",
+                         "spgist",
+                     ]
+                 ] = None,
                  pk: bool = False,
                  note: Optional[Union[Note, str]] = None,
                  comment: Optional[str] = None):

@@ -158,7 +158,7 @@ Indexes are stored in the `indexes` attribute of a `Table` object.
 * **table** (`Table`) — link to table, for which this index is defined.
 * **name** (str) — index name, if defined.
 * **unique** (bool) — indicates whether the index is unique.
-* **type** (str) — index type, if defined. Can be either `hash` or `btree`.
+* **type** (str) — index type, if defined. Accepted values: `brin`, `btree`, `gin`, `gist`, `hash`, `spgist`.
 * **pk** (bool) — indicates whether this a primary key index.
 * **note** (note) — index note, if defined.
 * **comment** (str) — comment, if it was added just before index definition.
