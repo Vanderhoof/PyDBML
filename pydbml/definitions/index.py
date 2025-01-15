@@ -15,7 +15,12 @@ from pydbml.parser.blueprints import IndexBlueprint
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 index_type = pp.CaselessLiteral("type:").suppress() + _ - (
-    pp.CaselessLiteral("btree")('type') | pp.CaselessLiteral("hash")('type')
+    pp.CaselessLiteral("brin")('type') |
+    pp.CaselessLiteral("btree")('type') |
+    pp.CaselessLiteral("gin")('type') |
+    pp.CaselessLiteral("gist")('type') |
+    pp.CaselessLiteral("hash")('type') |
+    pp.CaselessLiteral("spgist")('type')
 )
 index_setting = _ + (
     unique('unique')
