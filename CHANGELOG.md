@@ -1,3 +1,6 @@
+# 1.1.3
+- New: support more index types. Thanks @pierresouchay for the contribution.
+
 # 1.1.2
 - Fix: escaping single quotes in a column's default value. Thanks @ryanproback for the contribution
 - Fix: TableGroup and Project name are now safely quoted on render. Thanks @ryanproback for reporting

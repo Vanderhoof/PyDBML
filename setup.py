@@ -16,7 +16,7 @@ setup(
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
-    version='1.1.2',
+    version='1.1.3',
     author='Daniil Minukhin',
     author_email='ddddsa@gmail.com',
     url='https://github.com/Vanderhoof/PyDBML',
