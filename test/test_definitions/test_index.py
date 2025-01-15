@@ -20,12 +20,16 @@ ParserElement.set_default_whitespace_chars(' \t\r')
 
 class TestIndexType(TestCase):
     def test_correct(self) -> None:
-        val = 'Type: BTREE'
-        res = index_type.parse_string(val, parseAll=True)
-        self.assertEqual(res['type'], 'btree')
-        val2 = 'type:\nhash'
-        res2 = index_type.parse_string(val2, parseAll=True)
-        self.assertEqual(res2['type'], 'hash')
+        for val, expected in [
+            ("Type: BTREE", "btree"),
+            ("type: hash", "hash"),
+            ("type: gist", "gist"),
+            ("TYPE:SPGiST", "spgist"),
+            ("type: GIN", "gin"),
+            ("Type:\tbRiN", "brin"),
+        ]:
+            res = index_type.parse_string(val, parseAll=True)
+            self.assertEqual(res["type"], expected)
 
     def test_incorrect(self) -> None:
         val = 'type: wrong'
