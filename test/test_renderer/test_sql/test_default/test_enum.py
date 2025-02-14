@@ -21,7 +21,7 @@ class TestRenderEnum:
         expected = (
             'CREATE TYPE "product status" AS ENUM (\n'
             "  'production',\n"
-            "  'development',\n"
+            "  'development'\n"
             ");"
         )
         assert render_enum(enum1) == expected
@@ -33,7 +33,7 @@ class TestRenderEnum:
             "-- Enum comment\n"
             'CREATE TYPE "product status" AS ENUM (\n'
             "  'production',\n"
-            "  'development',\n"
+            "  'development'\n"
             ");"
         )
         assert render_enum(enum1) == expected

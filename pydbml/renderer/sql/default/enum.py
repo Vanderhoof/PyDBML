@@ -21,7 +21,8 @@ def render_enum(model: Enum) -> str:
 
     result = comment_to_sql(model.comment) if model.comment else ''
     result += f'CREATE TYPE {get_full_name_for_sql(model)} AS ENUM (\n'
-    result += '\n'.join(f'{indent(DefaultSQLRenderer.render(i), "  ")}' for i in model.items)
+    enum_body = '\n'.join(f'{indent(DefaultSQLRenderer.render(i), "  ")}' for i in model.items)
+    result += enum_body.rstrip(',')
     result += '\n);'
     return result
 
