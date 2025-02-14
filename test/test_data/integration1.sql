@@ -1,7 +1,7 @@
 CREATE TYPE "level" AS ENUM (
   'junior',
   'middle',
-  'senior',
+  'senior'
 );
 
 CREATE TABLE "books" (
