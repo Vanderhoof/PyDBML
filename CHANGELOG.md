@@ -1,3 +1,6 @@
+# 1.1.4
+- Fix: Remove trailing comma in Enum SQL (#58 thanks @ralfschulze for reporting)
+
 # 1.1.3
 - New: support more index types. Thanks @pierresouchay for the contribution.
 
