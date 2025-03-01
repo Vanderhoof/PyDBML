@@ -5,6 +5,7 @@ from .common import _c
 from .common import c
 from .common import n
 from .generic import name
+from .generic import name_pattern
 from pydbml.parser.blueprints import ReferenceBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
@@ -80,17 +81,8 @@ def parse_ref_settings(s, loc, tok):
 
 ref_settings.set_parse_action(parse_ref_settings)
 
-composite_name = (
-    '(' + pp.White()[...]
-    - name + pp.White()[...]
-    + (
-        pp.White()[...] + ","
-        + pp.White()[...] + name
-        + pp.White()[...]
-    )[...]
-    + ')'
-)
-name_or_composite = name | pp.Combine(composite_name)
+composite_name = pp.Regex(fr'\(\s*{name_pattern}(\s*,\s*{name_pattern}\s*)*\s*\)')
+name_or_composite = name | composite_name
 
 ref_cols = (
     (

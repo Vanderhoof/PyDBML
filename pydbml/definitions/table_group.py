@@ -1,24 +1,24 @@
 import pyparsing as pp
 
 from pydbml.parser.blueprints import TableGroupBlueprint, NoteBlueprint
-from .common import _, note, note_object, hex_color
+from .common import _, note, note_object, hex_color_pattern
 from .common import _c
 from .common import end
 from .generic import name
+from .generic import name_pattern
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
-table_name = pp.Combine(name + '.' + name) | name
+table_name = pp.Regex(fr'{name_pattern}(\.{name_pattern})?')
 note_element = note | note_object
 
 tg_element = _ + (note_element('note') | table_name.set_results_name('items', list_all_matches=True)) + _
 
 tg_body = tg_element[...]
 
-
 tg_color = (
     pp.CaselessLiteral('color:').suppress() + _
-    - pp.Combine(hex_color)('color')
+    - pp.Regex(hex_color_pattern)('color')
 )
 tg_setting = _ + (note('note') | tg_color) + _
 
