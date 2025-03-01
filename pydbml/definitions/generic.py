@@ -5,6 +5,7 @@ from pydbml.parser.blueprints import ExpressionBlueprint
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
 name = pp.Word(pp.unicode.alphanums + '_') | pp.QuotedString('"')
+name_pattern = r'(\b\w+\b|\".*?\")'  # for use inside pp.Regex()
 
 # Literals
 
@@ -13,11 +14,8 @@ string_literal = (
     ^ pp.QuotedString('"', escChar="\\")
     ^ pp.QuotedString("'''", escChar="\\", multiline=True)
 )
-expression_literal = pp.Combine(
-    pp.Suppress('`')
-    + pp.CharsNotIn('`')[...]
-    + pp.Suppress('`')
-).set_parse_action(lambda s, lok, tok: ExpressionBlueprint(tok[0]))
+
+expression_literal = pp.Regex(r"`[^`]*`").set_parse_action(lambda s, lok, tok: ExpressionBlueprint(tok[0]))
 
 boolean_literal = (
     pp.CaselessLiteral('true')
@@ -26,9 +24,7 @@ boolean_literal = (
 )
 number_literal = (
     pp.Word(pp.nums)
-    ^ pp.Combine(
-        pp.Word(pp.nums) + '.' + pp.Word(pp.nums)
-    )
+    ^ pp.Regex(r"\d+\.\d+")
 )
 
 # Expression

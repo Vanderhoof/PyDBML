@@ -11,6 +11,7 @@ from .generic import boolean_literal
 from .generic import expression
 from .generic import expression_literal
 from .generic import name
+from .generic import name_pattern
 from .generic import number_literal
 from .generic import string_literal
 from .reference import ref_inline
@@ -22,7 +23,7 @@ pp.ParserElement.set_default_whitespace_chars(' \t\r')
 type_args = ("(" + pp.original_text_for(expression) + ")")
 
 # column type is parsed as a single string, it will be split by blueprint
-column_type = pp.Combine((name + pp.Literal('[]')) | (name + '.' + name) | ((name) + type_args[0, 1]))
+column_type = pp.Regex(fr'{name_pattern}(\[\]|\.{name_pattern}|(\([^)]*\))?)')
 
 default = pp.CaselessLiteral('default:').suppress() + _ - (
     string_literal

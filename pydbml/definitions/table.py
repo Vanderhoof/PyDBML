@@ -2,7 +2,7 @@ import pyparsing as pp
 
 from pydbml.parser.blueprints import TableBlueprint
 from .column import table_column, table_column_with_properties
-from .common import _, hex_color
+from .common import _, hex_color_pattern
 from .common import _c
 from .common import end
 from .common import note
@@ -17,7 +17,7 @@ alias = pp.WordStart() + pp.Literal('as').suppress() - pp.WordEnd() - name
 
 header_color = (
     pp.CaselessLiteral('headercolor:').suppress() + _
-    - pp.Combine(hex_color)('header_color')
+    - pp.Regex(hex_color_pattern)('header_color')
 )
 table_setting = _ + (note('note') | header_color) + _
 table_settings = '[' + table_setting + (',' + table_setting)[...] + ']'
