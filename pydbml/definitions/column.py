@@ -1,18 +1,14 @@
 import pyparsing as pp
 
-from .common import _
-from .common import _c
-from .common import c
-from .common import n
-from .common import note
-from .common import pk
-from .common import unique
-from .generic import boolean_literal
-from .generic import expression
-from .generic import expression_literal
-from .generic import name
-from .generic import number_literal
-from .generic import string_literal
+from .common import _, _c, c, n, note, pk, unique
+from .generic import (
+    boolean_literal,
+    expression,
+    expression_literal,
+    name,
+    number_literal,
+    string_literal
+)
 from .reference import ref_inline
 from pydbml.parser.blueprints import ColumnBlueprint
 

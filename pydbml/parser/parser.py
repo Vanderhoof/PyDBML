@@ -23,11 +23,14 @@ from pydbml.renderer.base import BaseRenderer
 from pydbml.renderer.dbml.default import DefaultDBMLRenderer
 from pydbml.renderer.sql.default import DefaultSQLRenderer
 from pydbml.tools import remove_bom
-from .blueprints import EnumBlueprint, StickyNoteBlueprint
-from .blueprints import ProjectBlueprint
-from .blueprints import ReferenceBlueprint
-from .blueprints import TableBlueprint
-from .blueprints import TableGroupBlueprint
+from .blueprints import (
+    EnumBlueprint,
+    StickyNoteBlueprint,
+    ProjectBlueprint,
+    ReferenceBlueprint,
+    TableBlueprint,
+    TableGroupBlueprint
+)
 
 pp.ParserElement.set_default_whitespace_chars(" \t\r")
 
