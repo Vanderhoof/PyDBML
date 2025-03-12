@@ -1,3 +1,6 @@
+# 1.2.0
+- Fix: Temporarily disable unicode characters support in identifiers for performance (#59)
+
 # 1.1.4
 - Fix: Remove trailing comma in Enum SQL (#58 thanks @ralfschulze for reporting)
 
