@@ -4,7 +4,7 @@ from pydbml.parser.blueprints import ExpressionBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 
-name = pp.Word(pp.unicode.alphanums + '_') | pp.QuotedString('"')
+name = pp.Word(pp.alphanums + '_') | pp.QuotedString('"')
 
 # Literals
 
