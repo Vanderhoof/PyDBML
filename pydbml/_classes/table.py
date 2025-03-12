@@ -4,9 +4,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Union
 
-from pydbml.exceptions import ColumnNotFoundError
-from pydbml.exceptions import IndexNotFoundError
-from pydbml.exceptions import UnknownDatabaseError
+from pydbml.exceptions import ColumnNotFoundError, IndexNotFoundError, UnknownDatabaseError
 from .base import SQLObject, DBMLObject
 from .column import Column
 from .index import Index

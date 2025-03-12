@@ -5,11 +5,7 @@ from typing import Optional
 from typing import Union
 
 from ._classes.sticky_note import StickyNote
-from .classes import Enum
-from .classes import Project
-from .classes import Reference
-from .classes import Table
-from .classes import TableGroup
+from .classes import Enum, Project, Reference, Table, TableGroup
 from .exceptions import DatabaseValidationError
 from .renderer.base import BaseRenderer
 from .renderer.dbml.default.renderer import DefaultDBMLRenderer
