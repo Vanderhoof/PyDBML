@@ -26,3 +26,12 @@ class TestRenderColumn:
             "'value''s'"
         )
         assert render_column(string_column) == expected
+
+    @staticmethod
+    def test_string(boolean_column: Column) -> None:
+        expected = (
+            "-- This is a defaulted boolean column\n"
+            '"enabled" boolean NOT NULL DEFAULT '
+            "False"
+        )
+        assert render_column(boolean_column) == expected
