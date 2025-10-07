@@ -12,7 +12,7 @@ Enum "level" {
 Table "Employees" as "emp" {
     "id" integer [pk, increment]
     "name" varchar [note: 'Full employee name']
-    "age" number
+    "age" number [default: 0]
     "level" level
     "favorite_book_id" integer
 }

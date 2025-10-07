@@ -87,6 +87,28 @@ def string_column_with_table(db: Database, table1: Table, string_column: Column)
     db.add(table1)
     return string_column
 
+@pytest.fixture
+def boolean_column() -> Column:
+    return Column(
+        name='enabled',
+        type='boolean',
+        pk=False,
+        autoinc=False,
+        unique=False,
+        not_null=True,
+        default=False,
+        comment='This is a defaulted boolean column',
+        note=Note('This is a note for the column'),
+        properties={'foo': 'bar', 'baz': "qux\nqux"}
+    )
+
+
+@pytest.fixture
+def boolean_column_with_table(db: Database, table1: Table, boolean_column: Column) -> Column:
+    table1.add_column(boolean_column)
+    db.add(table1)
+    return boolean_column
+
 
 @pytest.fixture
 def table1() -> Table:

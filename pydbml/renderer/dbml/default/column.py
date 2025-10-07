@@ -24,7 +24,7 @@ def render_options(model: Column) -> str:
         options.append('pk')
     if model.autoinc:
         options.append('increment')
-    if model.default:
+    if model.default is not None:
         options.append(f'default: {default_to_str(model.default)}')
     if model.unique:
         options.append('unique')
