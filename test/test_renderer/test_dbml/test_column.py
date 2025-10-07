@@ -137,3 +137,13 @@ class TestRenderColumn:
             "a note for the column']"
         )
         assert render_column(complex_column_with_table) == expected
+
+    @staticmethod
+    def test_string(string_column_with_table: Column) -> None:
+        expected = (
+            "// This is a defaulted string column\n"
+            '"name" varchar(255) [default: \'value\\\'s\', unique, not null, note: \'This is '
+            "a note for the column']"
+        )
+        assert render_column(string_column_with_table) == expected
+
