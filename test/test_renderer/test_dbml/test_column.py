@@ -133,7 +133,25 @@ class TestRenderColumn:
     def test_complex(complex_column_with_table: Column) -> None:
         expected = (
             "// This is a counter column\n"
-            '"counter" "product status" [pk, increment, unique, not null, note: \'This is '
+            '"counter" "product status" [pk, increment, default: 0, unique, not null, note: \'This is '
             "a note for the column']"
         )
         assert render_column(complex_column_with_table) == expected
+
+    @staticmethod
+    def test_string(string_column_with_table: Column) -> None:
+        expected = (
+            "// This is a defaulted string column\n"
+            '"name" varchar(255) [default: \'value\\\'s\', unique, not null, note: \'This is '
+            "a note for the column']"
+        )
+        assert render_column(string_column_with_table) == expected
+
+    @staticmethod
+    def test_boolean(boolean_column_with_table: Column) -> None:
+        expected = (
+            "// This is a defaulted boolean column\n"
+            '"enabled" boolean [default: False, not null, note: \'This is '
+            "a note for the column']"
+        )
+        assert render_column(boolean_column_with_table) == expected

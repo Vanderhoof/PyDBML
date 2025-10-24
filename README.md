@@ -97,12 +97,12 @@ CREATE TYPE "orders_status" AS ENUM (
   'created',
   'running',
   'done',
-  'failure',
+  'failure'
 );
 <BLANKLINE>
 CREATE TYPE "product status" AS ENUM (
   'Out of Stock',
-  'In Stock',
+  'In Stock'
 );
 <BLANKLINE>
 CREATE TABLE "orders" (
