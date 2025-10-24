@@ -17,3 +17,21 @@ class TestRenderColumn:
             "0"
         )
         assert render_column(complex_column) == expected
+
+    @staticmethod
+    def test_string(string_column: Column) -> None:
+        expected = (
+            "-- This is a defaulted string column\n"
+            '"name" varchar(255) UNIQUE NOT NULL DEFAULT '
+            "'value''s'"
+        )
+        assert render_column(string_column) == expected
+
+    @staticmethod
+    def test_string(boolean_column: Column) -> None:
+        expected = (
+            "-- This is a defaulted boolean column\n"
+            '"enabled" boolean NOT NULL DEFAULT '
+            "False"
+        )
+        assert render_column(boolean_column) == expected

@@ -1,8 +1,18 @@
+from typing import Union
+
 from pydbml.classes import Column, Enum, Expression
 from pydbml.renderer.sql.default.renderer import DefaultSQLRenderer
 from .utils import comment_to_sql
 from .enum import get_full_name_for_sql as get_full_name_for_sql_enum
 
+def default_to_str(val: Union[Expression, str, int, float, bool]) -> str:
+    if isinstance(val, Expression):
+        return DefaultSQLRenderer.render(val)
+    elif isinstance(val, str):
+        val = val.replace("'", "''")
+        return f"'{val}'"
+    else:
+        return str(val)
 
 @DefaultSQLRenderer.renderer_for(Column)
 def render_column(model: Column) -> str:
@@ -28,11 +38,7 @@ def render_column(model: Column) -> str:
     if model.not_null:
         components.append('NOT NULL')
     if model.default is not None:
-        if isinstance(model.default, Expression):
-            default = DefaultSQLRenderer.render(model.default)
-        else:
-            default = model.default  # type: ignore
-        components.append(f'DEFAULT {default}')
+        components.append(f'DEFAULT {default_to_str(model.default)}')
 
     result = comment_to_sql(model.comment) if model.comment else ''
     result += ' '.join(components)
