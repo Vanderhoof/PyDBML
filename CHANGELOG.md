@@ -1,3 +1,8 @@
+# 1.2.1
+
+- Fix: String default values were rendered without quotes in SQL. Thanks @samhaese for the contribution (#64)
+- Fix: Falsy default values were ignored. THanks @samhaese for the contribution (#63)
+
 # 1.2.0
 - Fix: Temporarily disable unicode characters support in identifiers for performance (#59)
 
