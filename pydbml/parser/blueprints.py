@@ -7,22 +7,21 @@ from typing import Literal
 from typing import Optional
 from typing import Union
 
-from pydbml.classes import Column
-from pydbml.classes import Enum
-from pydbml.classes import EnumItem
-from pydbml.classes import Expression
-from pydbml.classes import Index
-from pydbml.classes import Note
-from pydbml.classes import Project
-from pydbml.classes import Reference
-from pydbml.classes import Table
-from pydbml.classes import TableGroup
+from pydbml.classes import (
+    Column,
+    Enum,
+    EnumItem,
+    Expression,
+    Index,
+    Note,
+    Project,
+    Reference,
+    Table,
+    TableGroup
+)
 from pydbml._classes.sticky_note import StickyNote
-from pydbml.exceptions import ColumnNotFoundError
-from pydbml.exceptions import TableNotFoundError
-from pydbml.exceptions import ValidationError
-from pydbml.tools import remove_indentation
-from pydbml.tools import strip_empty_lines
+from pydbml.exceptions import ColumnNotFoundError, TableNotFoundError, ValidationError
+from pydbml.tools import remove_indentation, strip_empty_lines
 
 
 class Blueprint:

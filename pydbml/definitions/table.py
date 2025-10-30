@@ -2,11 +2,7 @@ import pyparsing as pp
 
 from pydbml.parser.blueprints import TableBlueprint
 from .column import table_column, table_column_with_properties
-from .common import _, hex_color
-from .common import _c
-from .common import end
-from .common import note
-from .common import note_object
+from .common import _, _c, end, hex_color, note, note_object
 from .generic import name, string_literal
 from .index import indexes
 

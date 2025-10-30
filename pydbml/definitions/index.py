@@ -1,16 +1,8 @@
 import pyparsing as pp
 
-from .common import _
-from .common import _c
-from .common import c
-from .common import note
-from .common import pk
-from .common import unique
-from .generic import expression_literal
-from .generic import name
-from .generic import string_literal
-from pydbml.parser.blueprints import ExpressionBlueprint
-from pydbml.parser.blueprints import IndexBlueprint
+from .common import _, _c, c, note, pk, unique
+from .generic import expression_literal, name, string_literal
+from pydbml.parser.blueprints import ExpressionBlueprint, IndexBlueprint
 
 pp.ParserElement.set_default_whitespace_chars(' \t\r')
 

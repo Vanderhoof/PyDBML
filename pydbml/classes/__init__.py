@@ -1,6 +1,5 @@
 from .._classes.column import Column
-from .._classes.enum import Enum
-from .._classes.enum import EnumItem
+from .._classes.enum import Enum, EnumItem
 from .._classes.expression import Expression
 from .._classes.index import Index
 from .._classes.note import Note

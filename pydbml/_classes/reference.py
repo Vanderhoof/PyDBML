@@ -5,8 +5,7 @@ from typing import Optional
 from typing import Union
 
 from pydbml.constants import MANY_TO_MANY
-from pydbml.exceptions import DBMLError
-from pydbml.exceptions import TableNotFoundError
+from pydbml.exceptions import DBMLError, TableNotFoundError
 from .base import SQLObject, DBMLObject
 from .column import Column
 from .table import Table
