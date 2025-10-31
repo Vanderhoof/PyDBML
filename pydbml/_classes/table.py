@@ -2,6 +2,7 @@ from typing import Iterable, Dict
 from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
+from typing import Tuple
 from typing import Union
 
 from pydbml.exceptions import ColumnNotFoundError
@@ -38,7 +39,7 @@ class Table(SQLObject, DBMLObject):
         self.database: Optional[Database] = None
         self.name = name
         self.schema = schema
-        self.columns: List[Column] = []
+        self._columns: List[Column] = []
         for column in columns or []:
             self.add_column(column)
         self.indexes: List[Index] = []
@@ -50,6 +51,11 @@ class Table(SQLObject, DBMLObject):
         self.comment = comment
         self.abstract = abstract
         self.properties = properties if properties else {}
+
+    @property
+    def columns(self) -> Tuple[Column, ...]:
+        """Returns a read-only tuple of columns."""
+        return tuple(self._columns)
 
     @property
     def note(self):
@@ -75,18 +81,18 @@ class Table(SQLObject, DBMLObject):
         if not isinstance(c, Column):
             raise TypeError('Columns must be of type Column')
         c.table = self
-        self.columns.append(c)
+        self._columns.append(c)
 
     def delete_column(self, c: Union[Column, int]) -> Column:
         if isinstance(c, Column):
-            if c in self.columns:
+            if c in self._columns:
                 c.table = None
-                return self.columns.pop(self.columns.index(c))
+                return self._columns.pop(self._columns.index(c))
             else:
                 raise ColumnNotFoundError(f'Column {c} if missing in the table')
         elif isinstance(c, int):
-            self.columns[c].table = None
-            return self.columns.pop(c)
+            self._columns[c].table = None
+            return self._columns.pop(c)
 
     def add_index(self, i: Index) -> None:
         '''
@@ -119,9 +125,9 @@ class Table(SQLObject, DBMLObject):
 
     def __getitem__(self, k: Union[int, str]) -> Column:
         if isinstance(k, int):
-            return self.columns[k]
+            return self._columns[k]
         elif isinstance(k, str):
-            for c in self.columns:
+            for c in self._columns:
                 if c.name == k:
                     return c
             raise ColumnNotFoundError(f'Column {k} not present in table {self.name}')
@@ -135,7 +141,7 @@ class Table(SQLObject, DBMLObject):
             return default
 
     def __iter__(self):
-        return iter(self.columns)
+        return iter(self._columns)
 
     def __repr__(self):
         '''
