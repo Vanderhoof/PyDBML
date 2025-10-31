@@ -61,6 +61,9 @@ class TestDatabase(TestCase):
         t2 = Table('test_table')
         with self.assertRaises(DatabaseValidationError):
             database.add_table(t2)
+        with self.assertRaises(AttributeError):
+            # shouldn't be possible to modify tables directly
+            database.tables.append(t2)
 
     def test_delete_table(self) -> None:
         c = Column('test', 'varchar', True)

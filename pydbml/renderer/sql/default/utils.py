@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Sequence
 
 from pydbml.classes import Enum, Reference, Table
 from pydbml.constants import MANY_TO_ONE, ONE_TO_MANY
@@ -9,7 +9,7 @@ def comment_to_sql(val: str) -> str:
     return comment(val, '--')
 
 
-def reorder_tables_for_sql(tables: List['Table'], refs: List['Reference']) -> List['Table']:
+def reorder_tables_for_sql(tables: Sequence['Table'], refs: List['Reference']) -> List['Table']:
     """
     Attempt to reorder the tables, so that they are defined in SQL before they are referenced by
     inline foreign keys.

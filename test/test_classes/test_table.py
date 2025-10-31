@@ -96,9 +96,13 @@ class TestTable(TestCase):
         t.add_column(c2)
         self.assertEqual(c1.table, t)
         self.assertEqual(c2.table, t)
-        self.assertEqual(t.columns, [c1, c2])
+        self.assertEqual(t.columns, (c1, c2))
         with self.assertRaises(TypeError):
             t.add_column('wrong type')
+        c3 = Column('value', 'varchar')
+        with self.assertRaises(AttributeError):
+            # shouldn't be possible to modify columns directly
+            t.columns.append(c3)
 
     def test_delete_column(self) -> None:
         t = Table('products')

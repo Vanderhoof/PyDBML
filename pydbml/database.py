@@ -2,6 +2,7 @@ from typing import Any, Type
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 from ._classes.sticky_note import StickyNote
@@ -25,7 +26,7 @@ class Database:
     ) -> None:
         self.sql_renderer = sql_renderer
         self.dbml_renderer = dbml_renderer
-        self.tables: List['Table'] = []
+        self._tables: List['Table'] = []
         self.table_dict: Dict[str, 'Table'] = {}
         self.refs: List['Reference'] = []
         self.enums: List['Enum'] = []
@@ -34,19 +35,24 @@ class Database:
         self.project: Optional['Project'] = None
         self.allow_properties = allow_properties
 
+    @property
+    def tables(self) -> Tuple['Table', ...]:
+        """Returns a read-only tuple of tables."""
+        return tuple(self._tables)
+
     def __repr__(self) -> str:
         return f"<Database>"
 
     def __getitem__(self, k: Union[int, str]) -> Table:
         if isinstance(k, int):
-            return self.tables[k]
+            return self._tables[k]
         elif isinstance(k, str):
             return self.table_dict[k]
         else:
             raise TypeError('indeces must be str or int')
 
     def __iter__(self):
-        return iter(self.tables)
+        return iter(self._tables)
 
     def _set_database(self, obj: Any) -> None:
         obj.database = self
@@ -71,7 +77,7 @@ class Database:
             raise DatabaseValidationError(f'Unsupported type {type(obj)}.')
 
     def add_table(self, obj: Table) -> Table:
-        if obj in self.tables:
+        if obj in self._tables:
             raise DatabaseValidationError(f'{obj} is already in the database.')
         if obj.full_name in self.table_dict:
             raise DatabaseValidationError(f'Table {obj.full_name} is already in the database.')
@@ -80,7 +86,7 @@ class Database:
 
         self._set_database(obj)
 
-        self.tables.append(obj)
+        self._tables.append(obj)
         self.table_dict[obj.full_name] = obj
         if obj.alias:
             self.table_dict[obj.alias] = obj
@@ -152,10 +158,10 @@ class Database:
 
     def delete_table(self, obj: Table) -> Table:
         try:
-            index = self.tables.index(obj)
+            index = self._tables.index(obj)
         except ValueError:
             raise DatabaseValidationError(f'{obj} is not in the database.')
-        self._unset_database(self.tables.pop(index))
+        self._unset_database(self._tables.pop(index))
         result = self.table_dict.pop(obj.full_name)
         if obj.alias:
             self.table_dict.pop(obj.alias)
