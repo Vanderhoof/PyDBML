@@ -99,16 +99,16 @@ class Reference(SQLObject, DBMLObject):
         >>> c1 = Column('c1', 'int')
         >>> c2 = Column('c2', 'int')
         >>> print(Reference('>', col1=c1, col2=c2))
-        Reference([c1] > [c2]
+        Reference([c1] > [c2])
         >>> c12 = Column('c12', 'int')
         >>> c22 = Column('c22', 'int')
         >>> print(Reference('<', col1=[c1, c12], col2=(c2, c22)))
-        Reference([c1, c12] < [c2, c22]
+        Reference([c1, c12] < [c2, c22])
         '''
 
         col1 = ', '.join(f'{c.name}' for c in self.col1)
         col2 = ', '.join(f'{c.name}' for c in self.col2)
-        return f"Reference([{col1}] {self.type} [{col2}]"
+        return f"Reference([{col1}] {self.type} [{col2}])"
 
     def _validate(self):
         table1 = self.col1[0].table

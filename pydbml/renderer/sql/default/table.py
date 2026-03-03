@@ -68,7 +68,7 @@ def render_column_notes(model: Table) -> str:
     for col in model.columns:
         if col.note:
             quoted_note = f"'{prepare_text_for_sql(col.note)}'"
-            note_sql = f'COMMENT ON COLUMN "{model.name}"."{col.name}" IS {quoted_note};'
+            note_sql = f'COMMENT ON COLUMN {get_full_name_for_sql(model)}."{col.name}" IS {quoted_note};'
             result += f'\n\n{note_sql}'
     return result
 

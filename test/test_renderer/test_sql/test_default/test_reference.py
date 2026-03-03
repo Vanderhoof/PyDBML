@@ -34,7 +34,7 @@ class TestValidateForSQL:
 class TestGenerateInlineSQL:
     @staticmethod
     def test_simple(reference1: Reference) -> None:
-        expected = '{c}FOREIGN KEY ("product_id") REFERENCES "products" ("id")'
+        expected = 'FOREIGN KEY ("product_id") REFERENCES "products" ("id")'
         assert (
             generate_inline_sql(
                 reference1, source_col=reference1.col1, ref_col=reference1.col2
@@ -43,10 +43,23 @@ class TestGenerateInlineSQL:
         )
 
     @staticmethod
+    def test_with_constraint(reference1: Reference) -> None:
+        expected = 'CONSTRAINT "fk_name" FOREIGN KEY ("product_id") REFERENCES "products" ("id")'
+        assert (
+            generate_inline_sql(
+                reference1,
+                source_col=reference1.col1,
+                ref_col=reference1.col2,
+                constraint='CONSTRAINT "fk_name"',
+            )
+            == expected
+        )
+
+    @staticmethod
     def test_on_update_on_delete(reference1: Reference) -> None:
         reference1.on_update = "cascade"
         reference1.on_delete = "set null"
-        expected = '{c}FOREIGN KEY ("product_id") REFERENCES "products" ("id") ON UPDATE CASCADE ON DELETE SET NULL'
+        expected = 'FOREIGN KEY ("product_id") REFERENCES "products" ("id") ON UPDATE CASCADE ON DELETE SET NULL'
         assert (
             generate_inline_sql(
                 reference1, source_col=reference1.col1, ref_col=reference1.col2
@@ -58,7 +71,7 @@ class TestGenerateInlineSQL:
 class TestGenerateNotInlineSQL:
     @staticmethod
     def test_simple(reference1: Reference) -> None:
-        expected = 'ALTER TABLE "orders" ADD {c}FOREIGN KEY ("product_id") REFERENCES "products" ("id");'
+        expected = 'ALTER TABLE "orders" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");'
         assert (
             generate_not_inline_sql(
                 reference1, source_col=reference1.col1, ref_col=reference1.col2
@@ -67,10 +80,23 @@ class TestGenerateNotInlineSQL:
         )
 
     @staticmethod
+    def test_with_constraint(reference1: Reference) -> None:
+        expected = 'ALTER TABLE "orders" ADD CONSTRAINT "fk_name" FOREIGN KEY ("product_id") REFERENCES "products" ("id");'
+        assert (
+            generate_not_inline_sql(
+                reference1,
+                source_col=reference1.col1,
+                ref_col=reference1.col2,
+                constraint='CONSTRAINT "fk_name"',
+            )
+            == expected
+        )
+
+    @staticmethod
     def test_on_update_on_delete(reference1: Reference) -> None:
         reference1.on_update = "cascade"
         reference1.on_delete = "set null"
-        expected = 'ALTER TABLE "orders" ADD {c}FOREIGN KEY ("product_id") REFERENCES "products" ("id") ON UPDATE CASCADE ON DELETE SET NULL;'
+        expected = 'ALTER TABLE "orders" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id") ON UPDATE CASCADE ON DELETE SET NULL;'
         assert (
             generate_not_inline_sql(
                 reference1, source_col=reference1.col1, ref_col=reference1.col2
@@ -88,9 +114,9 @@ def test_generate_many_to_many_sql(reference1: Reference) -> None:
           "products_id" integer NOT NULL,
           PRIMARY KEY ("orders_product_id", "products_id")
         );
-        
+
         ALTER TABLE "orders_products" ADD FOREIGN KEY ("orders_product_id") REFERENCES "orders" ("product_id");
-        
+
         ALTER TABLE "orders_products" ADD FOREIGN KEY ("products_id") REFERENCES "products" ("id");"""
     )
     assert generate_many_to_many_sql(reference1) == expected
@@ -113,7 +139,7 @@ class TestRenderReference:
         with patch("pydbml.renderer.sql.default.reference.generate_inline_sql") as mock:
             render_reference(reference1)
             mock.assert_called_once_with(
-                model=reference1, source_col=reference1.col1, ref_col=reference1.col2
+                model=reference1, source_col=reference1.col1, ref_col=reference1.col2, constraint=''
             )
             reference1.type = "-"
             render_reference(reference1)
@@ -126,7 +152,7 @@ class TestRenderReference:
         with patch("pydbml.renderer.sql.default.reference.generate_inline_sql") as mock:
             render_reference(reference1)
             mock.assert_called_once_with(
-                model=reference1, source_col=reference1.col2, ref_col=reference1.col1
+                model=reference1, source_col=reference1.col2, ref_col=reference1.col1, constraint=''
             )
 
     @staticmethod
@@ -136,7 +162,7 @@ class TestRenderReference:
         with patch("pydbml.renderer.sql.default.reference.generate_not_inline_sql") as mock:
             render_reference(reference1)
             mock.assert_called_once_with(
-                model=reference1, source_col=reference1.col1, ref_col=reference1.col2
+                model=reference1, source_col=reference1.col1, ref_col=reference1.col2, constraint=''
             )
             reference1.type = "-"
             render_reference(reference1)
@@ -149,5 +175,5 @@ class TestRenderReference:
         with patch("pydbml.renderer.sql.default.reference.generate_not_inline_sql") as mock:
             render_reference(reference1)
             mock.assert_called_once_with(
-                model=reference1, source_col=reference1.col2, ref_col=reference1.col1
+                model=reference1, source_col=reference1.col2, ref_col=reference1.col1, constraint=''
             )

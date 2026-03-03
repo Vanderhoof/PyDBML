@@ -236,7 +236,7 @@ class TableBlueprint(Blueprint):
                     else:
                         raise ColumnNotFoundError(
                             f'Cannot add index, column "{subj}" not defined in'
-                            ' table "{self.name}".'
+                            f' table "{self.name}".'
                         )
             index.subjects = new_subjects
             result.add_index(index)
