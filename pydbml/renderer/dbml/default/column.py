@@ -3,7 +3,7 @@ from typing import Union
 from pydbml.classes import Column, Enum, Expression
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
 from pydbml.renderer.dbml.default.utils import comment_to_dbml, note_option_to_dbml, quote_string, prepare_text_for_dbml
-from pydbml.renderer.sql.default.utils import get_full_name_for_sql
+from pydbml.renderer.utils import get_full_name
 
 
 def default_to_str(val: Union[Expression, str, int, float]) -> str:
@@ -47,7 +47,7 @@ def render_column(model: Column) -> str:
     result = comment_to_dbml(model.comment) if model.comment else ''
     result += f'"{model.name}" '
     if isinstance(model.type, Enum):
-        result += get_full_name_for_sql(model.type)
+        result += get_full_name(model.type)
     else:
         result += model.type
 
