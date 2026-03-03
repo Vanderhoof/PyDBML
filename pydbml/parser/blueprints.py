@@ -29,20 +29,18 @@ from pydbml.tools import strip_empty_lines
 class Blueprint:
     parser = None
 
+    def _preformat_text(self, text: str) -> str:
+        """Normalize note text: strip surrounding blank lines and remove common indentation."""
+        result = strip_empty_lines(text)
+        return remove_indentation(result)
+
 
 @dataclass
 class NoteBlueprint(Blueprint):
     text: str
 
-    def _preformat_text(self) -> str:
-        '''Preformat the note text for idempotence'''
-        result = strip_empty_lines(self.text)
-        result = remove_indentation(result)
-        return result
-
     def build(self) -> 'Note':
-        text = self._preformat_text()
-        return Note(text)
+        return Note(self._preformat_text(self.text))
 
 
 @dataclass
@@ -50,16 +48,8 @@ class StickyNoteBlueprint(Blueprint):
     name: str
     text: str
 
-    def _preformat_text(self) -> str:
-        '''Preformat the note text for idempotence'''
-        result = strip_empty_lines(self.text)
-        result = remove_indentation(result)
-        return result
-
     def build(self) -> StickyNote:
-        text = self._preformat_text()
-        name = self.name
-        return StickyNote(name=name, text=text)
+        return StickyNote(name=self.name, text=self._preformat_text(self.text))
 
 
 @dataclass
