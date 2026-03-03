@@ -11,7 +11,7 @@ class SQLObject:
     required_attributes: Tuple[str, ...] = ()
     dont_compare_fields: Tuple[str, ...] = ()
 
-    def check_attributes_for_sql(self):
+    def check_attributes_for_sql(self) -> None:
         '''
         Check if all attributes, required for rendering SQL are set in the
         instance. If some attribute is missing, raise AttributeMissingError

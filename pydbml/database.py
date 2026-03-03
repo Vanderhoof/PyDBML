@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any, Iterator, Type
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -45,7 +45,7 @@ class Database:
         else:
             raise TypeError('indeces must be str or int')
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Table]:
         return iter(self.tables)
 
     def _set_database(self, obj: Any) -> None:

@@ -1,11 +1,14 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 from typing import Any
-from typing import Collection
 from typing import Dict
 from typing import List
 from typing import Literal
 from typing import Optional
 from typing import Union
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pydbml.parser.parser import PyDBMLParser
 
 from pydbml.classes import Column
 from pydbml.classes import Enum
@@ -27,7 +30,7 @@ from pydbml.tools import strip_empty_lines
 
 
 class Blueprint:
-    parser = None
+    parser: Optional['PyDBMLParser'] = None
 
     def _preformat_text(self, text: str) -> str:
         """Normalize note text: strip surrounding blank lines and remove common indentation."""
@@ -67,10 +70,10 @@ class ReferenceBlueprint(Blueprint):
     name: Optional[str] = None
     schema1: str = DEFAULT_SCHEMA
     table1: Optional[str] = None
-    col1: Optional[Union[str, Collection[str]]] = None
+    col1: Optional[str] = None
     schema2: str = DEFAULT_SCHEMA
     table2: Optional[str] = None
-    col2: Optional[Union[str, Collection[str]]] = None
+    col2: Optional[str] = None
     comment: Optional[str] = None
     on_update: Optional[str] = None
     on_delete: Optional[str] = None
@@ -130,6 +133,7 @@ class ColumnBlueprint(Blueprint):
         if isinstance(self.default, ExpressionBlueprint):
             self.default = self.default.build()
         if self.parser:
+            assert self.parser.database is not None
             if '.' in self.type:
                 schema, name = self.type.split('.')
             else:

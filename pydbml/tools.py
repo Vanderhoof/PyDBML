@@ -9,7 +9,7 @@ def comment(val: str, comb: str) -> str:
     return '\n'.join(f'{comb} {cl}' for cl in val.split('\n')) + '\n'
 
 
-def indent(val: str, spaces=4) -> str:
+def indent(val: str, spaces: int = 4) -> str:
     if val == '':
         return val
     return ' ' * spaces + val.replace('\n', '\n' + ' ' * spaces)

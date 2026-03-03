@@ -110,7 +110,7 @@ class Reference(SQLObject, DBMLObject):
         col2 = ', '.join(f'{c.name}' for c in self.col2)
         return f"Reference([{col1}] {self.type} [{col2}])"
 
-    def _validate(self):
+    def _validate(self) -> None:
         table1 = self.col1[0].table
         if any(c.table != table1 for c in self.col1):
             raise DBMLError('Columns in col1 are from different tables')

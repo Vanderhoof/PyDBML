@@ -30,7 +30,7 @@ class Column(SQLObject, DBMLObject):
                  default: Optional[Union[str, int, bool, float, Expression]] = None,
                  note: Optional[Union[Note, str]] = None,
                  comment: Optional[str] = None,
-                 properties: Union[Dict[str, str], None] = None
+                 properties: Optional[Dict[str, str]] = None
                  ):
         self.name = name
         self.type = type
@@ -40,7 +40,7 @@ class Column(SQLObject, DBMLObject):
         self.autoinc = autoinc
         self.comment = comment
         self.note = Note(note)
-        self.properties = properties if properties else {}
+        self.properties: Dict[str, str] = properties if properties else {}
 
         self.default = default
         self.table: Optional['Table'] = None

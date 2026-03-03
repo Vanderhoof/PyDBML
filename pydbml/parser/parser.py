@@ -167,7 +167,7 @@ class PyDBMLParser:
         )
         self._syntax = expr[...] + ("\n" | comment)[...] + pp.StringEnd()
 
-    def parse_blueprint(self, s, loc, tok):
+    def parse_blueprint(self, s: str, loc: int, tok) -> None:
         blueprint = tok[0]
         if isinstance(blueprint, TableBlueprint):
             self.tables.append(blueprint)
