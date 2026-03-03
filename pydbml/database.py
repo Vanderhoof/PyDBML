@@ -136,6 +136,15 @@ class Database:
         self.project = obj
         return obj
 
+    def _remove_from(self, collection: list, obj: Any) -> Any:
+        try:
+            index = collection.index(obj)
+        except ValueError:
+            raise DatabaseValidationError(f'{obj} is not in the database.')
+        result = collection.pop(index)
+        self._unset_database(result)
+        return result
+
     def delete(self, obj: Any) -> Any:
         if isinstance(obj, Table):
             return self.delete_table(obj)
@@ -162,31 +171,13 @@ class Database:
         return result
 
     def delete_reference(self, obj: Reference) -> Reference:
-        try:
-            index = self.refs.index(obj)
-        except ValueError:
-            raise DatabaseValidationError(f'{obj} is not in the database.')
-        result = self.refs.pop(index)
-        self._unset_database(result)
-        return result
+        return self._remove_from(self.refs, obj)
 
     def delete_enum(self, obj: Enum) -> Enum:
-        try:
-            index = self.enums.index(obj)
-        except ValueError:
-            raise DatabaseValidationError(f'{obj} is not in the database.')
-        result = self.enums.pop(index)
-        self._unset_database(result)
-        return result
+        return self._remove_from(self.enums, obj)
 
     def delete_table_group(self, obj: TableGroup) -> TableGroup:
-        try:
-            index = self.table_groups.index(obj)
-        except ValueError:
-            raise DatabaseValidationError(f'{obj} is not in the database.')
-        result = self.table_groups.pop(index)
-        self._unset_database(result)
-        return result
+        return self._remove_from(self.table_groups, obj)
 
     def delete_project(self) -> Project:
         if self.project is None:
