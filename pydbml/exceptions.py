@@ -1,34 +1,38 @@
-class TableNotFoundError(Exception):
+class PyDBMLError(Exception):
+    """Base class for all PyDBML exceptions."""
+
+
+class TableNotFoundError(PyDBMLError):
     pass
 
 
-class ColumnNotFoundError(Exception):
+class ColumnNotFoundError(PyDBMLError):
     pass
 
 
-class IndexNotFoundError(Exception):
+class IndexNotFoundError(PyDBMLError):
     pass
 
 
-class AttributeMissingError(Exception):
+class AttributeMissingError(PyDBMLError):
     pass
 
 
-class DuplicateReferenceError(Exception):
+class DuplicateReferenceError(PyDBMLError):
     pass
 
 
-class UnknownDatabaseError(Exception):
+class UnknownDatabaseError(PyDBMLError):
     pass
 
 
-class DBMLError(Exception):
+class DBMLError(PyDBMLError):
     pass
 
 
-class DatabaseValidationError(Exception):
+class DatabaseValidationError(PyDBMLError):
     pass
 
 
-class ValidationError(Exception):
+class ValidationError(PyDBMLError):
     pass
