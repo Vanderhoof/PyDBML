@@ -46,9 +46,9 @@ def remove_indentation(source: str) -> str:
     for line in lines:
         if line and not line.isspace():
             indent_match = pattern.search(line)
-            if indent_match is not None:  # this is just for you mypy
+            if indent_match is not None:  # re.search() always returns a match here, never None
                 spaces.append(len(indent_match[0]))
 
     indent = min(spaces)
-    lines = [l[indent:] for l in lines]
+    lines = [line[indent:] for line in lines]
     return '\n'.join(lines)

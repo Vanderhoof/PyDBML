@@ -18,7 +18,7 @@ class Column(SQLObject, DBMLObject):
     '''Class representing table column.'''
 
     required_attributes = ('name', 'type')
-    dont_compare_fields = ('table',)
+    _eq_skip_fields = ('table',)
 
     def __init__(self,
                  name: str,

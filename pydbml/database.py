@@ -35,7 +35,7 @@ class Database:
         self.allow_properties = allow_properties
 
     def __repr__(self) -> str:
-        return f"<Database>"
+        return "<Database>"
 
     def __getitem__(self, k: Union[int, str]) -> Table:
         if isinstance(k, int):
@@ -43,7 +43,7 @@ class Database:
         elif isinstance(k, str):
             return self.table_dict[k]
         else:
-            raise TypeError('indeces must be str or int')
+            raise TypeError('indices must be str or int')
 
     def __iter__(self) -> Iterator[Table]:
         return iter(self.tables)
@@ -189,7 +189,7 @@ class Database:
 
     @property
     def sql(self):
-        '''Returs SQL of the parsed results'''
+        '''Returns SQL of the parsed results'''
         return self.sql_renderer.render_db(self)
 
     @property

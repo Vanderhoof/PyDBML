@@ -176,8 +176,6 @@ class IndexBlueprint(Blueprint):
     note: Optional[NoteBlueprint] = None
     comment: Optional[str] = None
 
-    table = None
-
     def build(self) -> 'Index':
         return Index(
             # TableBlueprint will process subjects

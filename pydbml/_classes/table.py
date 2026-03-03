@@ -22,7 +22,7 @@ class Table(SQLObject, DBMLObject):
     '''Class representing table.'''
 
     required_attributes = ('name', 'schema')
-    dont_compare_fields = ('database',)
+    _eq_skip_fields = ('database',)
 
     def __init__(self,
                  name: str,
@@ -84,7 +84,7 @@ class Table(SQLObject, DBMLObject):
                 c.table = None
                 return self.columns.pop(self.columns.index(c))
             else:
-                raise ColumnNotFoundError(f'Column {c} if missing in the table')
+                raise ColumnNotFoundError(f'Column {c!r} is missing in the table')
         elif isinstance(c, int):
             self.columns[c].table = None
             return self.columns.pop(c)
@@ -108,7 +108,7 @@ class Table(SQLObject, DBMLObject):
                 i.table = None
                 return self.indexes.pop(self.indexes.index(i))
             else:
-                raise IndexNotFoundError(f'Index {i} if missing in the table')
+                raise IndexNotFoundError(f'Index {i!r} is missing in the table')
         elif isinstance(i, int):
             self.indexes[i].table = None
             return self.indexes.pop(i)
@@ -127,7 +127,7 @@ class Table(SQLObject, DBMLObject):
                     return c
             raise ColumnNotFoundError(f'Column {k} not present in table {self.name}')
         else:
-            raise TypeError('indeces must be str or int')
+            raise TypeError('indices must be str or int')
 
     def get(self, k, default: Optional[Column] = None) -> Optional[Column]:
         try:

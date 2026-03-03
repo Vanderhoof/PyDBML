@@ -12,7 +12,7 @@ from pydbml.renderer.utils import get_full_name
 def validate_for_dbml(model: Reference):
     for col in chain(model.col1, model.col2):
         if col.table is None:
-            raise TableNotFoundError(f'Table on {col} is not set')
+            raise TableNotFoundError(f'Table for column {col!r} is not set')
 
 
 def render_inline_reference(model: Reference) -> str:

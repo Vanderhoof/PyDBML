@@ -7,7 +7,7 @@ from pydbml._classes.note import Note
 
 
 class Project(DBMLObject):
-    dont_compare_fields = ('database',)
+    _eq_skip_fields = ('database',)
 
     def __init__(self,
                  name: str,

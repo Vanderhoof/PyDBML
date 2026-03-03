@@ -19,7 +19,7 @@ class Reference(SQLObject, DBMLObject):
     and its `sql` property contains the ALTER TABLE clause.
     '''
     required_attributes = ('type', 'col1', 'col2')
-    dont_compare_fields = ('database', '_inline')
+    _eq_skip_fields = ('database', '_inline')
 
     def __init__(self,
                  type: Literal['>', '<', '-', '<>'],

@@ -4,7 +4,7 @@ from pydbml._classes.base import DBMLObject
 
 
 class StickyNote(DBMLObject):
-    dont_compare_fields = ('database',)
+    _eq_skip_fields = ('database',)
 
     def __init__(self, name: str, text: Any) -> None:
         self.name = name

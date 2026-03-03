@@ -4,7 +4,7 @@ from .base import SQLObject, DBMLObject
 
 
 class Note(SQLObject, DBMLObject):
-    dont_compare_fields = ('parent',)
+    _eq_skip_fields = ('parent',)
 
     def __init__(self, text: Optional[Union[str, 'Note']] = None) -> None:
         self.text: str = str(text) if text is not None else ''
