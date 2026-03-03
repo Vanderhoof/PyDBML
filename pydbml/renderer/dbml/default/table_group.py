@@ -2,7 +2,7 @@ from textwrap import indent
 
 from pydbml.classes import TableGroup
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
-from pydbml.renderer.dbml.default.table import get_full_name_for_dbml
+from pydbml.renderer.utils import get_full_name
 from pydbml.renderer.dbml.default.utils import comment_to_dbml
 from pydbml.tools import doublequote_string
 
@@ -16,7 +16,7 @@ def render_table_group(model: TableGroup) -> str:
         result += f' [color: {model.color}]'
     result += ' {\n'
     for i in model.items:
-        result += f'    {get_full_name_for_dbml(i)}\n'
+        result += f'    {get_full_name(i)}\n'
     if model.note:
         result += indent(model.note.dbml, '    ') + '\n'
     result += '}'

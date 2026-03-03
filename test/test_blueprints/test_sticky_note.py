@@ -18,13 +18,13 @@ class TestNote(TestCase):
 
         bp = StickyNoteBlueprint(name='mynote', text=oneline)
         self.assertEqual(bp.name, bp.name)
-        self.assertEqual(bp._preformat_text(), oneline)
+        self.assertEqual(bp._preformat_text(bp.text), oneline)
         bp = StickyNoteBlueprint(name='mynote', text=multiline)
         self.assertEqual(bp.name, bp.name)
-        self.assertEqual(bp._preformat_text(), multiline)
+        self.assertEqual(bp._preformat_text(bp.text), multiline)
         bp = StickyNoteBlueprint(name='mynote', text=long_line)
         self.assertEqual(bp.name, bp.name)
-        self.assertEqual(bp._preformat_text(), long_line)
+        self.assertEqual(bp._preformat_text(bp.text), long_line)
 
     def test_preformat_needed(self):
         uniform_indentation = '    line1\n    line2\n    line3'
@@ -34,20 +34,20 @@ class TestNote(TestCase):
 
         exptected = 'line1\nline2\nline3'
         bp = StickyNoteBlueprint(name='mynote', text=uniform_indentation)
-        self.assertEqual(bp._preformat_text(), exptected)
+        self.assertEqual(bp._preformat_text(bp.text), exptected)
         self.assertEqual(bp.name, bp.name)
 
         exptected = 'line1\n  line2\n\n line3'
         bp = StickyNoteBlueprint(name='mynote', text=varied_indentation)
-        self.assertEqual(bp._preformat_text(), exptected)
+        self.assertEqual(bp._preformat_text(bp.text), exptected)
         self.assertEqual(bp.name, bp.name)
 
         exptected = 'line1\nline2\nline3'
         bp = StickyNoteBlueprint(name='mynote', text=empty_lines)
-        self.assertEqual(bp._preformat_text(), exptected)
+        self.assertEqual(bp._preformat_text(bp.text), exptected)
         self.assertEqual(bp.name, bp.name)
 
         exptected = 'line1\nline2\nline3'
         bp = StickyNoteBlueprint(name='mynote', text=empty_indented_lines)
-        self.assertEqual(bp._preformat_text(), exptected)
+        self.assertEqual(bp._preformat_text(bp.text), exptected)
         self.assertEqual(bp.name, bp.name)

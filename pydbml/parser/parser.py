@@ -167,7 +167,7 @@ class PyDBMLParser:
         )
         self._syntax = expr[...] + ("\n" | comment)[...] + pp.StringEnd()
 
-    def parse_blueprint(self, s, loc, tok):
+    def parse_blueprint(self, s: str, loc: int, tok) -> None:
         blueprint = tok[0]
         if isinstance(blueprint, TableBlueprint):
             self.tables.append(blueprint)
@@ -209,11 +209,8 @@ class PyDBMLParser:
     def locate_table(self, schema: str, name: str) -> "Table":
         if not self.database:
             raise RuntimeError("Database is not ready")
-        # first by alias
-        result = self.database.table_dict.get(name)
-        if result is None:
-            full_name = f"{schema}.{name}"
-            result = self.database.table_dict.get(full_name)
+        full_name = f"{schema}.{name}"
+        result = self.database.table_dict.get(name) or self.database.table_dict.get(full_name)
         if result is None:
             raise TableNotFoundError(f"Table {full_name} not present in the database")
         return result

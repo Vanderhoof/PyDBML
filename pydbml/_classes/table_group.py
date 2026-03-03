@@ -12,7 +12,7 @@ class TableGroup(DBMLObject):
     but after parsing the whole document, PyDBMLParseResults class replaces
     them with references to actual tables.
     '''
-    dont_compare_fields = ('database',)
+    _eq_skip_fields = ('database',)
 
     def __init__(self,
                  name: str,

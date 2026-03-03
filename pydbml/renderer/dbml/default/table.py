@@ -4,17 +4,11 @@ from textwrap import indent
 from pydbml.classes import Table
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
 from pydbml.renderer.dbml.default.utils import comment_to_dbml, quote_string
-
-
-def get_full_name_for_dbml(model) -> str:
-    if model.schema == 'public':
-        return f'"{model.name}"'
-    else:
-        return f'"{model.schema}"."{model.name}"'
+from pydbml.renderer.utils import get_full_name
 
 
 def render_header(model: Table) -> str:
-    name = get_full_name_for_dbml(model)
+    name = get_full_name(model)
 
     result = f'Table {name} '
     if model.alias:

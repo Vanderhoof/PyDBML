@@ -12,18 +12,23 @@ def col_names(cols: List[Column]) -> str:
     return ', '.join(f'"{c.name}"' for c in cols)
 
 
-def validate_for_sql(model: Reference):
+def validate_for_sql(model: Reference) -> None:
     for col in chain(model.col1, model.col2):
         if col.table is None:
-            raise TableNotFoundError(f'Table on {col} is not set')
+            raise TableNotFoundError(f'Table for column {col!r} is not set')
 
 
-def generate_inline_sql(model: Reference, source_col: List[Column], ref_col: List[Column]) -> str:
+def generate_inline_sql(
+    model: Reference,
+    source_col: List[Column],
+    ref_col: List[Column],
+    constraint: str = '',
+) -> str:
+    constraint = (constraint.strip() + ' ') if constraint else ''
     result = comment_to_sql(model.comment) if model.comment else ''
-    result += (
-        f'{{c}}FOREIGN KEY ({col_names(source_col)}) '  # type: ignore
-        f'REFERENCES {get_full_name_for_sql(ref_col[0].table)} ({col_names(ref_col)})'  # type: ignore
-    )
+    assert ref_col[0].table is not None  # guaranteed by validate_for_sql
+    ref_table = get_full_name_for_sql(ref_col[0].table)
+    result += f'{constraint}FOREIGN KEY ({col_names(source_col)}) REFERENCES {ref_table} ({col_names(ref_col)})'
     if model.on_update:
         result += f' ON UPDATE {model.on_update.upper()}'
     if model.on_delete:
@@ -31,12 +36,22 @@ def generate_inline_sql(model: Reference, source_col: List[Column], ref_col: Lis
     return result
 
 
-def generate_not_inline_sql(model: Reference, source_col: List['Column'], ref_col: List['Column']):
+def generate_not_inline_sql(
+    model: Reference,
+    source_col: List[Column],
+    ref_col: List[Column],
+    constraint: str = '',
+) -> str:
+    constraint = (constraint.strip() + ' ') if constraint else ''
     result = comment_to_sql(model.comment) if model.comment else ''
+    assert source_col[0].table is not None  # guaranteed by validate_for_sql
+    assert ref_col[0].table is not None  # guaranteed by validate_for_sql
+    source_table = get_full_name_for_sql(source_col[0].table)
+    ref_table = get_full_name_for_sql(ref_col[0].table)
     result += (
-        f'ALTER TABLE {get_full_name_for_sql(source_col[0].table)}'  # type: ignore
-        f' ADD {{c}}FOREIGN KEY ({col_names(source_col)})'
-        f' REFERENCES {get_full_name_for_sql(ref_col[0].table)} ({col_names(ref_col)})' # type: ignore
+        f'ALTER TABLE {source_table}'
+        f' ADD {constraint}FOREIGN KEY ({col_names(source_col)})'
+        f' REFERENCES {ref_table} ({col_names(ref_col)})'
     )
     if model.on_update:
         result += f' ON UPDATE {model.on_update.upper()}'
@@ -47,14 +62,14 @@ def generate_not_inline_sql(model: Reference, source_col: List['Column'], ref_co
 
 def generate_many_to_many_sql(model: Reference) -> str:
     join_table = model.join_table
-    table_sql = join_table.sql  # type: ignore
+    assert join_table is not None  # guaranteed when model.type == MANY_TO_MANY
+    table_sql = join_table.sql
 
     n = len(model.col1)
-    ref1_sql = generate_not_inline_sql(model, join_table.columns[:n], model.col1)  # type: ignore
-    ref2_sql = generate_not_inline_sql(model, join_table.columns[n:], model.col2)  # type: ignore
+    ref1_sql = generate_not_inline_sql(model, join_table.columns[:n], model.col1)
+    ref2_sql = generate_not_inline_sql(model, join_table.columns[n:], model.col2)
 
-    result = '\n\n'.join((table_sql, ref1_sql, ref2_sql))
-    return result.format(c='')
+    return '\n\n'.join((table_sql, ref1_sql, ref2_sql))
 
 
 @DefaultSQLRenderer.renderer_for(Reference)
@@ -62,21 +77,17 @@ def render_reference(model: Reference) -> str:
     '''
     Returns SQL of the reference:
 
-    ALTER TABLE "orders" ADD FOREIGN KEY ("customer_id") REFERENCES "customers ("id");
-
+    ALTER TABLE "orders" ADD FOREIGN KEY ("customer_id") REFERENCES "customers" ("id");
     '''
     validate_for_sql(model)
 
     if model.type == MANY_TO_MANY:
         return generate_many_to_many_sql(model)
 
-    result = ''
+    constraint = f'CONSTRAINT "{model.name}"' if model.name else ''
     func = generate_inline_sql if model.inline else generate_not_inline_sql
     if model.type in (MANY_TO_ONE, ONE_TO_ONE):
-        result = func(model=model, source_col=model.col1, ref_col=model.col2)
+        return func(model=model, source_col=model.col1, ref_col=model.col2, constraint=constraint)
     elif model.type == ONE_TO_MANY:
-        result = func(model=model, source_col=model.col2, ref_col=model.col1)
-
-    c = f'CONSTRAINT "{model.name}" ' if model.name else ''
-
-    return result.format(c=c)
+        return func(model=model, source_col=model.col2, ref_col=model.col1, constraint=constraint)
+    return ''

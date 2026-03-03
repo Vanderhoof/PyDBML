@@ -1,15 +1,14 @@
-from typing import Any
+from typing import Optional, Union
 
 from .base import SQLObject, DBMLObject
 
 
 class Note(SQLObject, DBMLObject):
-    dont_compare_fields = ('parent',)
+    _eq_skip_fields = ('parent',)
 
-    def __init__(self, text: Any) -> None:
-        self.text: str
-        self.text = str(text) if text is not None else ''
-        self.parent: Any = None
+    def __init__(self, text: Optional[Union[str, 'Note']] = None) -> None:
+        self.text: str = str(text) if text is not None else ''
+        self.parent: object = None
 
     def __str__(self):
         '''Note text'''

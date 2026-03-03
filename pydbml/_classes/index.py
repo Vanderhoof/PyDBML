@@ -16,7 +16,7 @@ if TYPE_CHECKING:  # pragma: no cover
 class Index(SQLObject, DBMLObject):
     '''Class representing index.'''
     required_attributes = ('subjects', 'table')
-    dont_compare_fields = ('table',)
+    _eq_skip_fields = ('table',)
 
     def __init__(self,
                  subjects: List[Union[str, Column, Expression]],

@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any, Iterator, Type
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -35,7 +35,7 @@ class Database:
         self.allow_properties = allow_properties
 
     def __repr__(self) -> str:
-        return f"<Database>"
+        return "<Database>"
 
     def __getitem__(self, k: Union[int, str]) -> Table:
         if isinstance(k, int):
@@ -43,9 +43,9 @@ class Database:
         elif isinstance(k, str):
             return self.table_dict[k]
         else:
-            raise TypeError('indeces must be str or int')
+            raise TypeError('indices must be str or int')
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Table]:
         return iter(self.tables)
 
     def _set_database(self, obj: Any) -> None:
@@ -136,6 +136,15 @@ class Database:
         self.project = obj
         return obj
 
+    def _remove_from(self, collection: list, obj: Any) -> Any:
+        try:
+            index = collection.index(obj)
+        except ValueError:
+            raise DatabaseValidationError(f'{obj} is not in the database.')
+        result = collection.pop(index)
+        self._unset_database(result)
+        return result
+
     def delete(self, obj: Any) -> Any:
         if isinstance(obj, Table):
             return self.delete_table(obj)
@@ -162,31 +171,13 @@ class Database:
         return result
 
     def delete_reference(self, obj: Reference) -> Reference:
-        try:
-            index = self.refs.index(obj)
-        except ValueError:
-            raise DatabaseValidationError(f'{obj} is not in the database.')
-        result = self.refs.pop(index)
-        self._unset_database(result)
-        return result
+        return self._remove_from(self.refs, obj)
 
     def delete_enum(self, obj: Enum) -> Enum:
-        try:
-            index = self.enums.index(obj)
-        except ValueError:
-            raise DatabaseValidationError(f'{obj} is not in the database.')
-        result = self.enums.pop(index)
-        self._unset_database(result)
-        return result
+        return self._remove_from(self.enums, obj)
 
     def delete_table_group(self, obj: TableGroup) -> TableGroup:
-        try:
-            index = self.table_groups.index(obj)
-        except ValueError:
-            raise DatabaseValidationError(f'{obj} is not in the database.')
-        result = self.table_groups.pop(index)
-        self._unset_database(result)
-        return result
+        return self._remove_from(self.table_groups, obj)
 
     def delete_project(self) -> Project:
         if self.project is None:
@@ -198,7 +189,7 @@ class Database:
 
     @property
     def sql(self):
-        '''Returs SQL of the parsed results'''
+        '''Returns SQL of the parsed results'''
         return self.sql_renderer.render_db(self)
 
     @property

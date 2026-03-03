@@ -1,3 +1,10 @@
+# 1.2.2
+
+- Fix: `COMMENT ON COLUMN` SQL was generated with the wrong table name for tables in non-public schemas.
+- Fix: `Reference.__str__` was missing a closing parenthesis.
+- Fix: `delete_column` and `delete_index` now raise `ColumnNotFoundError` / `IndexNotFoundError` instead of a bare `IndexError` when an out-of-bounds integer index is given.
+- Internal: code quality and type safety improvements across the codebase.
+
 # 1.2.1
 
 - Fix: String default values were rendered without quotes in SQL. Thanks @samhaese for the contribution (#64)

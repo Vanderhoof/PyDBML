@@ -1,11 +1,14 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 from typing import Any
-from typing import Collection
 from typing import Dict
 from typing import List
 from typing import Literal
 from typing import Optional
 from typing import Union
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pydbml.parser.parser import PyDBMLParser
 
 from pydbml.classes import Column
 from pydbml.classes import Enum
@@ -18,6 +21,7 @@ from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
 from pydbml._classes.sticky_note import StickyNote
+from pydbml.constants import DEFAULT_SCHEMA
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
 from pydbml.exceptions import ValidationError
@@ -26,22 +30,20 @@ from pydbml.tools import strip_empty_lines
 
 
 class Blueprint:
-    parser = None
+    parser: Optional['PyDBMLParser'] = None
+
+    def _preformat_text(self, text: str) -> str:
+        """Normalize note text: strip surrounding blank lines and remove common indentation."""
+        result = strip_empty_lines(text)
+        return remove_indentation(result)
 
 
 @dataclass
 class NoteBlueprint(Blueprint):
     text: str
 
-    def _preformat_text(self) -> str:
-        '''Preformat the note text for idempotence'''
-        result = strip_empty_lines(self.text)
-        result = remove_indentation(result)
-        return result
-
     def build(self) -> 'Note':
-        text = self._preformat_text()
-        return Note(text)
+        return Note(self._preformat_text(self.text))
 
 
 @dataclass
@@ -49,16 +51,8 @@ class StickyNoteBlueprint(Blueprint):
     name: str
     text: str
 
-    def _preformat_text(self) -> str:
-        '''Preformat the note text for idempotence'''
-        result = strip_empty_lines(self.text)
-        result = remove_indentation(result)
-        return result
-
     def build(self) -> StickyNote:
-        text = self._preformat_text()
-        name = self.name
-        return StickyNote(name=name, text=text)
+        return StickyNote(name=self.name, text=self._preformat_text(self.text))
 
 
 @dataclass
@@ -74,12 +68,12 @@ class ReferenceBlueprint(Blueprint):
     type: Literal['>', '<', '-', '<>']
     inline: bool
     name: Optional[str] = None
-    schema1: str = 'public'
+    schema1: str = DEFAULT_SCHEMA
     table1: Optional[str] = None
-    col1: Optional[Union[str, Collection[str]]] = None
-    schema2: str = 'public'
+    col1: Optional[str] = None
+    schema2: str = DEFAULT_SCHEMA
     table2: Optional[str] = None
-    col2: Optional[Union[str, Collection[str]]] = None
+    col2: Optional[str] = None
     comment: Optional[str] = None
     on_update: Optional[str] = None
     on_delete: Optional[str] = None
@@ -139,10 +133,11 @@ class ColumnBlueprint(Blueprint):
         if isinstance(self.default, ExpressionBlueprint):
             self.default = self.default.build()
         if self.parser:
+            assert self.parser.database is not None
             if '.' in self.type:
                 schema, name = self.type.split('.')
             else:
-                schema, name = 'public', self.type
+                schema, name = DEFAULT_SCHEMA, self.type
             for enum in self.parser.database.enums:
                 if (enum.schema, enum.name) == (schema, name):
                     self.type = enum
@@ -181,8 +176,6 @@ class IndexBlueprint(Blueprint):
     note: Optional[NoteBlueprint] = None
     comment: Optional[str] = None
 
-    table = None
-
     def build(self) -> 'Index':
         return Index(
             # TableBlueprint will process subjects
@@ -199,7 +192,7 @@ class IndexBlueprint(Blueprint):
 @dataclass
 class TableBlueprint(Blueprint):
     name: str
-    schema: str = 'public'
+    schema: str = DEFAULT_SCHEMA
     columns: Optional[List[ColumnBlueprint]] = None
     indexes: Optional[List[IndexBlueprint]] = None
     alias: Optional[str] = None
@@ -236,7 +229,7 @@ class TableBlueprint(Blueprint):
                     else:
                         raise ColumnNotFoundError(
                             f'Cannot add index, column "{subj}" not defined in'
-                            ' table "{self.name}".'
+                            f' table "{self.name}".'
                         )
             index.subjects = new_subjects
             result.add_index(index)
@@ -272,7 +265,7 @@ class EnumItemBlueprint(Blueprint):
 class EnumBlueprint(Blueprint):
     name: str
     items: List[EnumItemBlueprint]
-    schema: str = 'public'
+    schema: str = DEFAULT_SCHEMA
     comment: Optional[str] = None
 
     def build(self) -> 'Enum':
@@ -314,7 +307,7 @@ class TableGroupBlueprint(Blueprint):
         items = []
         for table_name in self.items:
             components = table_name.split('.')
-            schema, table = components if len(components) == 2 else ('public', components[0])
+            schema, table = components if len(components) == 2 else (DEFAULT_SCHEMA, components[0])
             table_obj = self.parser.locate_table(schema, table)
             if table_obj in items:
                 raise ValidationError(f'Table "{table}" is already in group "{self.name}"')

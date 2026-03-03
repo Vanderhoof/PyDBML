@@ -1,23 +1,23 @@
 from pydbml import Database
 from pydbml.classes import Table, Index, Note
 from pydbml.renderer.dbml.default.table import (
-    get_full_name_for_dbml,
     render_header,
     render_indexes,
     render_table,
 )
+from pydbml.renderer.utils import get_full_name
 
 
 class TestGetFullNameForDBML:
     @staticmethod
     def test_no_schema(table1: Table) -> None:
         table1.schema = "public"
-        assert get_full_name_for_dbml(table1) == '"products"'
+        assert get_full_name(table1) == '"products"'
 
     @staticmethod
     def test_with_schema(table1: Table) -> None:
         table1.schema = "myschema"
-        assert get_full_name_for_dbml(table1) == '"myschema"."products"'
+        assert get_full_name(table1) == '"myschema"."products"'
 
 
 class TestRenderHeader:

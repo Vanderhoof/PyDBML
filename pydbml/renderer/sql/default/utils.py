@@ -1,7 +1,8 @@
-from typing import List, Dict, Union
+from typing import List, Dict
 
-from pydbml.classes import Enum, Reference, Table
+from pydbml.classes import Reference, Table
 from pydbml.constants import MANY_TO_ONE, ONE_TO_MANY
+from pydbml.renderer.utils import get_full_name as get_full_name_for_sql
 from pydbml.tools import comment
 
 
@@ -30,8 +31,3 @@ def reorder_tables_for_sql(tables: List['Table'], refs: List['Reference']) -> Li
     return sorted(tables, key=lambda t: references.get(t.name, 0), reverse=True)
 
 
-def get_full_name_for_sql(model: Union[Table, Enum]) -> str:
-    if model.schema == 'public':
-        return f'"{model.name}"'
-    else:
-        return f'"{model.schema}"."{model.name}"'

@@ -4,6 +4,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Union
 
+from pydbml.constants import DEFAULT_SCHEMA
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import IndexNotFoundError
 from pydbml.exceptions import UnknownDatabaseError
@@ -21,11 +22,11 @@ class Table(SQLObject, DBMLObject):
     '''Class representing table.'''
 
     required_attributes = ('name', 'schema')
-    dont_compare_fields = ('database',)
+    _eq_skip_fields = ('database',)
 
     def __init__(self,
                  name: str,
-                 schema: str = 'public',
+                 schema: str = DEFAULT_SCHEMA,
                  alias: Optional[str] = None,
                  columns: Optional[Iterable[Column]] = None,
                  indexes: Optional[Iterable[Index]] = None,
@@ -83,10 +84,13 @@ class Table(SQLObject, DBMLObject):
                 c.table = None
                 return self.columns.pop(self.columns.index(c))
             else:
-                raise ColumnNotFoundError(f'Column {c} if missing in the table')
+                raise ColumnNotFoundError(f'Column {c!r} is missing in the table')
         elif isinstance(c, int):
-            self.columns[c].table = None
-            return self.columns.pop(c)
+            try:
+                self.columns[c].table = None
+                return self.columns.pop(c)
+            except IndexError:
+                raise ColumnNotFoundError(f'Column index {c} is out of range')
 
     def add_index(self, i: Index) -> None:
         '''
@@ -107,10 +111,13 @@ class Table(SQLObject, DBMLObject):
                 i.table = None
                 return self.indexes.pop(self.indexes.index(i))
             else:
-                raise IndexNotFoundError(f'Index {i} if missing in the table')
+                raise IndexNotFoundError(f'Index {i!r} is missing in the table')
         elif isinstance(i, int):
-            self.indexes[i].table = None
-            return self.indexes.pop(i)
+            try:
+                self.indexes[i].table = None
+                return self.indexes.pop(i)
+            except IndexError:
+                raise IndexNotFoundError(f'Index index {i} is out of range')
 
     def get_refs(self) -> List['Reference']:
         if not self.database:
@@ -126,7 +133,7 @@ class Table(SQLObject, DBMLObject):
                     return c
             raise ColumnNotFoundError(f'Column {k} not present in table {self.name}')
         else:
-            raise TypeError('indeces must be str or int')
+            raise TypeError('indices must be str or int')
 
     def get(self, k, default: Optional[Column] = None) -> Optional[Column]:
         try:

@@ -34,7 +34,7 @@ index_settings = (
 )
 
 
-def parse_index_settings(s, lok, tok):
+def parse_index_settings(s, loc, tok):
     '''
     [type: btree, name: 'name', unique, note: 'note']
     '''
@@ -77,7 +77,7 @@ indexes = (
 )
 
 
-def parse_index(s, lok, tok):
+def parse_index(s, loc, tok):
     '''
         (id, country) [pk] // composite primary key
         or

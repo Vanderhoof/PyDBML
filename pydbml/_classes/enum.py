@@ -1,10 +1,11 @@
-from typing import Iterable
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import Iterable, List, Optional, TYPE_CHECKING, Union
 
+from pydbml.constants import DEFAULT_SCHEMA
 from .base import SQLObject, DBMLObject
 from .note import Note
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pydbml.database import Database
 
 
 class EnumItem(SQLObject, DBMLObject):
@@ -44,9 +45,9 @@ class Enum(SQLObject, DBMLObject):
     def __init__(self,
                  name: str,
                  items: Iterable[Union['EnumItem', str]],
-                 schema: str = 'public',
+                 schema: str = DEFAULT_SCHEMA,
                  comment: Optional[str] = None):
-        self.database = None
+        self.database: Optional['Database'] = None
         self.name = name
         self.schema = schema
         self.comment = comment
