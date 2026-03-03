@@ -26,7 +26,8 @@ def generate_inline_sql(
 ) -> str:
     constraint = (constraint.strip() + ' ') if constraint else ''
     result = comment_to_sql(model.comment) if model.comment else ''
-    ref_table = get_full_name_for_sql(ref_col[0].table)  # type: ignore[arg-type]
+    assert ref_col[0].table is not None  # guaranteed by validate_for_sql
+    ref_table = get_full_name_for_sql(ref_col[0].table)
     result += f'{constraint}FOREIGN KEY ({col_names(source_col)}) REFERENCES {ref_table} ({col_names(ref_col)})'
     if model.on_update:
         result += f' ON UPDATE {model.on_update.upper()}'
@@ -43,8 +44,10 @@ def generate_not_inline_sql(
 ) -> str:
     constraint = (constraint.strip() + ' ') if constraint else ''
     result = comment_to_sql(model.comment) if model.comment else ''
-    source_table = get_full_name_for_sql(source_col[0].table)  # type: ignore[arg-type]
-    ref_table = get_full_name_for_sql(ref_col[0].table)  # type: ignore[arg-type]
+    assert source_col[0].table is not None  # guaranteed by validate_for_sql
+    assert ref_col[0].table is not None  # guaranteed by validate_for_sql
+    source_table = get_full_name_for_sql(source_col[0].table)
+    ref_table = get_full_name_for_sql(ref_col[0].table)
     result += (
         f'ALTER TABLE {source_table}'
         f' ADD {constraint}FOREIGN KEY ({col_names(source_col)})'
@@ -59,11 +62,12 @@ def generate_not_inline_sql(
 
 def generate_many_to_many_sql(model: Reference) -> str:
     join_table = model.join_table
-    table_sql = join_table.sql  # type: ignore[union-attr]
+    assert join_table is not None  # guaranteed when model.type == MANY_TO_MANY
+    table_sql = join_table.sql
 
     n = len(model.col1)
-    ref1_sql = generate_not_inline_sql(model, join_table.columns[:n], model.col1)  # type: ignore[union-attr]
-    ref2_sql = generate_not_inline_sql(model, join_table.columns[n:], model.col2)  # type: ignore[union-attr]
+    ref1_sql = generate_not_inline_sql(model, join_table.columns[:n], model.col1)
+    ref2_sql = generate_not_inline_sql(model, join_table.columns[n:], model.col2)
 
     return '\n\n'.join((table_sql, ref1_sql, ref2_sql))
 

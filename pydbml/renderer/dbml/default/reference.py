@@ -19,7 +19,8 @@ def render_inline_reference(model: Reference) -> str:
     # settings are ignored for inline ref
     if len(model.col2) > 1:
         raise DBMLError('Cannot render DBML: composite ref cannot be inline')
-    table_name = get_full_name(model.col2[0].table)  # type: ignore[arg-type]
+    assert model.col2[0].table is not None  # guaranteed by validate_for_dbml
+    table_name = get_full_name(model.col2[0].table)
     return f'ref: {model.type} {table_name}."{model.col2[0].name}"'
 
 
@@ -43,13 +44,14 @@ def render_options(model: Reference) -> str:
 
 
 def render_not_inline_reference(model: Reference) -> str:
+    assert model.table1 is not None and model.table2 is not None  # guaranteed by validate_for_dbml
     result = comment_to_dbml(model.comment) if model.comment else ''
     result += 'Ref'
     if model.name:
         result += f' {model.name}'
 
     result += (
-        ' {\n    '  # type: ignore
+        ' {\n    '
         f'{get_full_name(model.table1)}.{render_col(model.col1)} '
         f'{model.type} '
         f'{get_full_name(model.table2)}.{render_col(model.col2)}'

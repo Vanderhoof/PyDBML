@@ -62,7 +62,7 @@ class Reference(SQLObject, DBMLObject):
             name=f'{self.table1.name}_{self.table2.name}',
             schema=self.table1.schema,
             columns=(
-                Column(name=f'{c.table.name}_{c.name}', type=c.type, not_null=True, pk=True)  # type: ignore
+                Column(name=f'{c.table.name}_{c.name}', type=c.type, not_null=True, pk=True)  # type: ignore[union-attr]
                 for c in chain(self.col1, self.col2)
             ),
             abstract=True
