@@ -86,8 +86,11 @@ class Table(SQLObject, DBMLObject):
             else:
                 raise ColumnNotFoundError(f'Column {c!r} is missing in the table')
         elif isinstance(c, int):
-            self.columns[c].table = None
-            return self.columns.pop(c)
+            try:
+                self.columns[c].table = None
+                return self.columns.pop(c)
+            except IndexError:
+                raise ColumnNotFoundError(f'Column index {c} is out of range')
 
     def add_index(self, i: Index) -> None:
         '''
@@ -110,8 +113,11 @@ class Table(SQLObject, DBMLObject):
             else:
                 raise IndexNotFoundError(f'Index {i!r} is missing in the table')
         elif isinstance(i, int):
-            self.indexes[i].table = None
-            return self.indexes.pop(i)
+            try:
+                self.indexes[i].table = None
+                return self.indexes.pop(i)
+            except IndexError:
+                raise IndexNotFoundError(f'Index index {i} is out of range')
 
     def get_refs(self) -> List['Reference']:
         if not self.database:
