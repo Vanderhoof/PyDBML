@@ -4,6 +4,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Union
 
+from pydbml.constants import DEFAULT_SCHEMA
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import IndexNotFoundError
 from pydbml.exceptions import UnknownDatabaseError
@@ -25,7 +26,7 @@ class Table(SQLObject, DBMLObject):
 
     def __init__(self,
                  name: str,
-                 schema: str = 'public',
+                 schema: str = DEFAULT_SCHEMA,
                  alias: Optional[str] = None,
                  columns: Optional[Iterable[Column]] = None,
                  indexes: Optional[Iterable[Index]] = None,

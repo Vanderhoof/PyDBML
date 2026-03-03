@@ -1,7 +1,7 @@
 from typing import List, Dict, Union
 
 from pydbml.classes import Enum, Reference, Table
-from pydbml.constants import MANY_TO_ONE, ONE_TO_MANY
+from pydbml.constants import DEFAULT_SCHEMA, MANY_TO_ONE, ONE_TO_MANY
 from pydbml.tools import comment
 
 
@@ -31,7 +31,7 @@ def reorder_tables_for_sql(tables: List['Table'], refs: List['Reference']) -> Li
 
 
 def get_full_name_for_sql(model: Union[Table, Enum]) -> str:
-    if model.schema == 'public':
+    if model.schema == DEFAULT_SCHEMA:
         return f'"{model.name}"'
     else:
         return f'"{model.schema}"."{model.name}"'

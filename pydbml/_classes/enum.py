@@ -3,6 +3,7 @@ from typing import List
 from typing import Optional
 from typing import Union
 
+from pydbml.constants import DEFAULT_SCHEMA
 from .base import SQLObject, DBMLObject
 from .note import Note
 
@@ -44,7 +45,7 @@ class Enum(SQLObject, DBMLObject):
     def __init__(self,
                  name: str,
                  items: Iterable[Union['EnumItem', str]],
-                 schema: str = 'public',
+                 schema: str = DEFAULT_SCHEMA,
                  comment: Optional[str] = None):
         self.database = None
         self.name = name

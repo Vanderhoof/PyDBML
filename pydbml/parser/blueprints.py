@@ -18,6 +18,7 @@ from pydbml.classes import Reference
 from pydbml.classes import Table
 from pydbml.classes import TableGroup
 from pydbml._classes.sticky_note import StickyNote
+from pydbml.constants import DEFAULT_SCHEMA
 from pydbml.exceptions import ColumnNotFoundError
 from pydbml.exceptions import TableNotFoundError
 from pydbml.exceptions import ValidationError
@@ -74,10 +75,10 @@ class ReferenceBlueprint(Blueprint):
     type: Literal['>', '<', '-', '<>']
     inline: bool
     name: Optional[str] = None
-    schema1: str = 'public'
+    schema1: str = DEFAULT_SCHEMA
     table1: Optional[str] = None
     col1: Optional[Union[str, Collection[str]]] = None
-    schema2: str = 'public'
+    schema2: str = DEFAULT_SCHEMA
     table2: Optional[str] = None
     col2: Optional[Union[str, Collection[str]]] = None
     comment: Optional[str] = None
@@ -142,7 +143,7 @@ class ColumnBlueprint(Blueprint):
             if '.' in self.type:
                 schema, name = self.type.split('.')
             else:
-                schema, name = 'public', self.type
+                schema, name = DEFAULT_SCHEMA, self.type
             for enum in self.parser.database.enums:
                 if (enum.schema, enum.name) == (schema, name):
                     self.type = enum
@@ -199,7 +200,7 @@ class IndexBlueprint(Blueprint):
 @dataclass
 class TableBlueprint(Blueprint):
     name: str
-    schema: str = 'public'
+    schema: str = DEFAULT_SCHEMA
     columns: Optional[List[ColumnBlueprint]] = None
     indexes: Optional[List[IndexBlueprint]] = None
     alias: Optional[str] = None
@@ -272,7 +273,7 @@ class EnumItemBlueprint(Blueprint):
 class EnumBlueprint(Blueprint):
     name: str
     items: List[EnumItemBlueprint]
-    schema: str = 'public'
+    schema: str = DEFAULT_SCHEMA
     comment: Optional[str] = None
 
     def build(self) -> 'Enum':
@@ -314,7 +315,7 @@ class TableGroupBlueprint(Blueprint):
         items = []
         for table_name in self.items:
             components = table_name.split('.')
-            schema, table = components if len(components) == 2 else ('public', components[0])
+            schema, table = components if len(components) == 2 else (DEFAULT_SCHEMA, components[0])
             table_obj = self.parser.locate_table(schema, table)
             if table_obj in items:
                 raise ValidationError(f'Table "{table}" is already in group "{self.name}"')

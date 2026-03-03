@@ -2,12 +2,13 @@ import re
 from textwrap import indent
 
 from pydbml.classes import Table
+from pydbml.constants import DEFAULT_SCHEMA
 from pydbml.renderer.dbml.default.renderer import DefaultDBMLRenderer
 from pydbml.renderer.dbml.default.utils import comment_to_dbml, quote_string
 
 
 def get_full_name_for_dbml(model) -> str:
-    if model.schema == 'public':
+    if model.schema == DEFAULT_SCHEMA:
         return f'"{model.name}"'
     else:
         return f'"{model.schema}"."{model.name}"'
